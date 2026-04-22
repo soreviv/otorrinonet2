@@ -1,0 +1,239 @@
+{
+  "_meta": {
+    "models": {
+      "systemUser": "Usuario con acceso al sistema (médico, enfermera, recepcionista). Tiene rol, estado activo/inactivo y registro de último acceso.",
+      "auditLog": "Entrada inmutable de la bitácora de auditoría. Registra quién realizó qué acción sobre qué recurso, desde qué IP y cuándo.",
+      "arcoRequest": "Solicitud de derechos ARCO presentada por un paciente: Acceso, Rectificación, Cancelación u Oposición conforme a LFPDPPP.",
+      "fhirExport": "Registro de una exportación de expediente en formato HL7-FHIR realizada desde el sistema.",
+      "privacyNotice": "Aviso de privacidad vigente conforme a LFPDPPP con fecha de última actualización.",
+      "dashboardMetrics": "Métricas de resumen del estado del sistema para el panel principal del administrador.",
+      "complianceBadge": "Indicador de cumplimiento de una norma o regulación específica."
+    },
+    "relationships": [
+      "auditLog pertenece a un systemUser (quien realizó la acción) y referencia a un recurso (expediente, receta, etc.).",
+      "arcoRequest está vinculada a un paciente (por nombre y ID) y tiene un estado de gestión.",
+      "fhirExport puede ser individual (un paciente) o masiva (rango de fechas), registra quién la solicitó.",
+      "dashboardMetrics agrega datos de systemUser, auditLog, arcoRequest y fhirExport."
+    ]
+  },
+  "dashboardMetrics": {
+    "activeUsers": 4,
+    "accessesLast24h": 17,
+    "fhirExportsThisMonth": 3,
+    "pendingArcoRequests": 2,
+    "encryptionActive": true,
+    "lastBackup": "2026-04-19T03:00:00-06:00",
+    "systemStatus": "ok"
+  },
+  "complianceBadges": [
+    { "id": "nom-024", "label": "NOM-024-SSA3", "description": "Expediente clínico electrónico", "status": "cumple" },
+    { "id": "nom-035", "label": "NOM-035-SSA3", "description": "Interoperabilidad en salud", "status": "cumple" },
+    { "id": "lfpdppp", "label": "LFPDPPP", "description": "Protección de datos personales", "status": "cumple" },
+    { "id": "fhir-r4", "label": "HL7-FHIR R4", "description": "Estándar de interoperabilidad", "status": "cumple" }
+  ],
+  "systemUsers": [
+    {
+      "id": "usr-001",
+      "name": "Dr. Alejandro Viveros Domínguez",
+      "email": "drviverosorl@gmail.com",
+      "role": "medico",
+      "status": "activo",
+      "lastAccess": "2026-04-20T08:15:00-06:00",
+      "createdAt": "2024-01-10T09:00:00-06:00"
+    },
+    {
+      "id": "usr-002",
+      "name": "Lic. Carmen Salinas Ruiz",
+      "email": "carmen.salinas@viverosorl.com",
+      "role": "recepcionista",
+      "status": "activo",
+      "lastAccess": "2026-04-19T17:45:00-06:00",
+      "createdAt": "2024-02-01T09:00:00-06:00"
+    },
+    {
+      "id": "usr-003",
+      "name": "Enf. Patricia Morales Díaz",
+      "email": "patricia.morales@viverosorl.com",
+      "role": "enfermera",
+      "status": "activo",
+      "lastAccess": "2026-04-18T14:30:00-06:00",
+      "createdAt": "2024-03-15T09:00:00-06:00"
+    },
+    {
+      "id": "usr-004",
+      "name": "Lic. Roberto Campos Vega",
+      "email": "roberto.campos@viverosorl.com",
+      "role": "recepcionista",
+      "status": "inactivo",
+      "lastAccess": "2025-12-20T16:00:00-06:00",
+      "createdAt": "2023-09-01T09:00:00-06:00"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "log-001",
+      "action": "acceso",
+      "resource": "Expediente — María González Reyes (VIV-2024-001)",
+      "userId": "usr-001",
+      "userName": "Dr. Alejandro Viveros Domínguez",
+      "ipAddress": "192.168.1.10",
+      "timestamp": "2026-04-20T08:20:00-06:00"
+    },
+    {
+      "id": "log-002",
+      "action": "firma",
+      "resource": "Receta rx-001 — María González Reyes",
+      "userId": "usr-001",
+      "userName": "Dr. Alejandro Viveros Domínguez",
+      "ipAddress": "192.168.1.10",
+      "timestamp": "2026-04-18T09:48:22-06:00"
+    },
+    {
+      "id": "log-003",
+      "action": "acceso",
+      "resource": "Expediente — Carlos Mendoza Ortiz (VIV-2024-002)",
+      "userId": "usr-003",
+      "userName": "Enf. Patricia Morales Díaz",
+      "ipAddress": "192.168.1.15",
+      "timestamp": "2026-04-18T14:32:00-06:00"
+    },
+    {
+      "id": "log-004",
+      "action": "exportacion-fhir",
+      "resource": "Expediente — Lucía Ramírez Fuentes (VIV-2024-005)",
+      "userId": "usr-001",
+      "userName": "Dr. Alejandro Viveros Domínguez",
+      "ipAddress": "192.168.1.10",
+      "timestamp": "2026-04-17T11:05:00-06:00"
+    },
+    {
+      "id": "log-005",
+      "action": "modificacion",
+      "resource": "Cita apt-003 — Roberto Silva Cárdenas",
+      "userId": "usr-002",
+      "userName": "Lic. Carmen Salinas Ruiz",
+      "ipAddress": "192.168.1.12",
+      "timestamp": "2026-04-17T10:15:00-06:00"
+    },
+    {
+      "id": "log-006",
+      "action": "creacion",
+      "resource": "Nota quirúrgica surg-001 — Lucía Ramírez Fuentes",
+      "userId": "usr-001",
+      "userName": "Dr. Alejandro Viveros Domínguez",
+      "ipAddress": "192.168.1.10",
+      "timestamp": "2026-04-15T11:50:00-06:00"
+    },
+    {
+      "id": "log-007",
+      "action": "acceso",
+      "resource": "Expediente — Roberto Silva Cárdenas (VIV-2024-004)",
+      "userId": "usr-002",
+      "userName": "Lic. Carmen Salinas Ruiz",
+      "ipAddress": "192.168.1.12",
+      "timestamp": "2026-04-14T09:05:00-06:00"
+    },
+    {
+      "id": "log-008",
+      "action": "eliminacion",
+      "resource": "Cita cancelada apt-007 — Ana Torres Mendieta",
+      "userId": "usr-002",
+      "userName": "Lic. Carmen Salinas Ruiz",
+      "ipAddress": "192.168.1.12",
+      "timestamp": "2026-04-13T16:45:00-06:00"
+    }
+  ],
+  "arcoRequests": [
+    {
+      "id": "arco-001",
+      "type": "acceso",
+      "patientName": "María González Reyes",
+      "patientId": "exp-001",
+      "description": "La paciente solicita copia completa de su expediente clínico y todas las recetas emitidas.",
+      "status": "pendiente",
+      "submittedAt": "2026-04-18T14:00:00-06:00",
+      "resolvedAt": null,
+      "notes": null
+    },
+    {
+      "id": "arco-002",
+      "type": "rectificacion",
+      "patientName": "Carlos Mendoza Ortiz",
+      "patientId": "exp-002",
+      "description": "Solicita corrección de fecha de nacimiento registrada incorrectamente (aparece 1978-05-12, debe ser 1978-05-21).",
+      "status": "en-proceso",
+      "submittedAt": "2026-04-10T10:30:00-06:00",
+      "resolvedAt": null,
+      "notes": "Verificando documentación de identidad adjunta."
+    },
+    {
+      "id": "arco-003",
+      "type": "cancelacion",
+      "patientName": "Sofía Herrera Leal",
+      "patientId": "exp-006",
+      "description": "La paciente solicita la eliminación de sus datos de la agenda y contacto, manteniendo únicamente el expediente clínico por obligación legal.",
+      "status": "resuelta",
+      "submittedAt": "2026-03-20T09:00:00-06:00",
+      "resolvedAt": "2026-04-02T11:00:00-06:00",
+      "notes": "Datos de contacto eliminados. Expediente clínico conservado conforme a NOM-004-SSA3 (10 años)."
+    },
+    {
+      "id": "arco-004",
+      "type": "oposicion",
+      "patientName": "Roberto Silva Cárdenas",
+      "patientId": "exp-004",
+      "description": "El paciente se opone al uso de sus datos con fines estadísticos y de investigación.",
+      "status": "resuelta",
+      "submittedAt": "2026-02-14T16:00:00-06:00",
+      "resolvedAt": "2026-02-28T10:00:00-06:00",
+      "notes": "Preferencia registrada. Datos excluidos de análisis estadístico interno."
+    }
+  ],
+  "fhirExports": [
+    {
+      "id": "fhir-001",
+      "type": "individual",
+      "patientName": "Lucía Ramírez Fuentes",
+      "patientId": "exp-005",
+      "requestedBy": "Dr. Alejandro Viveros Domínguez",
+      "status": "completado",
+      "fileSize": "48 KB",
+      "requestedAt": "2026-04-17T11:00:00-06:00",
+      "completedAt": "2026-04-17T11:05:00-06:00"
+    },
+    {
+      "id": "fhir-002",
+      "type": "masiva",
+      "patientName": null,
+      "patientId": null,
+      "dateRangeFrom": "2026-01-01",
+      "dateRangeTo": "2026-03-31",
+      "totalPatients": 12,
+      "requestedBy": "Dr. Alejandro Viveros Domínguez",
+      "status": "completado",
+      "fileSize": "512 KB",
+      "requestedAt": "2026-04-05T09:30:00-06:00",
+      "completedAt": "2026-04-05T09:35:00-06:00"
+    },
+    {
+      "id": "fhir-003",
+      "type": "individual",
+      "patientName": "María González Reyes",
+      "patientId": "exp-001",
+      "requestedBy": "Dr. Alejandro Viveros Domínguez",
+      "status": "en-proceso",
+      "fileSize": null,
+      "requestedAt": "2026-04-20T08:30:00-06:00",
+      "completedAt": null
+    }
+  ],
+  "privacyNotice": {
+    "version": "3.0",
+    "effectiveDate": "2026-01-01",
+    "lastUpdated": "2025-12-15",
+    "responsible": "Dr. Alejandro Viveros Domínguez",
+    "address": "Av. Insurgentes Sur 1234, Col. Del Valle, CDMX",
+    "email": "privacidad@viverosorl.com",
+    "downloadUrl": "/aviso-de-privacidad-v3.pdf"
+  }
+}

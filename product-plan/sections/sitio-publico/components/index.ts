@@ -1,0 +1,7 @@
+export { HomePage } from './HomePage'
+export { DoctorProfilePage } from './DoctorProfilePage'
+export { ServicesPage } from './ServicesPage'
+export { LocationPage } from './LocationPage'
+export { ContactPage } from './ContactPage'
+export { ServiceCard } from './ServiceCard'
+export { ReviewCard } from './ReviewCard'

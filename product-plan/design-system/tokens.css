@@ -1,0 +1,13 @@
+/* Design Tokens — Dr. Viveros ORL */
+
+:root {
+  /* Colors */
+  --color-primary: teal;       /* buttons, links, key accents */
+  --color-secondary: sky;      /* tags, highlights, secondary elements */
+  --color-neutral: slate;      /* backgrounds, text, borders */
+
+  /* Typography */
+  --font-heading: 'DM Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}

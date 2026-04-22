@@ -1,0 +1,314 @@
+import { useRef, useState, useEffect } from 'react'
+import type { PrescriptionDetailProps } from '../types'
+
+function formatDateTime(iso: string) {
+  const d = new Date(iso)
+  return d.toLocaleString('es-MX', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  })
+}
+
+export function PrescriptionDetail({
+  prescription,
+  onSign,
+  onPrint,
+  onBack,
+}: PrescriptionDetailProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [isDrawing, setIsDrawing] = useState(false)
+  const [hasStrokes, setHasStrokes] = useState(false)
+  const [lastPos, setLastPos] = useState({ x: 0, y: 0 })
+
+  const isSigned = prescription.status === 'firmada'
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.strokeStyle = '#0f766e'
+    ctx.lineWidth = 2.5
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+  }, [])
+
+  function getPos(e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) {
+    const rect = canvas.getBoundingClientRect()
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
+    if ('touches' in e) {
+      return {
+        x: (e.touches[0].clientX - rect.left) * scaleX,
+        y: (e.touches[0].clientY - rect.top) * scaleY,
+      }
+    }
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY,
+    }
+  }
+
+  function startDraw(e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) {
+    if (isSigned) return
+    e.preventDefault()
+    const canvas = canvasRef.current!
+    const pos = getPos(e, canvas)
+    setIsDrawing(true)
+    setLastPos(pos)
+  }
+
+  function draw(e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) {
+    if (!isDrawing || isSigned) return
+    e.preventDefault()
+    const canvas = canvasRef.current!
+    const ctx = canvas.getContext('2d')!
+    const pos = getPos(e, canvas)
+    ctx.beginPath()
+    ctx.moveTo(lastPos.x, lastPos.y)
+    ctx.lineTo(pos.x, pos.y)
+    ctx.stroke()
+    setLastPos(pos)
+    setHasStrokes(true)
+  }
+
+  function stopDraw() {
+    setIsDrawing(false)
+  }
+
+  function clearCanvas() {
+    const canvas = canvasRef.current!
+    const ctx = canvas.getContext('2d')!
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    setHasStrokes(false)
+  }
+
+  function handleSign() {
+    if (!hasStrokes) return
+    const canvas = canvasRef.current!
+    const dataUrl = canvas.toDataURL('image/png')
+    onSign?.(prescription.id, dataUrl)
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      {/* Header */}
+      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-400"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M19 12H5M12 5l-7 7 7 7" />
+              </svg>
+            </button>
+          )}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-base font-bold text-slate-900 dark:text-white">Receta Médica</h1>
+            <p className="text-xs font-mono text-slate-400 dark:text-slate-500">{prescription.patientName}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {isSigned ? (
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-50 dark:bg-teal-900/30 text-xs font-semibold text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-700/50">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                Firmada
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-xs font-semibold text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700/50">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+                Borrador
+              </span>
+            )}
+            {isSigned && (
+              <button
+                onClick={() => onPrint?.(prescription.id)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                Imprimir
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto px-4 py-4 space-y-4 pb-8">
+
+        {/* Prescription card — styled as official document */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          {/* Document header */}
+          <div className="bg-teal-700 dark:bg-teal-800 px-5 py-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-teal-200 uppercase tracking-widest">Receta Médica</p>
+              <p className="text-lg font-bold text-white mt-0.5">{prescription.doctorName}</p>
+              <p className="text-sm text-teal-200">{prescription.doctorLicense}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-teal-300">Fecha de emisión</p>
+              <p className="text-sm font-semibold text-white">
+                {new Date(prescription.date + 'T00:00:00').toLocaleDateString('es-MX', {
+                  day: '2-digit', month: 'long', year: 'numeric'
+                })}
+              </p>
+            </div>
+          </div>
+
+          {/* Patient */}
+          <div className="px-5 py-3 bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-800/50">
+            <p className="text-xs text-teal-700 dark:text-teal-400 font-medium uppercase tracking-wide">Paciente</p>
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{prescription.patientName}</p>
+          </div>
+
+          {/* Medications */}
+          <div className="divide-y divide-slate-100 dark:divide-slate-700">
+            {prescription.medications.map((med, i) => (
+              <div key={i} className="px-5 py-4">
+                <div className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-400 text-xs font-bold flex items-center justify-center">
+                    {i + 1}
+                  </span>
+                  <div className="flex-1">
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <p className="font-semibold text-slate-800 dark:text-slate-200">{med.name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{med.presentation}</p>
+                    </div>
+                    <div className="mt-2 grid grid-cols-3 gap-x-4 gap-y-1">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Dosis</p>
+                        <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{med.dose}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Frecuencia</p>
+                        <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{med.frequency}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Duración</p>
+                        <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{med.duration}</p>
+                      </div>
+                    </div>
+                    {med.instructions && (
+                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 italic">
+                        ℹ {med.instructions}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Signature section */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+              </svg>
+              <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                {isSigned ? 'Firma electrónica del médico' : 'Firmar receta'}
+              </h2>
+            </div>
+            {!isSigned && (
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                Dibuja tu firma en el área de abajo. Al confirmar, la receta quedará sellada con timestamp y no podrá modificarse.
+              </p>
+            )}
+          </div>
+
+          <div className="px-5 py-4">
+            {isSigned ? (
+              /* Show existing signature */
+              <div className="space-y-3">
+                <div className="rounded-xl border-2 border-dashed border-teal-200 dark:border-teal-700/50 bg-teal-50 dark:bg-teal-900/10 h-28 flex items-center justify-center">
+                  <span className="text-xs text-teal-500 dark:text-teal-500 italic">Firma registrada ✓</span>
+                </div>
+                {prescription.signedAt && (
+                  <div className="rounded-lg bg-slate-50 dark:bg-slate-700/50 px-4 py-3 space-y-1">
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Timestamp NOM</p>
+                    <p className="text-xs font-mono text-slate-700 dark:text-slate-300">
+                      {formatDateTime(prescription.signedAt)}
+                    </p>
+                    {prescription.signatureTimestamp && (
+                      <>
+                        <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium mt-2">UTC (auditoría)</p>
+                        <p className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                          {prescription.signatureTimestamp}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Signature canvas */
+              <div className="space-y-3">
+                <div className="relative rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/30 overflow-hidden select-none">
+                  <canvas
+                    ref={canvasRef}
+                    width={600}
+                    height={160}
+                    className="w-full cursor-crosshair touch-none"
+                    onMouseDown={startDraw}
+                    onMouseMove={draw}
+                    onMouseUp={stopDraw}
+                    onMouseLeave={stopDraw}
+                    onTouchStart={startDraw}
+                    onTouchMove={draw}
+                    onTouchEnd={stopDraw}
+                  />
+                  {!hasStrokes && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <p className="text-xs text-slate-400 dark:text-slate-500 italic">Dibuja tu firma aquí</p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={clearCanvas}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors"
+                  >
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
+                    </svg>
+                    Limpiar
+                  </button>
+                  <button
+                    onClick={handleSign}
+                    disabled={!hasStrokes}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-teal-600 hover:bg-teal-700 disabled:bg-slate-200 dark:disabled:bg-slate-700 disabled:text-slate-400 dark:disabled:text-slate-500 text-white transition-colors shadow-sm"
+                  >
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    Firmar y sellar receta
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center">
+                  Al firmar, se genera un timestamp conforme a normatividad mexicana. La receta será inmutable.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  )
+}

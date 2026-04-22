@@ -1,0 +1,293 @@
+{
+  "_meta": {
+    "models": {
+      "service": "Tipo de consulta o especialidad que ofrece el Dr. Viveros para agendar citas.",
+      "appointment": "Cita médica agendada por un paciente, con sus datos de contacto, servicio solicitado, fecha, hora y estado actual.",
+      "availableSlots": "Horarios disponibles por día. Lunes, martes y miércoles de 16:00 a 19:00; jueves y viernes de 10:00 a 13:00. Sábado y domingo sin consulta."
+    },
+    "relationships": [
+      "Cada appointment referencia un service mediante serviceId y guarda el nombre del servicio en serviceName para mostrar sin necesidad de lookup.",
+      "Un appointment puede tener uno de cuatro estados: pendiente (recién solicitada, esperando confirmación), confirmada, cancelada, reprogramada.",
+      "availableSlots se cruza con appointments para determinar qué horas están tomadas: un slot con available=false corresponde a una cita confirmada o pendiente en esa fecha/hora."
+    ]
+  },
+
+  "services": [
+    {
+      "id": "orl-general",
+      "name": "Consulta ORL General",
+      "duration": 30,
+      "description": "Evaluación general de oído, nariz y garganta"
+    },
+    {
+      "id": "vacunacion",
+      "name": "Vacunación",
+      "duration": 20,
+      "description": "Aplicación de vacunas indicadas por el especialista"
+    },
+    {
+      "id": "audiologia",
+      "name": "Pérdida de la Audición / Tinnitus / Adaptación de Auxiliares Auditivos",
+      "duration": 45,
+      "description": "Evaluación auditiva, diagnóstico de tinnitus y adaptación de auxiliares auditivos"
+    },
+    {
+      "id": "vertigo",
+      "name": "Vértigo",
+      "duration": 30,
+      "description": "Diagnóstico y tratamiento de vértigo y mareos"
+    },
+    {
+      "id": "cirugia-nariz",
+      "name": "Cirugía Funcional de Nariz",
+      "duration": 60,
+      "description": "Consulta preoperatoria y seguimiento postquirúrgico de nariz"
+    },
+    {
+      "id": "cirugia-endoscopica",
+      "name": "Cirugía Endoscópica de Nariz",
+      "duration": 60,
+      "description": "Consulta preoperatoria y seguimiento de cirugía endoscópica nasal"
+    },
+    {
+      "id": "inmunoterapia",
+      "name": "Inmunoterapia / Rinitis Alérgica",
+      "duration": 30,
+      "description": "Evaluación y tratamiento de rinitis alérgica con inmunoterapia"
+    }
+  ],
+
+  "availableSlots": [
+    {
+      "date": "2026-04-21",
+      "dayOfWeek": "lunes",
+      "slots": [
+        { "time": "16:00", "available": false },
+        { "time": "16:30", "available": false },
+        { "time": "17:00", "available": false },
+        { "time": "17:30", "available": true },
+        { "time": "18:00", "available": true },
+        { "time": "18:30", "available": true }
+      ]
+    },
+    {
+      "date": "2026-04-22",
+      "dayOfWeek": "martes",
+      "slots": [
+        { "time": "16:00", "available": false },
+        { "time": "16:30", "available": true },
+        { "time": "17:00", "available": false },
+        { "time": "17:30", "available": true },
+        { "time": "18:00", "available": true },
+        { "time": "18:30", "available": true }
+      ]
+    },
+    {
+      "date": "2026-04-23",
+      "dayOfWeek": "miércoles",
+      "slots": [
+        { "time": "16:00", "available": true },
+        { "time": "16:30", "available": false },
+        { "time": "17:00", "available": false },
+        { "time": "17:30", "available": true },
+        { "time": "18:00", "available": true },
+        { "time": "18:30", "available": true }
+      ]
+    },
+    {
+      "date": "2026-04-24",
+      "dayOfWeek": "jueves",
+      "slots": [
+        { "time": "10:00", "available": false },
+        { "time": "10:30", "available": false },
+        { "time": "11:00", "available": false },
+        { "time": "11:30", "available": true },
+        { "time": "12:00", "available": true },
+        { "time": "12:30", "available": true }
+      ]
+    },
+    {
+      "date": "2026-04-25",
+      "dayOfWeek": "viernes",
+      "slots": [
+        { "time": "10:00", "available": true },
+        { "time": "10:30", "available": false },
+        { "time": "11:00", "available": true },
+        { "time": "11:30", "available": true },
+        { "time": "12:00", "available": false },
+        { "time": "12:30", "available": true }
+      ]
+    }
+  ],
+
+  "appointments": [
+    {
+      "id": "apt-001",
+      "patientName": "María González Reyes",
+      "phone": "81 2345 6789",
+      "email": "maria.gonzalez@gmail.com",
+      "serviceId": "orl-general",
+      "serviceName": "Consulta ORL General",
+      "date": "2026-04-21",
+      "time": "16:00",
+      "reason": "Dolor de oído persistente en oído derecho desde hace dos semanas. También presenta reducción de audición al hablar por teléfono.",
+      "status": "confirmada",
+      "privacyAccepted": true,
+      "createdAt": "2026-04-18T10:30:00Z"
+    },
+    {
+      "id": "apt-002",
+      "patientName": "Carlos Mendoza Ortiz",
+      "phone": "81 9876 5432",
+      "email": "c.mendoza@hotmail.com",
+      "serviceId": "vertigo",
+      "serviceName": "Vértigo",
+      "date": "2026-04-21",
+      "time": "16:30",
+      "reason": "Episodios de vértigo con náuseas al cambiar de posición, especialmente al levantarse por las mañanas.",
+      "status": "pendiente",
+      "privacyAccepted": true,
+      "createdAt": "2026-04-18T14:15:00Z"
+    },
+    {
+      "id": "apt-003",
+      "patientName": "Ana Sofía Torres Villarreal",
+      "phone": "81 1122 3344",
+      "email": "ana.torres@outlook.com",
+      "serviceId": "inmunoterapia",
+      "serviceName": "Inmunoterapia / Rinitis Alérgica",
+      "date": "2026-04-21",
+      "time": "17:00",
+      "reason": "Seguimiento de tratamiento de inmunoterapia, segunda dosis del ciclo mensual.",
+      "status": "confirmada",
+      "privacyAccepted": true,
+      "createdAt": "2026-04-15T09:00:00Z"
+    },
+    {
+      "id": "apt-004",
+      "patientName": "Roberto Silva Cárdenas",
+      "phone": "81 5566 7788",
+      "email": "rsilva@empresa.com",
+      "serviceId": "audiologia",
+      "serviceName": "Pérdida de la Audición / Tinnitus / Adaptación de Auxiliares Auditivos",
+      "date": "2026-04-22",
+      "time": "16:00",
+      "reason": "Zumbido constante en oído izquierdo desde hace un mes aproximadamente. No presenta dolor.",
+      "status": "pendiente",
+      "privacyAccepted": true,
+      "createdAt": "2026-04-17T16:45:00Z"
+    },
+    {
+      "id": "apt-005",
+      "patientName": "Lucía Ramírez Fuentes",
+      "phone": "81 3344 5566",
+      "email": "lucia.ramirez@gmail.com",
+      "serviceId": "cirugia-nariz",
+      "serviceName": "Cirugía Funcional de Nariz",
+      "date": "2026-04-22",
+      "time": "17:00",
+      "reason": "Consulta preoperatoria para septoplastia indicada por médico de cabecera.",
+      "status": "confirmada",
+      "privacyAccepted": true,
+      "createdAt": "2026-04-10T11:00:00Z"
+    },
+    {
+      "id": "apt-006",
+      "patientName": "Jorge Hernández López",
+      "phone": "81 7788 9900",
+      "email": "jhernandez@yahoo.com",
+      "serviceId": "orl-general",
+      "serviceName": "Consulta ORL General",
+      "date": "2026-04-23",
+      "time": "16:30",
+      "reason": "Revisión postoperatoria.",
+      "status": "cancelada",
+      "privacyAccepted": true,
+      "createdAt": "2026-04-14T08:30:00Z"
+    },
+    {
+      "id": "apt-007",
+      "patientName": "Diana Castillo Vega",
+      "phone": "81 2233 4455",
+      "email": "dcastillo@gmail.com",
+      "serviceId": "vacunacion",
+      "serviceName": "Vacunación",
+      "date": "2026-04-23",
+      "time": "17:00",
+      "reason": "Vacuna contra influenza y neumococo según esquema indicado.",
+      "status": "confirmada",
+      "privacyAccepted": true,
+      "createdAt": "2026-04-16T13:20:00Z"
+    },
+    {
+      "id": "apt-008",
+      "patientName": "Fernando Morales Reyes",
+      "phone": "81 6677 8899",
+      "email": "fmorales@outlook.com",
+      "serviceId": "cirugia-endoscopica",
+      "serviceName": "Cirugía Endoscópica de Nariz",
+      "date": "2026-04-24",
+      "time": "10:00",
+      "reason": "Primera consulta para evaluación de poliposis nasal con obstrucción bilateral.",
+      "status": "reprogramada",
+      "privacyAccepted": true,
+      "createdAt": "2026-04-12T15:00:00Z"
+    },
+    {
+      "id": "apt-009",
+      "patientName": "Valentina Cruz Moreno",
+      "phone": "81 4455 6677",
+      "email": "vcruz@gmail.com",
+      "serviceId": "orl-general",
+      "serviceName": "Consulta ORL General",
+      "date": "2026-04-24",
+      "time": "10:30",
+      "reason": "Faringitis recurrente.",
+      "status": "pendiente",
+      "privacyAccepted": true,
+      "createdAt": "2026-04-18T17:00:00Z"
+    },
+    {
+      "id": "apt-010",
+      "patientName": "Miguel Ángel Soto Garza",
+      "phone": "81 8899 0011",
+      "email": "masoto@hotmail.com",
+      "serviceId": "inmunoterapia",
+      "serviceName": "Inmunoterapia / Rinitis Alérgica",
+      "date": "2026-04-24",
+      "time": "11:00",
+      "reason": "Inicio de ciclo de inmunoterapia para alergia a ácaros del polvo, derivado por alergólogo.",
+      "status": "confirmada",
+      "privacyAccepted": true,
+      "createdAt": "2026-04-13T10:00:00Z"
+    },
+    {
+      "id": "apt-011",
+      "patientName": "Gabriela Núñez Peña",
+      "phone": "81 3322 1100",
+      "email": "gnunez@gmail.com",
+      "serviceId": "orl-general",
+      "serviceName": "Consulta ORL General",
+      "date": "2026-04-25",
+      "time": "10:30",
+      "reason": "Consulta por ronquido nocturno y somnolencia diurna.",
+      "status": "confirmada",
+      "privacyAccepted": true,
+      "createdAt": "2026-04-19T09:15:00Z"
+    },
+    {
+      "id": "apt-012",
+      "patientName": "Héctor Jiménez Robles",
+      "phone": "81 9911 2233",
+      "email": "hjimenez@empresa.mx",
+      "serviceId": "audiologia",
+      "serviceName": "Pérdida de la Audición / Tinnitus / Adaptación de Auxiliares Auditivos",
+      "date": "2026-04-25",
+      "time": "12:00",
+      "reason": "Hipoacusia bilateral progresiva de 3 años de evolución. Solicita evaluación para auxiliar auditivo.",
+      "status": "pendiente",
+      "privacyAccepted": true,
+      "createdAt": "2026-04-20T11:00:00Z"
+    }
+  ]
+}
