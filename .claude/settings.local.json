@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npx create-next-app@latest *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3004/)",
+      "Bash(curl -s http://localhost:3004/staff/agenda)",
+      "Bash(git add *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/perfil)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/servicios)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/ubicacion)",
+      "Bash(pkill -f \"next dev\")",
+      "WebFetch(domain:www.otorrinonet.com)",
+      "Bash(npx tsc *)",
+      "Bash(npx prisma *)",
+      "Bash(DATABASE_URL=\"postgresql://placeholder:placeholder@localhost:5432/otorrinonet\" npx prisma *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('version','?'\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('description','?'\\), d.get\\('version','?'\\)\\)\")",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git remote *)",
+      "Bash(xargs sed *)",
+      "Bash(curl -s http://localhost:3000/agendar -o /dev/null -w \"%{http_code}\")",
+      "Bash(echo \"PID: $!\")",
+      "Bash(curl -s http://localhost:3000/ -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s http://localhost:3000/agendar)",
+      "Bash(curl -s http://localhost:3000/agendar -o /dev/null -w \" %{http_code}\")",
+      "Bash(curl -s http://localhost:3000/contacto -o /dev/null -w \" %{http_code}\")",
+      "Bash(git ls-tree *)",
+      "Bash(git rm *)",
+      "Bash(git config *)"
+    ]
+  }
+}
