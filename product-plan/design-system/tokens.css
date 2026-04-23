@@ -2,8 +2,8 @@
 
 :root {
   /* Colors */
-  --color-primary: teal;       /* buttons, links, key accents */
-  --color-secondary: sky;      /* tags, highlights, secondary elements */
+  --color-primary: sky;        /* buttons, links, key accents */
+  --color-secondary: blue;     /* tags, highlights, secondary elements */
   --color-neutral: slate;      /* backgrounds, text, borders */
 
   /* Typography */

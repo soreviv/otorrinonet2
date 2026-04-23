@@ -1,0 +1,259 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  medico
+  enfermera
+  recepcionista
+}
+
+enum UserStatus {
+  activo
+  inactivo
+}
+
+enum AppointmentStatus {
+  pendiente
+  confirmada
+  cancelada
+  completada
+}
+
+enum AuditAction {
+  acceso
+  creacion
+  modificacion
+  eliminacion
+  firma
+  exportacion_fhir
+}
+
+enum ArcoType {
+  acceso
+  rectificacion
+  cancelacion
+  oposicion
+}
+
+enum ArcoStatus {
+  pendiente
+  en_proceso
+  resuelta
+  rechazada
+}
+
+enum FhirExportType {
+  individual
+  masiva
+}
+
+enum FhirExportStatus {
+  en_proceso
+  completado
+  error
+}
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
+model StaffUser {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String
+  role         UserRole
+  status       UserStatus @default(activo)
+  passwordHash String
+  totpSecret   String?
+  totpEnabled  Boolean    @default(false)
+  lastAccess   DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  auditLogs   AuditLog[]
+  fhirExports FhirExport[]
+
+  @@map("staff_users")
+}
+
+// ─── Patients ─────────────────────────────────────────────────────────────────
+
+model Patient {
+  id               String   @id @default(cuid())
+  expedienteNumber String   @unique
+  firstName        String
+  lastName         String
+  dateOfBirth      DateTime
+  gender           String
+  curp             String?  @unique
+  phone            String?
+  email            String?
+  address          String?
+  bloodType        String?
+  allergies        String[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  appointments   Appointment[]
+  evolutionNotes EvolutionNote[]
+  surgicalNotes  SurgicalNote[]
+  prescriptions  Prescription[]
+  consentForms   ConsentForm[]
+  arcoRequests   ArcoRequest[]
+  fhirExports    FhirExport[]
+
+  @@map("patients")
+}
+
+// ─── Agenda ───────────────────────────────────────────────────────────────────
+
+model Service {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  durationMins Int      @default(30)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  appointments Appointment[]
+
+  @@map("services")
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  patientId   String
+  serviceId   String
+  scheduledAt DateTime
+  status      AppointmentStatus @default(pendiente)
+  notes       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id])
+
+  @@map("appointments")
+}
+
+// ─── Clinical Documents ───────────────────────────────────────────────────────
+
+model EvolutionNote {
+  id          String    @id @default(cuid())
+  patientId   String
+  subjective  String
+  objective   String
+  assessment  String
+  plan        String
+  diagnosis   String[]
+  signedAt    DateTime?
+  signedById  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("evolution_notes")
+}
+
+model SurgicalNote {
+  id           String    @id @default(cuid())
+  patientId    String
+  type         String
+  procedure    String
+  findings     String?
+  instructions String?
+  signedAt     DateTime?
+  signedById   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("surgical_notes")
+}
+
+model Prescription {
+  id          String    @id @default(cuid())
+  patientId   String
+  medications Json
+  diagnosis   String
+  notes       String?
+  signedAt    DateTime?
+  signedById  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("prescriptions")
+}
+
+model ConsentForm {
+  id              String    @id @default(cuid())
+  patientId       String
+  type            String
+  content         String
+  patientSignedAt DateTime?
+  doctorSignedAt  DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("consent_forms")
+}
+
+// ─── Compliance & Admin ───────────────────────────────────────────────────────
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  action    AuditAction
+  resource  String
+  userId    String
+  ipAddress String
+  timestamp DateTime    @default(now())
+
+  user StaffUser @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model ArcoRequest {
+  id          String     @id @default(cuid())
+  type        ArcoType
+  patientId   String
+  description String
+  status      ArcoStatus @default(pendiente)
+  notes       String?
+  submittedAt DateTime   @default(now())
+  resolvedAt  DateTime?
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("arco_requests")
+}
+
+model FhirExport {
+  id            String           @id @default(cuid())
+  type          FhirExportType
+  patientId     String?
+  dateRangeFrom DateTime?
+  dateRangeTo   DateTime?
+  requestedById String
+  status        FhirExportStatus @default(en_proceso)
+  fileSize      String?
+  requestedAt   DateTime         @default(now())
+  completedAt   DateTime?
+
+  patient     Patient?   @relation(fields: [patientId], references: [id], onDelete: SetNull)
+  requestedBy StaffUser  @relation(fields: [requestedById], references: [id])
+
+  @@map("fhir_exports")
+}
