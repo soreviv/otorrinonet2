@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import bcrypt from 'bcryptjs'
-import { authenticator } from 'otplib'
+import { generateSecret, generateURI, verifySync } from 'otplib'
 import { prisma } from '@/lib/prisma'
 import {
   createSession,
@@ -48,7 +48,7 @@ export async function getSetup2faData(): Promise<{ secret: string; otpauth: stri
   if (!user) return null
 
   // Reuse stored secret if exists (user may refresh page)
-  const secret = user.totpSecret ?? authenticator.generateSecret()
+  const secret = user.totpSecret ?? generateSecret()
 
   if (!user.totpSecret) {
     await prisma.staffUser.update({
@@ -57,7 +57,7 @@ export async function getSetup2faData(): Promise<{ secret: string; otpauth: stri
     })
   }
 
-  const otpauth = authenticator.keyuri(user.email, 'ORL Viveros', secret)
+  const otpauth = generateURI({ label: user.email, issuer: 'ORL Viveros', secret })
   return { secret, otpauth, email: user.email }
 }
 
@@ -69,7 +69,7 @@ export async function confirmSetup2faAction(_prev: ActionResult | null, formData
   const user = await prisma.staffUser.findUnique({ where: { id: pending.userId } })
   if (!user?.totpSecret) return { error: 'Error de configuración. Intenta de nuevo.' }
 
-  const valid = authenticator.verify({ token: code, secret: user.totpSecret })
+  const valid = verifySync({ token: code, secret: user.totpSecret })
   if (!valid) return { error: 'Código incorrecto. Intenta de nuevo.' }
 
   await prisma.staffUser.update({
@@ -96,7 +96,7 @@ export async function verify2faAction(_prev: ActionResult | null, formData: Form
   const user = await prisma.staffUser.findUnique({ where: { id: pending.userId } })
   if (!user?.totpSecret) return { error: 'Error de autenticación. Contacta al administrador.' }
 
-  const valid = authenticator.verify({ token: code, secret: user.totpSecret })
+  const valid = verifySync({ token: code, secret: user.totpSecret })
   if (!valid) return { error: 'Código incorrecto. Intenta de nuevo.' }
 
   await prisma.staffUser.update({
