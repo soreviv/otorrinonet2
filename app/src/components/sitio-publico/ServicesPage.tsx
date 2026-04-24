@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import {
   Stethoscope, Ear, Wind, Flower2, Scissors, Activity,
   Calendar, Menu, X, ChevronRight, ArrowLeft,
@@ -43,15 +44,9 @@ export function ServicesPage({ services, doctorProfile, onBookAppointment }: Ser
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100 dark:bg-slate-900/95 dark:border-slate-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <a href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center shadow-sm group-hover:bg-sky-700 transition-colors">
-                <Stethoscope className="w-4 h-4 text-white" />
-              </div>
-              <div className="leading-tight">
-                <p className="text-sm font-bold text-slate-900 dark:text-white">Dr. Viveros</p>
-                <p className="text-[10px] text-sky-600 font-semibold uppercase tracking-widest">ORL · CDMX</p>
-              </div>
-            </a>
+            <Link href="/" className="flex items-center group">
+              <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" width={40} height={40} className="h-10 w-auto" />
+            </Link>
 
             <div className="hidden md:flex items-center gap-7">
               {NAV_LINKS.map(({ label, href }) => (
@@ -211,15 +206,11 @@ export function ServicesPage({ services, doctorProfile, onBookAppointment }: Ser
       <footer className="bg-slate-900 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <a href="/" className="flex items-center gap-2.5 group">
-              <div className="w-7 h-7 rounded-lg bg-sky-600 flex items-center justify-center group-hover:bg-sky-500 transition-colors">
-                <Stethoscope className="w-3.5 h-3.5 text-white" />
+            <Link href="/" className="flex items-center group">
+              <div className="bg-white rounded-xl p-1.5">
+                <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" width={32} height={32} className="h-8 w-auto" />
               </div>
-              <div className="leading-tight">
-                <p className="text-sm font-bold text-white">Dr. Alejandro Viveros ORL</p>
-                <p className="text-[10px] text-slate-500">Otorrinolaringología · Ciudad de México</p>
-              </div>
-            </a>
+            </Link>
             <p className="text-[11px] text-slate-600">© 2026 Dr. Alejandro Viveros</p>
           </div>
         </div>
