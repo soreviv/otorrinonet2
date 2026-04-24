@@ -60,7 +60,7 @@ export function HomePage({
           <div className="flex items-center justify-between h-16">
 
             <Link href="/" className="flex items-center group">
-              <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" className="h-10 w-auto" />
+              <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" width={40} height={40} className="h-10 w-auto" />
             </Link>
 
             <div className="hidden md:flex items-center gap-7">
@@ -341,7 +341,7 @@ export function HomePage({
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <Link href="/" className="flex items-center group">
               <div className="bg-white rounded-xl p-1.5">
-                <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" className="h-8 w-auto" />
+                <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" width={32} height={32} className="h-8 w-auto" />
               </div>
             </Link>
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Link from 'next/link'
 import {
   Calendar, Menu, X, MapPin,
   Phone, MessageCircle, Mail, Send, CheckCircle2,
@@ -68,9 +69,9 @@ export function ContactPage({ contactInfo, onSubmitContactForm, onBookAppointmen
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100 dark:bg-slate-900/95 dark:border-slate-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <a href="/" className="flex items-center group">
-              <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" className="h-10 w-auto" />
-            </a>
+            <Link href="/" className="flex items-center group">
+              <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" width={40} height={40} className="h-10 w-auto" />
+            </Link>
 
             <div className="hidden md:flex items-center gap-7">
               {NAV_LINKS.map(({ label, href }) => (
@@ -427,11 +428,11 @@ export function ContactPage({ contactInfo, onSubmitContactForm, onBookAppointmen
       <footer className="bg-slate-900 py-8 mt-4">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <a href="/" className="flex items-center group">
+            <Link href="/" className="flex items-center group">
               <div className="bg-white rounded-xl p-1.5">
-                <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" className="h-8 w-auto" />
+                <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" width={32} height={32} className="h-8 w-auto" />
               </div>
-            </a>
+            </Link>
             <p className="text-[11px] text-slate-600">© 2026 Dr. Alejandro Viveros</p>
           </div>
         </div>
