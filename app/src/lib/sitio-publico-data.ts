@@ -13,6 +13,7 @@ export const doctorProfile: DoctorProfile = {
   licenseNumber: '6277305',
   specialtyLicense: '10148701',
   photo: '/assets/dr-viveros-perfil.jpg',
+  photoProfile: '/assets/dr-viveros-perfil-2.jpg',
   tagline:
     'Especialista en Otorrinolaringología y Cirugía de Cabeza y Cuello. Atención humana, ética y de alta calidad con las técnicas más modernas y menos invasivas.',
   shortBio:

@@ -13,6 +13,7 @@ export interface DoctorProfile {
   licenseNumber: string
   specialtyLicense: string
   photo: string
+  photoProfile: string
   tagline: string
   shortBio: string
   fullBio: string

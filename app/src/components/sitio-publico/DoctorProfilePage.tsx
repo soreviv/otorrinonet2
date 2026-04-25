@@ -115,7 +115,7 @@ export function DoctorProfilePage({
               <div className="w-40 h-40 md:w-52 md:h-52 rounded-3xl overflow-hidden bg-gradient-to-br from-sky-400 to-sky-700 shadow-xl">
                 {!imgError && (
                   <img
-                    src={doctorProfile.photo}
+                    src={doctorProfile.photoProfile}
                     alt={doctorProfile.fullName}
                     onError={() => setImgError(true)}
                     className="w-full h-full object-cover"
