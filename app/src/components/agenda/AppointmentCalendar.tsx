@@ -67,6 +67,14 @@ const STATUS: Record<AppointmentStatus, StatusCfg> = {
     pillBg: 'bg-sky-100 dark:bg-sky-900/40',
     pillText: 'text-sky-700 dark:text-sky-300',
   },
+  completada: {
+    label: 'Completada',
+    bg: 'bg-emerald-50 dark:bg-emerald-950/30',
+    text: 'text-emerald-700 dark:text-emerald-300',
+    dot: 'bg-emerald-500',
+    pillBg: 'bg-emerald-100 dark:bg-emerald-900/40',
+    pillText: 'text-emerald-700 dark:text-emerald-300',
+  },
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

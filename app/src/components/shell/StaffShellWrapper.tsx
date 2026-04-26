@@ -40,12 +40,13 @@ const staffNavItems = [
   },
 ]
 
-const demoUser = {
-  name: 'Dr. Alejandro Viveros',
-  role: 'medico' as StaffRole,
+interface ShellWrapperProps {
+  children: React.ReactNode
+  userName: string
+  userRole: StaffRole
 }
 
-export function StaffShellWrapper({ children }: { children: React.ReactNode }) {
+export function StaffShellWrapper({ children, userName, userRole }: ShellWrapperProps) {
   const router = useRouter()
   const pathname = usePathname()
 
@@ -57,7 +58,7 @@ export function StaffShellWrapper({ children }: { children: React.ReactNode }) {
   return (
     <StaffShell
       navigationItems={navigationItems}
-      user={demoUser}
+      user={{ name: userName, role: userRole }}
       onNavigate={(href) => router.push(href)}
       onLogout={() => logoutAction()}
     >

@@ -97,6 +97,11 @@ model Patient {
   address          String?
   bloodType        String?
   allergies        String[]
+  familyHistoryJson     Json?
+  personalHistoryJson   Json?
+  currentConditionJson  Json?
+  physicalExamJson      Json?
+  diagnosesJson         Json?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -107,6 +112,7 @@ model Patient {
   consentForms   ConsentForm[]
   arcoRequests   ArcoRequest[]
   fhirExports    FhirExport[]
+  vitals         Vitals[]
 
   @@map("patients")
 }
@@ -140,6 +146,38 @@ model Appointment {
   service Service @relation(fields: [serviceId], references: [id])
 
   @@map("appointments")
+}
+
+// ─── CIE-10 Catalog ──────────────────────────────────────────────────────────
+
+model Cie10 {
+  codigo      String  @id
+  descripcion String
+  categoria   String?
+
+  @@map("cie10_catalog")
+}
+
+// ─── Vitals ───────────────────────────────────────────────────────────────────
+
+model Vitals {
+  id                   String   @id @default(cuid())
+  patientId            String
+  presionSistolica     Int?
+  presionDiastolica    Int?
+  frecuenciaCardiaca   Int?
+  frecuenciaRespiratoria Int?
+  temperatura          Float?
+  saturacionOxigeno    Int?
+  peso                 Float?
+  talla                Float?
+  glucosa              Int?
+  recordedById         String?
+  createdAt            DateTime @default(now())
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("vitals")
 }
 
 // ─── Clinical Documents ───────────────────────────────────────────────────────

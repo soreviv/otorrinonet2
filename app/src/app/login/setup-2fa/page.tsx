@@ -34,9 +34,7 @@ export default async function Setup2faPage() {
           </ol>
         </div>
 
-        <div className="flex justify-center">
-          <Setup2faForm otpauth={data.otpauth} secret={data.secret} />
-        </div>
+        <Setup2faForm otpauth={data.otpauth} secret={data.secret} />
       </div>
     </div>
   )

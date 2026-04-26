@@ -1,11 +1,16 @@
 'use client'
 
-import { useActionState } from 'react'
-import { redirect } from 'next/navigation'
+import { useActionState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { verify2faAction } from '@/app/actions/auth'
 
 export default function Verify2faPage() {
+  const router = useRouter()
   const [state, action, pending] = useActionState(verify2faAction, null)
+
+  useEffect(() => {
+    if (state && 'ok' in state) router.replace('/staff')
+  }, [state, router])
 
   return (
     <div className="w-full max-w-sm">
@@ -60,7 +65,7 @@ export default function Verify2faPage() {
 
       <p className="text-center mt-4">
         <button
-          onClick={() => redirect('/login')}
+          onClick={() => router.push('/login')}
           className="text-xs text-slate-400 hover:text-slate-600 hover:underline"
         >
           ← Volver al inicio de sesión

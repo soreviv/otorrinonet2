@@ -1,136 +1,52 @@
-'use client'
+import { Suspense } from 'react'
+import { getPatients } from '@/app/actions/ehr'
+import { getNotasData } from '@/app/actions/notas'
+import { NotasClient } from './NotasClient'
 
-import { Suspense, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { DocumentList, PrescriptionDetail, ConsentFormDetail } from '@/components/notas'
-import {
-  SAMPLE_EVOLUTION_NOTES,
-  SAMPLE_SURGICAL_NOTES,
-  SAMPLE_PRESCRIPTIONS,
-  SAMPLE_CONSENT_FORMS,
-} from '@/lib/notas-data'
-import { SAMPLE_PATIENTS } from '@/lib/ehr-data'
-import type { Prescription, ConsentForm } from '@/lib/notas-types'
-
-type View = 'list' | 'prescription' | 'consent'
-
-function nowCDMX(): string {
-  return new Date().toLocaleString('sv-SE', { timeZone: 'America/Mexico_City' }).replace(' ', 'T') + '-06:00'
+interface Props {
+  searchParams: Promise<{ paciente?: string }>
 }
 
-function NotasPageInner() {
-  const searchParams = useSearchParams()
-  const patientId = searchParams.get('paciente') ?? SAMPLE_PATIENTS[0].id
-
-  const patient = SAMPLE_PATIENTS.find(p => p.id === patientId) ?? SAMPLE_PATIENTS[0]
-  const currentPatient = {
-    id: patient.id,
-    name: patient.generalData.fullName,
-    expedienteNumber: patient.expedienteNumber,
-  }
-
-  const [view, setView] = useState<View>('list')
-  const [selectedRxId, setSelectedRxId] = useState<string | null>(null)
-  const [selectedConsentId, setSelectedConsentId] = useState<string | null>(null)
-
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>(SAMPLE_PRESCRIPTIONS)
-  const [consentForms, setConsentForms] = useState<ConsentForm[]>(SAMPLE_CONSENT_FORMS)
-
-  const selectedRx = prescriptions.find(r => r.id === selectedRxId) ?? null
-  const selectedConsent = consentForms.find(c => c.id === selectedConsentId) ?? null
-
-  function handleViewPrescription(id: string) {
-    setSelectedRxId(id)
-    setView('prescription')
-  }
-
-  function handleViewConsent(id: string) {
-    setSelectedConsentId(id)
-    setView('consent')
-  }
-
-  function handleSignPrescription(id: string, signatureData: string) {
-    const now = new Date()
-    const signedAt = nowCDMX()
-    const signatureTimestamp = now.toISOString()
-    setPrescriptions(prev =>
-      prev.map(rx =>
-        rx.id === id
-          ? { ...rx, status: 'firmada', signatureData, signedAt, signatureTimestamp }
-          : rx
+async function NotasLoader({ patientId }: { patientId: string | undefined }) {
+  if (!patientId) {
+    const patients = await getPatients()
+    if (patients.length === 0) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <p className="text-slate-400 text-sm">No hay pacientes registrados aún.</p>
+        </div>
       )
-    )
+    }
+    patientId = patients[0].id
   }
 
-  function handleSignConsent(id: string, signatureData: string) {
-    const signedAt = nowCDMX()
-    setConsentForms(prev =>
-      prev.map(c =>
-        c.id === id
-          ? { ...c, status: 'firmado-presencial', patientSignatureData: signatureData, signedAt, signatureMethod: 'presencial' }
-          : c
-      )
-    )
-  }
+  const data = await getNotasData(patientId)
 
-  function handleSendConsentEmail(id: string) {
-    const emailSentAt = nowCDMX()
-    setConsentForms(prev =>
-      prev.map(c =>
-        c.id === id ? { ...c, emailSentAt } : c
-      )
-    )
-  }
-
-  function handlePrint(id: string) {
-    console.log('print/download:', id)
-    window.print()
-  }
-
-  if (view === 'prescription' && selectedRx) {
+  if (!data) {
     return (
-      <PrescriptionDetail
-        prescription={selectedRx}
-        onSign={handleSignPrescription}
-        onPrint={handlePrint}
-        onBack={() => setView('list')}
-      />
-    )
-  }
-
-  if (view === 'consent' && selectedConsent) {
-    return (
-      <ConsentFormDetail
-        consent={selectedConsent}
-        onSignPresential={handleSignConsent}
-        onSendEmail={handleSendConsentEmail}
-        onPrint={handlePrint}
-        onBack={() => setView('list')}
-      />
+      <div className="flex items-center justify-center h-64">
+        <p className="text-slate-400 text-sm">Paciente no encontrado.</p>
+      </div>
     )
   }
 
   return (
-    <DocumentList
-      currentPatient={currentPatient}
-      evolutionNotes={SAMPLE_EVOLUTION_NOTES}
-      surgicalNotes={SAMPLE_SURGICAL_NOTES}
-      prescriptions={prescriptions}
-      consentForms={consentForms}
-      onViewPrescription={handleViewPrescription}
-      onViewConsent={handleViewConsent}
-      onNewNote={() => console.log('nueva nota de evolución')}
-      onNewSurgicalNote={() => console.log('nueva nota quirúrgica')}
-      onNewPrescription={() => console.log('nueva receta')}
-      onNewConsent={() => console.log('nuevo consentimiento')}
+    <NotasClient
+      currentPatient={data.patient}
+      evolutionNotes={data.evolutionNotes}
+      surgicalNotes={data.surgicalNotes}
+      initialPrescriptions={data.prescriptions}
+      initialConsentForms={data.consentForms}
     />
   )
 }
 
-export default function NotasPage() {
+export default async function NotasPage({ searchParams }: Props) {
+  const { paciente } = await searchParams
+
   return (
-    <Suspense>
-      <NotasPageInner />
+    <Suspense fallback={<div className="flex items-center justify-center h-64"><p className="text-slate-400 text-sm">Cargando…</p></div>}>
+      <NotasLoader patientId={paciente} />
     </Suspense>
   )
 }

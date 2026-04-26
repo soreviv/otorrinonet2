@@ -83,7 +83,7 @@ export async function confirmSetup2faAction(_prev: ActionResult | null, formData
   await deletePendingSession()
   await createSession({ userId: user.id, email: user.email, name: user.name, role: user.role })
 
-  redirect('/staff')
+  return { ok: true }
 }
 
 // ─── Verify 2FA (step 2b — returning user) ────────────────────────────────────
@@ -107,7 +107,7 @@ export async function verify2faAction(_prev: ActionResult | null, formData: Form
   await deletePendingSession()
   await createSession({ userId: user.id, email: user.email, name: user.name, role: user.role })
 
-  redirect('/staff')
+  return { ok: true }
 }
 
 // ─── Logout ───────────────────────────────────────────────────────────────────

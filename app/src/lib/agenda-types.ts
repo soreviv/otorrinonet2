@@ -1,4 +1,4 @@
-export type AppointmentStatus = 'pendiente' | 'confirmada' | 'cancelada' | 'reprogramada'
+export type AppointmentStatus = 'pendiente' | 'confirmada' | 'cancelada' | 'reprogramada' | 'completada'
 
 export interface Service {
   id: string

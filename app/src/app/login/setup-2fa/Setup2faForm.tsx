@@ -1,10 +1,12 @@
 'use client'
 
 import { useActionState, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import QRCode from 'qrcode'
 import { confirmSetup2faAction } from '@/app/actions/auth'
 
 export function Setup2faForm({ otpauth, secret }: { otpauth: string; secret: string }) {
+  const router = useRouter()
   const [state, action, pending] = useActionState(confirmSetup2faAction, null)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [showSecret, setShowSecret] = useState(false)
@@ -12,6 +14,10 @@ export function Setup2faForm({ otpauth, secret }: { otpauth: string; secret: str
   useEffect(() => {
     QRCode.toDataURL(otpauth, { width: 180, margin: 1 }).then(setQrDataUrl)
   }, [otpauth])
+
+  useEffect(() => {
+    if (state && 'ok' in state) router.replace('/staff')
+  }, [state, router])
 
   return (
     <div className="w-full space-y-5">
