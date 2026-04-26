@@ -2,7 +2,8 @@
 
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
-import { CLINIC_CONFIG } from '@/lib/clinic-config'
+import { getClinicConfigFromDB } from '@/lib/clinic-config'
+import { logAction } from '@/lib/audit'
 import type { EvolutionNote, SurgicalNote, Prescription, ConsentForm } from '@/lib/notas-types'
 
 // ─── Map helpers ─────────────────────────────────────────────────────────────
@@ -47,7 +48,7 @@ function mapSurgical(n: {
 
 function mapPrescription(p: {
   id: string; patientId: string; medications: unknown; signedAt: Date | null; createdAt: Date
-}, patientName: string): Prescription {
+}, patientName: string, clinicCfg: Record<string, unknown>): Prescription {
   return {
     id: p.id,
     patientId: p.patientId,
@@ -55,12 +56,12 @@ function mapPrescription(p: {
     date: p.createdAt.toISOString().split('T')[0],
     status: p.signedAt ? 'firmada' : 'borrador',
     medications: Array.isArray(p.medications) ? (p.medications as any[]) : [],
-    ...CLINIC_CONFIG,
+    ...clinicCfg,
     signatureData: null,
     signedAt: p.signedAt?.toISOString() ?? null,
     signatureTimestamp: p.signedAt?.toISOString() ?? null,
     createdAt: p.createdAt.toISOString(),
-  }
+  } as Prescription
 }
 
 function mapConsent(c: {
@@ -87,23 +88,25 @@ function mapConsent(c: {
 
 export async function getNotasData(patientId: string) {
   const session = await verifySession()
-  const [patient, evolutionNotes, surgicalNotes, prescriptions, consentForms] = await Promise.all([
+  const [patient, evolutionNotes, surgicalNotes, prescriptions, consentForms, clinicCfg] = await Promise.all([
     prisma.patient.findUnique({ where: { id: patientId } }),
     prisma.evolutionNote.findMany({ where: { patientId }, orderBy: { createdAt: 'desc' } }),
     prisma.surgicalNote.findMany({ where: { patientId }, orderBy: { createdAt: 'desc' } }),
     prisma.prescription.findMany({ where: { patientId }, orderBy: { createdAt: 'desc' } }),
     prisma.consentForm.findMany({ where: { patientId }, orderBy: { createdAt: 'desc' } }),
+    getClinicConfigFromDB(),
   ])
 
   if (!patient) return null
 
   const patientName = `${patient.firstName} ${patient.lastName}`
+  await logAction({ action: 'vista', resource: 'patient', resourceId: patientId, userId: session.userId })
 
   return {
     patient: { id: patient.id, name: patientName, expedienteNumber: patient.expedienteNumber },
     evolutionNotes: evolutionNotes.map(n => mapEvolution(n, patientName, session.name)),
     surgicalNotes: surgicalNotes.map(n => mapSurgical(n, patientName, session.name)),
-    prescriptions: prescriptions.map(p => mapPrescription(p, patientName)),
+    prescriptions: prescriptions.map(p => mapPrescription(p, patientName, clinicCfg as any)),
     consentForms: consentForms.map(c => mapConsent(c, patientName, session.name)),
   }
 }
@@ -191,15 +194,17 @@ export async function createPrescription(
   medications: import('@/lib/notas-types').PrescriptionMedication[],
   diagnosis: string,
 ): Promise<Prescription> {
-  await verifySession()
-  const [patient, rx] = await Promise.all([
+  const session = await verifySession()
+  const [patient, rx, clinicCfg] = await Promise.all([
     prisma.patient.findUnique({ where: { id: patientId }, select: { firstName: true, lastName: true } }),
     prisma.prescription.create({
       data: { patientId, medications: medications as any, diagnosis, notes: null },
     }),
+    getClinicConfigFromDB(),
   ])
   const patientName = patient ? `${patient.firstName} ${patient.lastName}` : ''
-  return mapPrescription(rx, patientName)
+  await logAction({ action: 'creacion', resource: 'prescription', resourceId: rx.id, userId: session.userId })
+  return mapPrescription(rx, patientName, clinicCfg as any)
 }
 
 export async function createConsentForm(
@@ -218,11 +223,13 @@ export async function createConsentForm(
 // ─── Sign ─────────────────────────────────────────────────────────────────────
 
 export async function signPrescriptionInDB(id: string): Promise<void> {
-  await verifySession()
+  const session = await verifySession()
   await prisma.prescription.update({ where: { id }, data: { signedAt: new Date() } })
+  await logAction({ action: 'firma', resource: 'prescription', resourceId: id, userId: session.userId })
 }
 
 export async function signConsentInDB(id: string): Promise<void> {
-  await verifySession()
+  const session = await verifySession()
   await prisma.consentForm.update({ where: { id }, data: { patientSignedAt: new Date() } })
+  await logAction({ action: 'firma', resource: 'consent_form', resourceId: id, userId: session.userId })
 }

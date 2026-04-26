@@ -29,11 +29,15 @@ enum AppointmentStatus {
 
 enum AuditAction {
   acceso
+  vista
   creacion
   modificacion
   eliminacion
   firma
   exportacion_fhir
+  login_ok
+  login_fallido
+  logout
 }
 
 enum ArcoType {
@@ -91,7 +95,7 @@ model Patient {
   lastName         String
   dateOfBirth      DateTime
   gender           String
-  curp             String?  @unique
+  curp             String?
   phone            String?
   email            String?
   address          String?
@@ -113,6 +117,7 @@ model Patient {
   arcoRequests   ArcoRequest[]
   fhirExports    FhirExport[]
   vitals         Vitals[]
+  labOrders      LabOrder[]
 
   @@map("patients")
 }
@@ -251,16 +256,54 @@ model ConsentForm {
 // ─── Compliance & Admin ───────────────────────────────────────────────────────
 
 model AuditLog {
-  id        String      @id @default(cuid())
-  action    AuditAction
-  resource  String
-  userId    String
-  ipAddress String
-  timestamp DateTime    @default(now())
+  id         String      @id @default(cuid())
+  action     AuditAction
+  resource   String
+  resourceId String?
+  userId     String?
+  details    String?
+  ipAddress  String?
+  userAgent  String?
+  timestamp  DateTime    @default(now())
 
-  user StaffUser @relation(fields: [userId], references: [id])
+  user StaffUser? @relation(fields: [userId], references: [id])
 
   @@map("audit_logs")
+}
+
+model LabOrder {
+  id                    String    @id @default(cuid())
+  patientId             String
+  requestedById         String
+  estudios              String[]
+  diagnosticoPresuntivo String?
+  indicacionesClinicas  String?
+  urgente               Boolean   @default(false)
+  ayuno                 Boolean   @default(false)
+  status                String    @default("pendiente")
+  resultados            String?
+  fechaResultados       DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("lab_orders")
+}
+
+model ClinicConfig {
+  id                     String   @id @default("singleton")
+  clinicName             String   @default("Clínica ORL Viveros")
+  clinicAddress          String?
+  clinicPhone            String?
+  clinicCofepris         String?
+  doctorName             String   @default("Dr. Alejandro Viveros Domínguez")
+  doctorLicense          String?
+  doctorSpecialtyLicense String?
+  doctorUniversity       String?
+  updatedAt              DateTime @updatedAt
+
+  @@map("clinic_config")
 }
 
 model ArcoRequest {

@@ -27,7 +27,7 @@ export async function getAuditLogs(): Promise<AuditLog[]> {
     action: l.action.replace('_', '-') as AuditLog['action'],
     resource: l.resource,
     userId: l.userId,
-    userName: l.user.name,
+    userName: l.user?.name ?? 'Sistema',
     ipAddress: l.ipAddress,
     timestamp: l.timestamp.toISOString(),
   }))

@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
-import { CLINIC_CONFIG } from '@/lib/clinic-config'
+import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import type { EvolutionNote, Prescription } from '@/lib/notas-types'
 
 export interface VitalsRecord {
@@ -69,16 +69,12 @@ export async function getPatientEvolutionNotes(patientId: string): Promise<Evolu
 
 export async function getPatientPrescriptions(patientId: string): Promise<Prescription[]> {
   await verifySession()
-  const patient = await prisma.patient.findUnique({
-    where: { id: patientId },
-    select: { firstName: true, lastName: true },
-  })
+  const [patient, rxs, clinicCfg] = await Promise.all([
+    prisma.patient.findUnique({ where: { id: patientId }, select: { firstName: true, lastName: true } }),
+    prisma.prescription.findMany({ where: { patientId }, orderBy: { createdAt: 'desc' } }),
+    getClinicConfigFromDB(),
+  ])
   const patientName = patient ? `${patient.firstName} ${patient.lastName}` : ''
-
-  const rxs = await prisma.prescription.findMany({
-    where: { patientId },
-    orderBy: { createdAt: 'desc' },
-  })
 
   return rxs.map(p => ({
     id: p.id,
@@ -87,7 +83,7 @@ export async function getPatientPrescriptions(patientId: string): Promise<Prescr
     date: p.createdAt.toISOString().split('T')[0],
     status: p.signedAt ? 'firmada' : 'borrador',
     medications: Array.isArray(p.medications) ? (p.medications as any[]) : [],
-    ...CLINIC_CONFIG,
+    ...clinicCfg,
     signatureData: null,
     signedAt: p.signedAt?.toISOString() ?? null,
     signatureTimestamp: p.signedAt?.toISOString() ?? null,

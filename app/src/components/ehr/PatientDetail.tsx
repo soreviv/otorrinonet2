@@ -5,12 +5,12 @@ import type { PatientDetailProps, UserRole, DiagnosisStatus } from '@/lib/ehr-ty
 import type { EvolutionNote, Prescription } from '@/lib/notas-types'
 import type { VitalsRecord } from '@/app/actions/patient-clinical'
 import { getPatientVitals, getPatientEvolutionNotes, getPatientPrescriptions } from '@/app/actions/patient-clinical'
+import { getPatientLabOrders, type LabOrderRecord } from '@/app/actions/lab-orders'
 import { printPrescription } from '@/lib/print-prescription'
 import {
   ChevronDown, ArrowLeft, Pencil, User, HeartPulse, ClipboardList,
   Stethoscope, Pill, AlertTriangle, Lock, Calendar, Phone, Mail,
-  MapPin, Hash, Activity, Thermometer, Weight, Ruler, FileText,
-  Printer, ScrollText,
+  MapPin, FileText, Printer, ScrollText, FlaskConical, AlertCircle,
 } from 'lucide-react'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -308,9 +308,91 @@ function RecetasTab({ patientId, onNewPrescription }: { patientId: string; onNew
   )
 }
 
+// ─── Estudios/Lab tab ─────────────────────────────────────────────────────────
+
+function EstudiosTab({ patientId, onNewOrder }: { patientId: string; onNewOrder?: () => void }) {
+  const [orders, setOrders] = useState<LabOrderRecord[] | null>(null)
+
+  useEffect(() => {
+    getPatientLabOrders(patientId).then(setOrders)
+  }, [patientId])
+
+  if (orders === null) return <div className="flex items-center justify-center h-32 text-slate-400 text-sm">Cargando…</div>
+
+  return (
+    <div className="space-y-3">
+      {onNewOrder && (
+        <div className="flex justify-end">
+          <button onClick={onNewOrder}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition-colors">
+            <FlaskConical className="w-3.5 h-3.5" strokeWidth={2} />
+            Nueva solicitud
+          </button>
+        </div>
+      )}
+      {!orders.length && <div className="flex items-center justify-center h-32 text-slate-400 text-sm italic">Sin solicitudes de estudios.</div>}
+      {orders.map(order => (
+        <div key={order.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center">
+                <FlaskConical className="w-4 h-4 text-indigo-600 dark:text-indigo-400" strokeWidth={1.75} />
+              </div>
+              <div>
+                <p className="text-xs text-slate-400">{formatDateShort(order.createdAt)}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${order.status === 'completado' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : order.status === 'en_proceso' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}`}>
+                    {order.status === 'completado' ? 'Completado' : order.status === 'en_proceso' ? 'En proceso' : 'Pendiente'}
+                  </span>
+                  {order.urgente && (
+                    <span className="flex items-center gap-1 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                      <AlertCircle className="w-3 h-3" strokeWidth={2} />Urgente
+                    </span>
+                  )}
+                  {order.ayuno && <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">Requiere ayuno</span>}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="px-5 py-4 space-y-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Estudios solicitados</p>
+              <div className="flex flex-wrap gap-1.5">
+                {order.estudios.map((e, i) => (
+                  <span key={i} className="px-2 py-1 rounded-lg text-xs font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900">
+                    {e}
+                  </span>
+                ))}
+              </div>
+            </div>
+            {order.diagnosticoPresuntivo && (
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Diagnóstico presuntivo</p>
+                <p className="text-sm text-slate-700 dark:text-slate-300">{order.diagnosticoPresuntivo}</p>
+              </div>
+            )}
+            {order.indicacionesClinicas && (
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Indicaciones clínicas</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400 italic">{order.indicacionesClinicas}</p>
+              </div>
+            )}
+            {order.resultados && (
+              <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1">Resultados</p>
+                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{order.resultados}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ─── Tab bar ──────────────────────────────────────────────────────────────────
 
-type Tab = 'expediente' | 'vitales' | 'notas' | 'recetas'
+type Tab = 'expediente' | 'vitales' | 'notas' | 'recetas' | 'estudios'
 
 function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
@@ -318,6 +400,7 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
     { id: 'vitales', label: 'Signos Vitales', icon: <HeartPulse className="w-3.5 h-3.5" strokeWidth={1.75} /> },
     { id: 'notas', label: 'Notas', icon: <FileText className="w-3.5 h-3.5" strokeWidth={1.75} /> },
     { id: 'recetas', label: 'Recetas', icon: <ScrollText className="w-3.5 h-3.5" strokeWidth={1.75} /> },
+    { id: 'estudios', label: 'Estudios', icon: <FlaskConical className="w-3.5 h-3.5" strokeWidth={1.75} /> },
   ]
   return (
     <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 overflow-x-auto shrink-0">
@@ -478,6 +561,10 @@ export function PatientDetail({ patient, currentUserRole, onEdit, onViewDocument
 
         {tab === 'recetas' && (
           <RecetasTab patientId={p.id} onNewPrescription={isMedico ? () => onViewDocuments?.(p.id) : undefined} />
+        )}
+
+        {tab === 'estudios' && (
+          <EstudiosTab patientId={p.id} onNewOrder={isMedico ? () => {} : undefined} />
         )}
       </div>
     </div>

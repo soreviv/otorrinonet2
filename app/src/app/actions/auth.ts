@@ -11,6 +11,7 @@ import {
   deletePendingSession,
   deleteSession,
 } from '@/lib/session'
+import { logAction } from '@/lib/audit'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,11 +28,15 @@ export async function loginAction(_prev: ActionResult | null, formData: FormData
   const user = await prisma.staffUser.findUnique({ where: { email } })
 
   if (!user || user.status === 'inactivo') {
+    await logAction({ action: 'login_fallido', resource: 'auth', details: { email, reason: 'user_not_found' } })
     return { error: 'Credenciales incorrectas.' }
   }
 
   const valid = await bcrypt.compare(password, user.passwordHash)
-  if (!valid) return { error: 'Credenciales incorrectas.' }
+  if (!valid) {
+    await logAction({ action: 'login_fallido', resource: 'auth', userId: user.id, details: { reason: 'invalid_password' } })
+    return { error: 'Credenciales incorrectas.' }
+  }
 
   await createPendingSession(user.id)
 
@@ -74,14 +79,12 @@ export async function confirmSetup2faAction(_prev: ActionResult | null, formData
 
   await prisma.staffUser.update({
     where: { id: user.id },
-    data: {
-      totpEnabled: true,
-      lastAccess: new Date(),
-    },
+    data: { totpEnabled: true, lastAccess: new Date() },
   })
 
   await deletePendingSession()
   await createSession({ userId: user.id, email: user.email, name: user.name, role: user.role })
+  await logAction({ action: 'login_ok', resource: 'auth', userId: user.id, details: { method: '2fa_setup' } })
 
   return { ok: true }
 }
@@ -97,15 +100,16 @@ export async function verify2faAction(_prev: ActionResult | null, formData: Form
   if (!user?.totpSecret) return { error: 'Error de autenticación. Contacta al administrador.' }
 
   const valid = verifySync({ token: code, secret: user.totpSecret })
-  if (!valid) return { error: 'Código incorrecto. Intenta de nuevo.' }
+  if (!valid) {
+    await logAction({ action: 'login_fallido', resource: 'auth', userId: user.id, details: { reason: 'invalid_totp' } })
+    return { error: 'Código incorrecto. Intenta de nuevo.' }
+  }
 
-  await prisma.staffUser.update({
-    where: { id: user.id },
-    data: { lastAccess: new Date() },
-  })
+  await prisma.staffUser.update({ where: { id: user.id }, data: { lastAccess: new Date() } })
 
   await deletePendingSession()
   await createSession({ userId: user.id, email: user.email, name: user.name, role: user.role })
+  await logAction({ action: 'login_ok', resource: 'auth', userId: user.id, details: { method: 'totp' } })
 
   return { ok: true }
 }

@@ -38,9 +38,9 @@ export interface AuditLog {
   id: string
   action: AuditAction
   resource: string
-  userId: string
+  userId: string | null
   userName: string
-  ipAddress: string
+  ipAddress: string | null
   timestamp: string
 }
 
