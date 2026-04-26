@@ -32,7 +32,17 @@
       "Bash(curl -s http://localhost:3000/contacto -o /dev/null -w \" %{http_code}\")",
       "Bash(git ls-tree *)",
       "Bash(git rm *)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Bash(pm2 restart *)",
+      "Bash(pm2 show *)",
+      "Bash(curl *)",
+      "Bash(pm2 logs *)",
+      "Bash(node *)",
+      "Read(//var/www/nginx/**)",
+      "Read(//etc/nginx/sites-enabled/**)",
+      "Bash(npx tsx -e ' *)",
+      "Bash(PGPASSWORD='Nydz75xkCAF&GV9jTdJN' psql *)",
+      "Bash(grep -v \"^$\")"
     ]
   }
 }
