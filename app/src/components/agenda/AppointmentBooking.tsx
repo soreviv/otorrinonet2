@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 import type { AppointmentBookingProps, BookingFormData } from '@/lib/agenda-types'
+import { submitAppointmentRequest } from '@/app/actions/appointments'
 import {
   ChevronLeft,
   ChevronRight,
@@ -504,6 +505,8 @@ export function AppointmentBooking({ onSubmit }: AppointmentBookingProps) {
   const [form, setForm] = useState<FormData>(INITIAL_FORM)
   const [submitted, setSubmitted] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
   const turnstileRef = useRef<TurnstileInstance>(null)
 
   function canProceed() {
@@ -524,8 +527,26 @@ export function AppointmentBooking({ onSubmit }: AppointmentBookingProps) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  function handleNext() {
+  async function handleNext() {
     if (step === 1) {
+      setSubmitError(null)
+      setSubmitting(true)
+      const result = await submitAppointmentRequest({
+        date: selectedDate,
+        time: selectedTime,
+        patientName: form.patientName,
+        phone: form.phone,
+        email: form.email,
+        reason: form.reason,
+        captchaToken: captchaToken!,
+      })
+      setSubmitting(false)
+      if (!result.ok) {
+        setSubmitError(result.error ?? 'Error al enviar. Intenta de nuevo.')
+        turnstileRef.current?.reset()
+        setCaptchaToken(null)
+        return
+      }
       const bookingData: BookingFormData = {
         date: selectedDate,
         time: selectedTime,
@@ -643,18 +664,23 @@ export function AppointmentBooking({ onSubmit }: AppointmentBookingProps) {
                 ))}
               </div>
 
-              <button
-                onClick={handleNext}
-                disabled={!canProceed()}
-                className={`flex items-center gap-1.5 px-5 py-2 text-sm font-semibold rounded-xl transition-colors ${
-                  canProceed()
-                    ? 'bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white shadow-sm'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
-                }`}
-              >
-                {step === 2 ? 'Enviar solicitud' : 'Siguiente'}
-                {step < 2 && <ChevronRight className="w-4 h-4" strokeWidth={2} />}
-              </button>
+              <div className="flex flex-col items-end gap-1">
+                {submitError && (
+                  <p className="text-xs text-red-500">{submitError}</p>
+                )}
+                <button
+                  onClick={handleNext}
+                  disabled={!canProceed() || submitting}
+                  className={`flex items-center gap-1.5 px-5 py-2 text-sm font-semibold rounded-xl transition-colors ${
+                    canProceed() && !submitting
+                      ? 'bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white shadow-sm'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
+                  }`}
+                >
+                  {submitting ? 'Enviando…' : step === 2 ? 'Enviar solicitud' : 'Siguiente'}
+                  {!submitting && step < 2 && <ChevronRight className="w-4 h-4" strokeWidth={2} />}
+                </button>
+              </div>
             </div>
           )}
         </div>

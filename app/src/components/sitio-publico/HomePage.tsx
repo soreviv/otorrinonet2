@@ -242,9 +242,15 @@ export function HomePage({
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-              {services.map(service => (
-                <ServiceCard key={service.id} service={service} />
-              ))}
+              {services.map(service =>
+                service.id === 'vacunacion' ? (
+                  <Link key={service.id} href="/vacunacion">
+                    <ServiceCard service={service} />
+                  </Link>
+                ) : (
+                  <ServiceCard key={service.id} service={service} />
+                )
+              )}
             </div>
 
             <div className="text-center mt-10">

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import {
-  Stethoscope, Ear, Wind, Flower2, Scissors, Activity,
+  Stethoscope, Ear, Syringe, Flower2, Scissors, Activity,
   Calendar, Menu, X, ChevronRight, ArrowLeft,
 } from 'lucide-react'
 import type { ServicesPageProps, ServiceIcon } from '@/lib/sitio-publico-types'
@@ -19,7 +19,7 @@ const NAV_LINKS = [
 const ICON_MAP: Record<ServiceIcon, React.ComponentType<{ className?: string }>> = {
   stethoscope: Stethoscope,
   ear: Ear,
-  nose: Wind,
+  syringe: Syringe,
   allergen: Flower2,
   surgery: Scissors,
   balance: Activity,
@@ -160,13 +160,23 @@ export function ServicesPage({ services, doctorProfile, onBookAppointment }: Ser
                       </p>
                     </div>
 
-                    <button
-                      onClick={onBookAppointment}
-                      className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors group/btn"
-                    >
-                      Agendar consulta
-                      <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-                    </button>
+                    {service.id === 'vacunacion' ? (
+                      <Link
+                        href="/vacunacion"
+                        className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors group/btn"
+                      >
+                        Ver guía de vacunación
+                        <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5" />
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={onBookAppointment}
+                        className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors group/btn"
+                      >
+                        Agendar consulta
+                        <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5" />
+                      </button>
+                    )}
                   </div>
                 )
               })}

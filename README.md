@@ -19,16 +19,17 @@ Plataforma integral para la práctica privada del **Dr. Alejandro Viveros Domín
 
 ---
 
-## Funcionalidades (6 milestones completados)
+## Funcionalidades
 
 | # | Módulo | Ruta | Descripción |
 |---|---|---|---|
 | 1 | **Shell** | — | Design tokens, PatientShell y StaffShell con navegación y roles |
 | 2 | **Sitio Público** | `/`, `/perfil`, `/servicios`, `/ubicacion`, `/contacto` | Cinco páginas standalone de presentación profesional |
-| 3 | **Agenda de Citas** | `/agendar`, `/staff/agenda` | Formulario de 3 pasos para pacientes; calendario de gestión para recepcionista |
-| 4 | **Expediente Clínico (EHR)** | `/staff/ehr` | Historia clínica NOM-004-SSA3 con control de acceso por rol |
-| 5 | **Notas, Recetas y Consentimientos** | `/staff/notas` | Notas SOAP, recetas digitales con firma y timestamp, consentimientos informados |
-| 6 | **Administración** | `/staff/admin` | Usuarios, bitácora de auditoría, exportación FHIR, aviso de privacidad y solicitudes ARCO |
+| 3 | **Guía de Vacunación** | `/vacunacion` | Formulario interactivo basado en SSA + CDC; accesible desde la tarjeta de Vacunación en servicios |
+| 4 | **Agenda de Citas** | `/agendar`, `/staff/agenda` | Formulario de 3 pasos para pacientes; calendario de gestión para recepcionista |
+| 5 | **Expediente Clínico (EHR)** | `/staff/ehr` | Historia clínica NOM-004-SSA3 con control de acceso por rol |
+| 6 | **Notas, Recetas y Consentimientos** | `/staff/notas` | Notas SOAP, recetas digitales con firma y timestamp, consentimientos informados |
+| 7 | **Administración** | `/staff/admin` | Usuarios, bitácora de auditoría, exportación FHIR, aviso de privacidad y solicitudes ARCO |
 
 ---
 
@@ -68,10 +69,11 @@ otorrinonet/
 - Node.js 20+
 - PostgreSQL 15+
 - npm
+- PM2 (producción): `npm install -g pm2`
 
 ---
 
-## Configuración inicial
+## Configuración inicial (desarrollo)
 
 **1. Instalar dependencias**
 
@@ -86,21 +88,53 @@ npm install
 cp .env.example .env
 ```
 
-Editar `.env`:
+Editar `app/.env` con los valores reales:
 
 ```env
-DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/otorrinonet"
-JWT_SECRET="clave-secreta-segura"
+# Cadena de conexión a PostgreSQL
+DATABASE_URL="postgresql://USUARIO:CONTRASEÑA@localhost:5432/NOMBRE_DB"
+
+# Secreto de sesión JWT — generar con:
+# node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+SESSION_SECRET="tu-secreto-de-64-chars-hex"
+
+# Cloudflare Turnstile (protección de formularios) — obtener en: dash.cloudflare.com > Turnstile
+NEXT_PUBLIC_TURNSTILE_SITE_KEY="tu-site-key"    # clave pública (visible en el cliente)
+TURNSTILE_SECRET_KEY="tu-secret-key"            # clave privada (solo servidor, nunca exponer)
 ```
 
-**3. Base de datos**
+**3. Crear base de datos en PostgreSQL**
+
+```sql
+CREATE USER otorrinonet WITH PASSWORD 'tu_contraseña';
+CREATE DATABASE otorrinonet_db OWNER otorrinonet;
+```
+
+**4. Aplicar migraciones**
 
 ```bash
-npm run db:migrate   # Aplica migraciones
-npm run db:seed      # Carga datos iniciales
+npm run db:migrate
 ```
 
-**4. Iniciar servidor de desarrollo**
+Esto crea todas las tablas y genera el cliente Prisma automáticamente.
+
+**5. Sembrar datos iniciales**
+
+```bash
+npm run db:seed
+```
+
+Crea los usuarios del equipo con contraseña por defecto `Cambiar123!`:
+
+| Email | Nombre | Rol |
+|---|---|---|
+| `drviverosorl@gmail.com` | Dr. Alejandro Viveros Domínguez | `medico` |
+| `carmen.salinas@viverosorl.com` | Lic. Carmen Salinas Ruiz | `recepcionista` |
+| `patricia.morales@viverosorl.com` | Enf. Patricia Morales Díaz | `enfermera` |
+
+> **Importante:** Cambia las contraseñas inmediatamente después del primer inicio de sesión.
+
+**6. Iniciar servidor de desarrollo**
 
 ```bash
 npm run dev
@@ -110,29 +144,82 @@ Abrir [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## Scripts disponibles
+## Despliegue en producción
+
+**1. Completar los pasos 1–5 del apartado anterior**
+
+**2. Compilar la aplicación**
 
 ```bash
-npm run dev           # Servidor de desarrollo
-npm run build         # Build de producción
-npm run start         # Servidor de producción
-npm run lint          # ESLint
-npm run db:generate   # Regenerar cliente Prisma
-npm run db:migrate    # Aplicar migraciones
-npm run db:push       # Sincronizar esquema sin migración
-npm run db:seed       # Cargar datos iniciales
-npm run db:studio     # Abrir Prisma Studio
+npm run build
+```
+
+**3. Iniciar con PM2**
+
+```bash
+pm2 start "npm run start -- -p 5000" --name otorrinonet
+pm2 save
+pm2 startup   # Para que inicie automáticamente al reiniciar el servidor
+```
+
+**4. Nginx como proxy inverso** (ejemplo de configuración)
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name tudominio.com www.tudominio.com;
+
+    ssl_certificate     /etc/letsencrypt/live/tudominio.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/tudominio.com/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+**5. Actualizar en producción** (después de cambios en el código)
+
+```bash
+git pull
+npm run build
+pm2 restart otorrinonet
 ```
 
 ---
 
-## Roles de usuario
+## Scripts disponibles
 
-| Rol | Acceso |
+```bash
+npm run dev           # Servidor de desarrollo (puerto 3000)
+npm run build         # Compilar para producción
+npm run start         # Iniciar servidor de producción
+npm run lint          # ESLint
+npm run db:generate   # Regenerar cliente Prisma
+npm run db:migrate    # Aplicar migraciones (también regenera el cliente)
+npm run db:push       # Sincronizar esquema sin crear migración
+npm run db:seed       # Sembrar usuarios iniciales
+npm run db:studio     # Abrir Prisma Studio (GUI de base de datos)
+```
+
+---
+
+## Acceso al sistema
+
+La URL de login es `/login`. Tras autenticarse, el sistema redirige según el rol:
+
+| Rol | Rutas disponibles |
 |---|---|
-| `medico` | Acceso completo incluyendo administración |
-| `enfermera` | EHR (solo lectura en datos sensibles), notas |
-| `recepcionista` | Agenda de citas |
+| `medico` | `/staff/ehr`, `/staff/notas`, `/staff/agenda`, `/staff/admin` (acceso completo) |
+| `enfermera` | `/staff/ehr` (solo lectura en datos sensibles), `/staff/notas` |
+| `recepcionista` | `/staff/agenda` |
+
+El EHR y demás módulos de staff son accesibles en `/staff/*` una vez autenticado.
 
 ---
 

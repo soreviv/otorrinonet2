@@ -28,7 +28,7 @@ export interface DoctorProfile {
 export type ServiceIcon =
   | 'stethoscope'
   | 'ear'
-  | 'nose'
+  | 'syringe'
   | 'allergen'
   | 'surgery'
   | 'balance'

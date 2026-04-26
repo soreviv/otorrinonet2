@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 import type { ContactPageProps } from '@/lib/sitio-publico-types'
+import { submitContactForm } from '@/app/actions/contact'
 
 const NAV_LINKS = [
   { label: 'Inicio', href: '/' },
@@ -50,9 +51,28 @@ export function ContactPage({ contactInfo, onSubmitContactForm, onBookAppointmen
     return Object.keys(next).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
+    setSubmitError(null)
+    setSubmitting(true)
+    const result = await submitContactForm({
+      name: form.name,
+      phone: form.phone,
+      email: form.email,
+      message: form.message,
+      captchaToken: captchaToken!,
+    })
+    setSubmitting(false)
+    if (!result.ok) {
+      setSubmitError(result.error ?? 'Error al enviar. Intenta de nuevo.')
+      turnstileRef.current?.reset()
+      setCaptchaToken(null)
+      return
+    }
     onSubmitContactForm?.({ name: form.name, phone: form.phone, email: form.email, message: form.message })
     setSubmitted(true)
   }
@@ -313,12 +333,16 @@ export function ContactPage({ contactInfo, onSubmitContactForm, onBookAppointmen
                     )}
                   </div>
 
+                  {submitError && (
+                    <p className="text-xs text-red-500">{submitError}</p>
+                  )}
                   <button
                     type="submit"
-                    className="flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold px-6 py-3 rounded-xl transition-all hover:shadow-lg hover:shadow-sky-200 dark:hover:shadow-sky-900 active:scale-[0.98] text-sm"
+                    disabled={submitting}
+                    className="flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-700 disabled:bg-sky-400 text-white font-semibold px-6 py-3 rounded-xl transition-all hover:shadow-lg hover:shadow-sky-200 dark:hover:shadow-sky-900 active:scale-[0.98] text-sm"
                   >
                     <Send className="w-4 h-4" />
-                    Enviar Mensaje
+                    {submitting ? 'Enviando…' : 'Enviar Mensaje'}
                   </button>
                 </form>
               )}

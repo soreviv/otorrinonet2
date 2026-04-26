@@ -56,11 +56,11 @@ export const services: Service[] = [
       'Evaluación de la audición, diagnóstico de hipoacusia y orientación sobre auxiliares auditivos.',
   },
   {
-    id: 'rinologia',
-    name: 'Rinología',
-    icon: 'nose',
+    id: 'vacunacion',
+    name: 'Vacunación',
+    icon: 'syringe',
     shortDescription:
-      'Atención de enfermedades nasales y sinusales, incluyendo cirugía endoscópica nasal.',
+      'Aplicación de vacunas para adultos y niños, incluyendo esquemas de refuerzo y vacunas de viaje.',
   },
   {
     id: 'rinitis-alergica-inmunoterapia',
