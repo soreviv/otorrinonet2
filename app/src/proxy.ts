@@ -51,7 +51,7 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL('/staff', req.url))
   }
 
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
+  const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64')
   const csp = buildCsp(nonce)
 
   const requestHeaders = new Headers(req.headers)
