@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { PatientDetailProps, UserRole, DiagnosisStatus } from '@/lib/ehr-types'
+import type { PatientDetailProps, DiagnosisStatus } from '@/lib/ehr-types'
 import type { EvolutionNote, Prescription } from '@/lib/notas-types'
 import type { VitalsRecord } from '@/app/actions/patient-clinical'
 import { getPatientVitals, getPatientEvolutionNotes, getPatientPrescriptions } from '@/app/actions/patient-clinical'

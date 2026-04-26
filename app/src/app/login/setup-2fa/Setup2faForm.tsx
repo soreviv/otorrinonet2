@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import QRCode from 'qrcode'
 import { confirmSetup2faAction } from '@/app/actions/auth'
 
@@ -24,7 +25,7 @@ export function Setup2faForm({ otpauth, secret }: { otpauth: string; secret: str
       {/* QR Code */}
       <div className="flex flex-col items-center gap-3">
         {qrDataUrl ? (
-          <img src={qrDataUrl} alt="QR 2FA" className="rounded-xl border border-slate-200 shadow-sm" width={180} height={180} />
+          <Image src={qrDataUrl} alt="QR 2FA" className="rounded-xl border border-slate-200 shadow-sm" width={180} height={180} unoptimized />
         ) : (
           <div className="w-[180px] h-[180px] rounded-xl border border-slate-200 bg-slate-50 animate-pulse" />
         )}

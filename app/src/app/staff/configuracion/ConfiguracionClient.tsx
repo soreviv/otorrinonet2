@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import {
   Building2, Stethoscope, Users, Shield, Plus, UserCheck, UserX,
-  Save, RefreshCw, Search, ChevronDown, ChevronRight,
+  Save, RefreshCw, Search,
 } from 'lucide-react'
 import {
   saveClinicConfig, createStaffUser, toggleStaffUserStatus,

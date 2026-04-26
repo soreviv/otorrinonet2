@@ -82,6 +82,7 @@ export async function getPatientPrescriptions(patientId: string): Promise<Prescr
     patientName,
     date: p.createdAt.toISOString().split('T')[0],
     status: p.signedAt ? 'firmada' : 'borrador',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     medications: Array.isArray(p.medications) ? (p.medications as any[]) : [],
     ...clinicCfg,
     signatureData: null,

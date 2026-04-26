@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Cookie, X, ChevronDown, ChevronUp } from 'lucide-react'
 
 const STORAGE_KEY = 'cookie-consent'
@@ -37,14 +37,12 @@ const CATEGORIES = [
 ]
 
 export function CookieBanner() {
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return !localStorage.getItem(STORAGE_KEY)
+  })
   const [showDetails, setShowDetails] = useState(false)
   const [preferences, setPreferences] = useState<Preferences>({ analytics: false, marketing: false })
-
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (!stored) setVisible(true)
-  }, [])
 
   function save(record: ConsentRecord) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(record))

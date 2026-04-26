@@ -154,10 +154,10 @@ export function ContactPage({ contactInfo, onSubmitContactForm, onBookAppointmen
       <div className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center gap-1.5 text-xs text-slate-400">
-            <a href="/" className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors flex items-center gap-1">
+            <Link href="/" className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors flex items-center gap-1">
               <ArrowLeft className="w-3 h-3" />
               Inicio
-            </a>
+            </Link>
             <ChevronRight className="w-3 h-3" />
             <span className="text-slate-600 dark:text-slate-300 font-medium">Contacto</span>
           </div>

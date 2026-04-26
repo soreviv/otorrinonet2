@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Search, X, ChevronDown } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import { searchCie10 } from '@/app/actions/cie10'
 import type { Cie10Result } from '@/app/actions/cie10'
 
@@ -51,6 +51,7 @@ export function Cie10Search({ value, onChange, maxDiagnosticos = 5, disabled = f
     }
   }, [value])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { search(debouncedQuery) }, [debouncedQuery, search])
 
   function select(item: Cie10Result) {

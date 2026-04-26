@@ -44,8 +44,10 @@ export function HomePage({
   googleReviews,
   googleRatingSummary,
   contactInfo,
-  onBookAppointment,
-  onViewDoctorProfile,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onBookAppointment: _onBookAppointment,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onViewDoctorProfile: _onViewDoctorProfile,
   onViewAllServices,
 }: HomePageProps) {
   const [mobileOpen, setMobileOpen] = useState(false)

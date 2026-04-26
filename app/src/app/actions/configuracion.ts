@@ -87,6 +87,7 @@ export async function createStaffUser(data: {
     data: {
       email: data.email.toLowerCase().trim(),
       name: data.name,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       role: data.role as any,
       passwordHash,
     },

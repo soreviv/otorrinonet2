@@ -10,7 +10,6 @@ import type {
 } from '@/lib/ehr-types'
 
 const EMPTY_FAMILY: FamilyHistory = { notes: '', relevantConditions: [] }
-const EMPTY_PERSONAL: PersonalHistory = { pathological: '', allergies: [], currentMedications: [], nonPathological: '' }
 const EMPTY_CONDITION: CurrentCondition = { chiefComplaint: '', onset: '', description: '', evolution: '' }
 const EMPTY_EXAM: PhysicalExam = {
   vitalSigns: { bloodPressure: '', heartRate: '', temperature: '', weight: '', height: '', bmi: '' },
@@ -118,10 +117,15 @@ export async function savePatient(
     gender: data.generalData.sex,
     ...encrypted,
     allergies,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     familyHistoryJson: data.familyHistory as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     personalHistoryJson: { pathological, nonPathological, currentMedications } as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     currentConditionJson: data.currentCondition as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     physicalExamJson: data.physicalExam as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     diagnosesJson: data.diagnoses as any,
   }
 

@@ -6,7 +6,6 @@ import { Calendar, Menu, X, Syringe, ChevronRight, RotateCcw, ShieldCheck, Info 
 import {
   obtenerRecomendaciones,
   CONDICIONES_LABELS,
-  type FormVacunas,
   type Sexo,
   type Condicion,
   type VacunaRecomendada,
@@ -66,7 +65,7 @@ export function VaccineRecommendationPage({ onBookAppointment }: Props) {
   const toggleCondicion = (c: Condicion) => {
     setCondiciones(prev => {
       const next = new Set(prev)
-      next.has(c) ? next.delete(c) : next.add(c)
+      if (next.has(c)) next.delete(c); else next.add(c)
       return next
     })
     setResultados(null)

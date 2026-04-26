@@ -27,7 +27,7 @@ export default function PoliticaCookiesPage() {
             </li>
             <li>
               <strong className="text-slate-700 dark:text-slate-300">Compañía:</strong> cuando esta política
-              menciona "Compañía", "nosotros", "nos" o "nuestro", se refiere a Dr. Viveros Otorrino, que es
+              menciona &#x201C;Compañía&#x201D;, &#x201C;nosotros&#x201D;, &#x201C;nos&#x201D; o &#x201C;nuestro&#x201D;, se refiere a Dr. Viveros Otorrino, que es
               responsable de su información en virtud de esta Política de Cookies.
             </li>
             <li>
@@ -74,7 +74,7 @@ export default function PoliticaCookiesPage() {
           </h2>
           <p className="text-slate-600 dark:text-slate-400">
             Esta Política de cookies explica cómo Dr. Viveros Otorrino y sus afiliados (colectivamente
-            "Dr. Viveros Otorrino", "nosotros", "nos" y "nuestro"), utilizan cookies y tecnologías
+            &#x201C;Dr. Viveros Otorrino&#x201D;, &#x201C;nosotros&#x201D;, &#x201C;nos&#x201D; y &#x201C;nuestro&#x201D;), utilizan cookies y tecnologías
             similares para reconocerlo cuando visita nuestra plataforma. Explica qué son estas tecnologías
             y por qué las usamos, así como las opciones de cómo controlarlas.
           </p>
@@ -152,7 +152,7 @@ export default function PoliticaCookiesPage() {
               <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">Cookies de Redes Sociales</h3>
               <p className="text-slate-600 dark:text-slate-400 mt-1">
                 Estas cookies se utilizan cuando comparte información utilizando un botón para compartir
-                en las redes sociales o un botón "Me gusta" en nuestro Sitio o cuando vincula su cuenta
+                en las redes sociales o un botón &#x201C;Me gusta&#x201D; en nuestro Sitio o cuando vincula su cuenta
                 o interactúa con nuestro contenido a través de un sitio web de redes sociales.
               </p>
             </div>
@@ -173,7 +173,7 @@ export default function PoliticaCookiesPage() {
           </h2>
           <p className="text-slate-600 dark:text-slate-400">
             La mayoría de los navegadores le permiten controlar las cookies a través de sus preferencias
-            de "configuración". Sin embargo, si limita la capacidad de los sitios web para establecer
+            de &#x201C;configuración&#x201D;. Sin embargo, si limita la capacidad de los sitios web para establecer
             cookies, puede empeorar su experiencia de usuario en general.
           </p>
         </section>

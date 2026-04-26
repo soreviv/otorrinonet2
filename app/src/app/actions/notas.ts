@@ -55,6 +55,7 @@ function mapPrescription(p: {
     patientName,
     date: p.createdAt.toISOString().split('T')[0],
     status: p.signedAt ? 'firmada' : 'borrador',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     medications: Array.isArray(p.medications) ? (p.medications as any[]) : [],
     ...clinicCfg,
     signatureData: null,
@@ -106,6 +107,7 @@ export async function getNotasData(patientId: string) {
     patient: { id: patient.id, name: patientName, expedienteNumber: patient.expedienteNumber },
     evolutionNotes: evolutionNotes.map(n => mapEvolution(n, patientName, session.name)),
     surgicalNotes: surgicalNotes.map(n => mapSurgical(n, patientName, session.name)),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     prescriptions: prescriptions.map(p => mapPrescription(p, patientName, clinicCfg as any)),
     consentForms: consentForms.map(c => mapConsent(c, patientName, session.name)),
   }
@@ -198,12 +200,14 @@ export async function createPrescription(
   const [patient, rx, clinicCfg] = await Promise.all([
     prisma.patient.findUnique({ where: { id: patientId }, select: { firstName: true, lastName: true } }),
     prisma.prescription.create({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: { patientId, medications: medications as any, diagnosis, notes: null },
     }),
     getClinicConfigFromDB(),
   ])
   const patientName = patient ? `${patient.firstName} ${patient.lastName}` : ''
   await logAction({ action: 'creacion', resource: 'prescription', resourceId: rx.id, userId: session.userId })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return mapPrescription(rx, patientName, clinicCfg as any)
 }
 

@@ -1,13 +1,12 @@
 'use client'
 
-import { AppointmentBooking } from '@/components/agenda'
-import type { BookingFormData } from '@/lib/agenda-types'
+import dynamic from 'next/dynamic'
+
+const AppointmentBooking = dynamic(
+  () => import('@/components/agenda').then((m) => ({ default: m.AppointmentBooking })),
+  { ssr: false },
+)
 
 export default function AgendarPage() {
-  function handleSubmit(data: BookingFormData) {
-    // TODO: POST to /api/appointments, send confirmation email
-    console.log('Nueva solicitud de cita:', data)
-  }
-
-  return <AppointmentBooking onSubmit={handleSubmit} />
+  return <AppointmentBooking />
 }

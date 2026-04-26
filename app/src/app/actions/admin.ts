@@ -72,10 +72,12 @@ export async function getFhirExports(): Promise<FhirExport[]> {
 }
 
 export async function updateUserRole(userId: string, role: UserRole): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await prisma.staffUser.update({ where: { id: userId }, data: { role: role as any } })
 }
 
 export async function updateUserStatus(userId: string, status: UserStatus): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await prisma.staffUser.update({ where: { id: userId }, data: { status: status as any } })
 }
 
@@ -84,6 +86,7 @@ export async function updateArcoRequestStatus(
   status: ArcoStatus,
   notes?: string,
 ): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dbStatus = status.replace('-', '_') as any
   await prisma.arcoRequest.update({
     where: { id: requestId },
