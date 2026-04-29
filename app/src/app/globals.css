@@ -44,3 +44,41 @@ h1, h2, h3, h4 {
 code, pre, kbd, samp {
   font-family: var(--font-mono);
 }
+
+/* ── Decorative helpers ────────────────────────────────────────────────────
+   Clases para patrones y formas que antes eran estilos inline en componentes.
+   Su existencia en CSS externo permite eliminar unsafe-inline de style-src.  */
+
+.hero-clip-diagonal {
+  clip-path: polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%);
+}
+
+.hero-grid-overlay {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.4) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.cta-radial-glow {
+  background: radial-gradient(
+    ellipse 70% 80% at 50% 50%,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 100%
+  );
+}
+
+.dots-overlay-28 {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.dots-overlay-24 {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.dots-overlay-20 {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+  background-size: 20px 20px;
+}

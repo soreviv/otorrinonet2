@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { PublicFooter } from './PublicFooter'
 import {
   Stethoscope, Ear, Syringe, Flower2, Scissors, Activity,
   Calendar, Menu, X, ChevronRight, ArrowLeft,
@@ -183,10 +184,7 @@ export function ServicesPage({ services, doctorProfile, onBookAppointment }: Ser
             </div>
 
             <div className="mt-12 relative overflow-hidden bg-sky-600 rounded-2xl p-8 md:p-10 text-center">
-              <div
-                className="absolute inset-0 opacity-20 pointer-events-none"
-                style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '24px 24px' }}
-              />
+              <div className="absolute inset-0 opacity-20 pointer-events-none dots-overlay-24" />
               <div className="relative">
                 <p className="text-[11px] font-bold text-sky-100 uppercase tracking-widest mb-3">Primera consulta disponible esta semana</p>
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 leading-tight">
@@ -212,19 +210,7 @@ export function ServicesPage({ services, doctorProfile, onBookAppointment }: Ser
         )}
       </div>
 
-      {/* ── FOOTER ───────────────────────────────────────────────── */}
-      <footer className="bg-slate-900 py-8">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <Link href="/" className="flex items-center group">
-              <div className="bg-white rounded-xl p-1.5">
-                <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" width={32} height={32} className="h-8 w-auto" />
-              </div>
-            </Link>
-            <p className="text-[11px] text-slate-600">© 2026 Dr. Alejandro Viveros</p>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
 
     </div>
   )

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { PublicFooter } from './PublicFooter'
 import {
   Stethoscope, Calendar, Menu, X, GraduationCap,
   Award, Building2, ChevronRight, ArrowLeft,
@@ -261,10 +262,7 @@ export function DoctorProfilePage({
             )}
 
             <div className="relative overflow-hidden bg-sky-600 rounded-2xl p-6 text-center">
-              <div
-                className="absolute inset-0 opacity-20 pointer-events-none"
-                style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '20px 20px' }}
-              />
+              <div className="absolute inset-0 opacity-20 pointer-events-none dots-overlay-20" />
               <div className="relative">
                 <p className="text-xs font-bold text-sky-100 uppercase tracking-widest mb-2">Agenda tu consulta</p>
                 <p className="text-sm text-sky-50 mb-4 leading-relaxed">
@@ -284,19 +282,7 @@ export function DoctorProfilePage({
         </div>
       </div>
 
-      {/* ── FOOTER ───────────────────────────────────────────────── */}
-      <footer className="bg-slate-900 py-8 mt-4">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <Link href="/" className="flex items-center group">
-              <div className="bg-white rounded-xl p-1.5">
-                <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" width={32} height={32} className="h-8 w-auto" />
-              </div>
-            </Link>
-            <p className="text-[11px] text-slate-600">© 2026 Dr. Alejandro Viveros</p>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
 
     </div>
   )

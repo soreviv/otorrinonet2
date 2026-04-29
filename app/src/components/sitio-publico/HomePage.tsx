@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { PublicFooter } from './PublicFooter'
 import {
   Star, Calendar, ChevronRight,
   ArrowUpRight, Phone, Mail, Menu, X, MessageCircle,
@@ -124,18 +125,8 @@ export function HomePage({
 
       {/* ── HERO ───────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-white dark:bg-slate-900">
-        <div
-          className="absolute top-0 right-0 h-full w-[55%] bg-gradient-to-bl from-sky-600 to-sky-700 hidden md:block"
-          style={{ clipPath: 'polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%)' }}
-        />
-        <div
-          className="absolute top-0 right-0 h-full w-[55%] hidden md:block opacity-20"
-          style={{
-            clipPath: 'polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%)',
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-          }}
-        />
+        <div className="absolute top-0 right-0 h-full w-[55%] bg-gradient-to-bl from-sky-600 to-sky-700 hidden md:block hero-clip-diagonal" />
+        <div className="absolute top-0 right-0 h-full w-[55%] hidden md:block opacity-20 hero-clip-diagonal hero-grid-overlay" />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 lg:py-28">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 items-center">
@@ -305,14 +296,8 @@ export function HomePage({
 
       {/* ── BOTTOM CTA ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-sky-600 py-16 md:py-20">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse 70% 80% at 50% 50%, rgba(255,255,255,0.08) 0%, transparent 100%)' }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none opacity-20"
-          style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '28px 28px' }}
-        />
+        <div className="absolute inset-0 pointer-events-none cta-radial-glow" />
+        <div className="absolute inset-0 pointer-events-none opacity-20 dots-overlay-28" />
 
         <div className="relative max-w-2xl mx-auto text-center px-4 sm:px-6">
           <p className="text-[11px] font-bold text-sky-200 uppercase tracking-widest mb-4">Agenda tu consulta</p>
@@ -343,31 +328,7 @@ export function HomePage({
         </div>
       </section>
 
-      {/* ── FOOTER ─────────────────────────────────────────────────── */}
-      <footer className="bg-slate-900 py-8">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <Link href="/" className="flex items-center group">
-              <div className="bg-white rounded-xl p-1.5">
-                <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" width={32} height={32} className="h-8 w-auto" />
-              </div>
-            </Link>
-
-            <div className="flex items-center gap-5 text-slate-500 text-xs">
-              <a href={`tel:${contactInfo.phone}`} className="flex items-center gap-1.5 hover:text-sky-400 transition-colors">
-                <Phone className="w-3 h-3" />
-                {contactInfo.phone}
-              </a>
-              <a href={`mailto:${contactInfo.email}`} className="flex items-center gap-1.5 hover:text-sky-400 transition-colors">
-                <Mail className="w-3 h-3" />
-                {contactInfo.email}
-              </a>
-            </div>
-
-            <p className="text-[11px] text-slate-600">© 2026 Dr. Alejandro Viveros</p>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
 
     </div>
   )

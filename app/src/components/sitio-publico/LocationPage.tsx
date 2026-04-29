@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { PublicFooter } from './PublicFooter'
 import {
   Calendar, Menu, X, MapPin,
   Phone, MessageCircle, Mail, Clock, Navigation,
@@ -136,7 +137,7 @@ export function LocationPage({ contactInfo, onBookAppointment }: LocationPagePro
                 src={contactInfo.googleMapsEmbedUrl}
                 width="100%"
                 height="100%"
-                style={{ border: 0 }}
+                className="border-0"
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -245,19 +246,7 @@ export function LocationPage({ contactInfo, onBookAppointment }: LocationPagePro
         </div>
       </div>
 
-      {/* ── FOOTER ───────────────────────────────────────────────── */}
-      <footer className="bg-slate-900 py-8 mt-4">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <Link href="/" className="flex items-center group">
-              <div className="bg-white rounded-xl p-1.5">
-                <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" width={32} height={32} className="h-8 w-auto" />
-              </div>
-            </Link>
-            <p className="text-[11px] text-slate-600">© 2026 Dr. Alejandro Viveros</p>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
 
     </div>
   )
