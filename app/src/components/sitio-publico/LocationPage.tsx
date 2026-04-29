@@ -138,12 +138,11 @@ export function LocationPage({ contactInfo, onBookAppointment }: LocationPagePro
                 src={contactInfo.googleMapsEmbedUrl}
                 width="100%"
                 height="100%"
-                className="border-0"
+                className="border-0 w-full h-full"
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 title="Ubicación del consultorio"
-                className="w-full h-full"
               />
             </div>
 
