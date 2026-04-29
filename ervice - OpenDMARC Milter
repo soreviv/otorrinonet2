@@ -1,0 +1,16 @@
+[0;1;32m●[0m opendmarc.service - OpenDMARC Milter
+     Loaded: loaded (]8;;file://mail/usr/lib/systemd/system/opendmarc.service/usr/lib/systemd/system/opendmarc.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Thu 2026-04-23 21:35:52 UTC; 4 days ago
+       Docs: ]8;;man:opendmarc(8)man:opendmarc(8)]8;;
+             ]8;;man:opendmarc.conf(5)man:opendmarc.conf(5)]8;;
+   Main PID: 3599 (opendmarc)
+      Tasks: 6 (limit: 9483)
+     Memory: 2.3M (peak: 2.6M)
+        CPU: 8.526s
+     CGroup: /system.slice/opendmarc.service
+             └─[0;38;5;245m3599 /usr/sbin/opendmarc[0m
+
+Apr 23 21:35:52 mail systemd[1]: Starting opendmarc.service - OpenDMARC Milter...
+Apr 23 21:35:52 mail systemd[1]: Started opendmarc.service - OpenDMARC Milter.
+Apr 23 21:35:52 mail opendmarc[3599]: OpenDMARC Filter v1.4.2 starting ()
+Apr 23 21:35:52 mail opendmarc[3599]: additional trusted authentication services: mail.otorrinonet.com
