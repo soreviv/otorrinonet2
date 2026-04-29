@@ -17,19 +17,19 @@ export const doctorProfile: DoctorProfile = {
   tagline:
     'Especialista en Otorrinolaringología y Cirugía de Cabeza y Cuello. Atención humana, ética y de alta calidad con las técnicas más modernas y menos invasivas.',
   shortBio:
-    'Otorrinolaringólogo egresado de la Universidad La Salle con especialidad por la UNAM, formado en el Centro Médico Nacional La Raza. Comprometido con la actualización constante y la rápida recuperación de sus pacientes.',
+    'Médico Cirujano egresado de la Facultad Mexicana de Medicina de la Universidad La Salle (2003–2009), con desempeño sobresaliente en el CENEVAL, y especialista en Otorrinolaringología y Cirugía de Cabeza y Cuello por la UNAM (2012–2016), formado en el Centro Médico Nacional La Raza.',
   fullBio:
-    'El Dr. Alejandro Viveros Domínguez es Médico Cirujano egresado de la Facultad Mexicana de Medicina de la Universidad La Salle, con especialidad en Otorrinolaringología y Cirugía de Cabeza y Cuello por la UNAM, formado en el Centro Médico Nacional La Raza. Su enfoque se centra en brindar una atención humana, ética y de alta calidad.\n\nComprometido con la actualización constante, utiliza las técnicas más modernas y menos invasivas para asegurar la rápida recuperación de sus pacientes.',
+    'El Dr. Alejandro Viveros Domínguez es Médico Cirujano egresado de la Facultad Mexicana de Medicina de la Universidad La Salle (2003–2009), con desempeño sobresaliente en el Examen General de Egreso del Centro Nacional de Evaluación para la Educación Superior (CENEVAL), con especialidad en Otorrinolaringología y Cirugía de Cabeza y Cuello por la Universidad Nacional Autónoma de México (UNAM), realizada en la Unidad Médica de Alta Especialidad Hospital General Dr. Gaudencio González Garza del Centro Médico Nacional La Raza (2012–2016).\n\nSu enfoque se centra en brindar una atención humana, apegada a la mejor evidencia médica, para facilitar la toma de decisiones del paciente.',
   education: [
     {
       degree: 'Médico Cirujano',
       institution: 'Facultad Mexicana de Medicina — Universidad La Salle',
-      year: 2010,
+      year: 2009,
     },
     {
       degree: 'Especialidad en Otorrinolaringología y Cirugía de Cabeza y Cuello',
-      institution: 'UNAM — Centro Médico Nacional La Raza',
-      year: 2015,
+      institution: 'UNAM — UMAE Hospital General Dr. Gaudencio González Garza, CMN La Raza',
+      year: 2016,
     },
   ],
   certifications: [
