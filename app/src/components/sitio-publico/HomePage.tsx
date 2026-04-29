@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { PublicFooter } from './PublicFooter'
 import {
   Star, Calendar, ChevronRight,
@@ -63,7 +64,7 @@ export function HomePage({
           <div className="flex items-center justify-between h-16">
 
             <Link href="/" className="flex items-center group">
-              <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" width={40} height={40} className="h-10 w-auto" />
+              <Image src="/assets/logo-consultorio.png" alt="Logotipo del consultorio del Dr. Alejandro Viveros Domínguez, otorrinolaringólogo" width={40} height={40} className="h-10 w-auto" priority />
             </Link>
 
             <div className="hidden md:flex items-center gap-7">
@@ -178,11 +179,13 @@ export function HomePage({
               <div className="relative w-60 h-72 sm:w-72 sm:h-88 md:w-72 md:h-[360px] lg:w-80 lg:h-[400px]">
                 <div className="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-sky-400 to-sky-700">
                   {!imgError && (
-                    <img
+                    <Image
                       src={doctorProfile.photo}
-                      alt={doctorProfile.fullName}
+                      alt="Retrato del Dr. Alejandro Viveros Domínguez, médico otorrinolaringólogo especialista en cirugía de cabeza y cuello en Ciudad de México"
+                      fill
+                      className="object-cover z-10"
                       onError={() => setImgError(true)}
-                      className="absolute inset-0 w-full h-full object-cover z-10"
+                      priority
                     />
                   )}
                   <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 gap-3">

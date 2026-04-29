@@ -2,6 +2,8 @@
 
 import { useState, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { PublicFooter } from './PublicFooter'
 import {
   Calendar, Menu, X, MapPin,
   Phone, MessageCircle, Mail, Send, CheckCircle2,
@@ -90,7 +92,7 @@ export function ContactPage({ contactInfo, onSubmitContactForm, onBookAppointmen
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center group">
-              <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" width={40} height={40} className="h-10 w-auto" />
+              <Image src="/assets/logo-consultorio.png" alt="Logotipo del consultorio del Dr. Alejandro Viveros Domínguez, otorrinolaringólogo" width={40} height={40} className="h-10 w-auto" priority />
             </Link>
 
             <div className="hidden md:flex items-center gap-7">
@@ -448,19 +450,7 @@ export function ContactPage({ contactInfo, onSubmitContactForm, onBookAppointmen
         </div>
       </div>
 
-      {/* ── FOOTER ───────────────────────────────────────────────── */}
-      <footer className="bg-slate-900 py-8 mt-4">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <Link href="/" className="flex items-center group">
-              <div className="bg-white rounded-xl p-1.5">
-                <img src="/assets/logo-consultorio.png" alt="Dr. Alejandro Viveros Domínguez" width={32} height={32} className="h-8 w-auto" />
-              </div>
-            </Link>
-            <p className="text-[11px] text-slate-600">© 2026 Dr. Alejandro Viveros</p>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
 
     </div>
   )
