@@ -12,22 +12,10 @@ async function main() {
   console.log('Seeding database…')
 
   // ─── Services ──────────────────────────────────────────────────────────────
-  const services = [
-    { name: 'Consulta General ORL', description: 'Evaluación de oídos, nariz y garganta', durationMins: 30 },
-    { name: 'Consulta de Seguimiento', description: 'Revisión de tratamiento en curso', durationMins: 20 },
-    { name: 'Audiometría', description: 'Evaluación de la audición', durationMins: 45 },
-    { name: 'Endoscopía Nasal', description: 'Revisión endoscópica de fosas nasales', durationMins: 30 },
-    { name: 'Cirugía de Oído', description: 'Procedimiento quirúrgico en oído', durationMins: 90 },
-    { name: 'Rinoplastia Funcional', description: 'Corrección funcional de tabique', durationMins: 120 },
-  ]
-
-  for (const service of services) {
-    await prisma.service.upsert({
-      where: { id: service.name }, // workaround: use name as lookup
-      update: {},
-      create: service,
-    })
-  }
+  await prisma.service.deleteMany()
+  await prisma.service.create({
+    data: { name: 'Consulta', durationMins: 30 },
+  })
 
   // ─── Staff users ───────────────────────────────────────────────────────────
   const staffSeed = [

@@ -1,23 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { DocumentList, PrescriptionDetail, ConsentFormDetail } from '@/components/notas'
+import { DocumentList, PrescriptionDetail, ConsentFormDetail, ConsentFormCreate } from '@/components/notas'
 import { EvolutionNoteForm, type EvolutionNoteData } from '@/components/notas/EvolutionNoteForm'
 import { PrescriptionForm } from '@/components/notas/PrescriptionForm'
 import {
   createEvolutionNote,
   createPrescription,
+  createConsentForm,
   signPrescriptionInDB,
   signConsentInDB,
 } from '@/app/actions/notas'
-import type { Prescription, ConsentForm, CurrentPatient, EvolutionNote, SurgicalNote, PrescriptionMedication } from '@/lib/notas-types'
+import type { Prescription, ConsentForm, CurrentPatient, EvolutionNote, PrescriptionMedication } from '@/lib/notas-types'
 
-type View = 'list' | 'prescription' | 'consent' | 'new-note' | 'new-prescription'
+type View = 'list' | 'prescription' | 'consent' | 'new-note' | 'new-prescription' | 'new-consent'
 
 interface Props {
   currentPatient: CurrentPatient
   evolutionNotes: EvolutionNote[]
-  surgicalNotes: SurgicalNote[]
   initialPrescriptions: Prescription[]
   initialConsentForms: ConsentForm[]
 }
@@ -29,7 +29,6 @@ function nowCDMX(): string {
 export function NotasClient({
   currentPatient,
   evolutionNotes: initialNotes,
-  surgicalNotes,
   initialPrescriptions,
   initialConsentForms,
 }: Props) {
@@ -64,6 +63,13 @@ export function NotasClient({
       ),
     )
     await signPrescriptionInDB(id)
+  }
+
+  async function handleCreateConsent(type: string, content: string) {
+    const consent = await createConsentForm(currentPatient.id, { type, content })
+    setConsentForms(prev => [consent, ...prev])
+    setSelectedConsentId(consent.id)
+    setView('consent')
   }
 
   async function handleSignConsent(id: string, signatureData: string) {
@@ -122,19 +128,21 @@ export function NotasClient({
     )
   }
 
+  if (view === 'new-consent') {
+    return <ConsentFormCreate patientName={currentPatient.name} onSave={handleCreateConsent} onCancel={() => setView('list')} />
+  }
+
   return (
     <DocumentList
       currentPatient={currentPatient}
       evolutionNotes={evolutionNotes}
-      surgicalNotes={surgicalNotes}
       prescriptions={prescriptions}
       consentForms={consentForms}
       onViewPrescription={id => { setSelectedRxId(id); setView('prescription') }}
       onViewConsent={id => { setSelectedConsentId(id); setView('consent') }}
       onNewNote={() => setView('new-note')}
       onNewPrescription={() => setView('new-prescription')}
-      onNewSurgicalNote={() => {}}
-      onNewConsent={() => {}}
+      onNewConsent={() => setView('new-consent')}
     />
   )
 }

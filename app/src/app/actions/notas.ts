@@ -6,7 +6,7 @@ import { verifySession } from '@/lib/dal'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import { logAction } from '@/lib/audit'
 import { computeNoteSignatureHash } from '@/lib/crypto'
-import type { EvolutionNote, SurgicalNote, Prescription, PrescriptionMedication, ConsentForm } from '@/lib/notas-types'
+import type { EvolutionNote, Prescription, PrescriptionMedication, ConsentForm } from '@/lib/notas-types'
 
 // ─── Helpers de nombre de paciente ───────────────────────────────────────────
 
@@ -36,26 +36,6 @@ function mapEvolution(n: {
   }
 }
 
-function mapSurgical(n: {
-  id: string; patientId: string; subtipo: string | null;
-  operacionPlaneada: string | null; operacionRealizada: string | null;
-  hallazgosTransoperatorios: string | null; indicacionTerapeutica: string | null;
-  firmada: boolean; firmaHash: string | null; fechaFirma: Date | null; fecha: Date
-}, patientName: string, authorName: string): SurgicalNote {
-  return {
-    id: n.id,
-    patientId: n.patientId,
-    patientName,
-    type: (n.subtipo === 'postoperatoria' ? 'postoperatoria' : 'preoperatoria') as SurgicalNote['type'],
-    procedure: n.operacionPlaneada ?? n.operacionRealizada ?? '',
-    scheduledDate: n.fecha.toISOString().split('T')[0],
-    anesthesia: '',
-    instructions: n.indicacionTerapeutica ?? '',
-    observations: n.hallazgosTransoperatorios ?? '',
-    authorName,
-    createdAt: n.fecha.toISOString(),
-  }
-}
 
 function mapPrescription(
   rows: Array<{
@@ -127,14 +107,10 @@ function mapConsent(c: {
 export async function getNotasData(patientId: string) {
   const session = await verifySession()
 
-  const [patient, evolutionNotes, surgicalNotes, prescriptionRows, consents, clinicCfg] = await Promise.all([
+  const [patient, evolutionNotes, prescriptionRows, consents, clinicCfg] = await Promise.all([
     prisma.patient.findUnique({ where: { id: patientId } }),
     prisma.medicalNote.findMany({
       where: { patientId, tipo: 'nota_evolucion' },
-      orderBy: { fecha: 'desc' },
-    }),
-    prisma.medicalNote.findMany({
-      where: { patientId, tipo: 'nota_quirurgica' },
       orderBy: { fecha: 'desc' },
     }),
     prisma.prescription.findMany({
@@ -167,7 +143,6 @@ export async function getNotasData(patientId: string) {
   return {
     patient: { id: patient.id, name: pName, expedienteNumber: patient.expedienteNumber },
     evolutionNotes: evolutionNotes.map(n => mapEvolution(n, pName, session.name)),
-    surgicalNotes: surgicalNotes.map(n => mapSurgical(n, pName, session.name)),
     prescriptions,
     consentForms: consents.map(c => mapConsent(c, pName, session.name)),
   }
