@@ -28,13 +28,13 @@ export default function LoginPage() {
     <div className="w-full max-w-sm">
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="w-14 h-14 rounded-2xl bg-sky-600/10 mx-auto flex items-center justify-center mb-4">
-          <ShieldCheck className="w-8 h-8 text-sky-600" />
+        <div className="w-14 h-14 rounded-2xl bg-white/20 mx-auto flex items-center justify-center mb-4">
+          <ShieldCheck className="w-8 h-8 text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 font-[family-name:var(--font-dm-sans)]">
+        <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-dm-sans)]">
           Dr. Viveros ORL
         </h1>
-        <p className="text-sm text-slate-500 mt-1">Panel de personal médico</p>
+        <p className="text-sm text-sky-200 mt-1">Panel de personal médico</p>
       </div>
 
       {/* Card */}
@@ -118,7 +118,7 @@ export default function LoginPage() {
         </form>
       </div>
 
-      <p className="text-center text-xs text-slate-400 mt-6">
+      <p className="text-center text-xs text-sky-200 mt-6">
         Después de verificar tu contraseña se solicitará el código 2FA.
       </p>
 
