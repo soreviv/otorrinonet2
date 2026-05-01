@@ -1,25 +1,41 @@
 'use client'
 
 import { useState } from 'react'
-import { DocumentList, PrescriptionDetail, ConsentFormDetail, ConsentFormCreate } from '@/components/notas'
+import {
+  DocumentList,
+  PrescriptionDetail,
+  ConsentFormDetail,
+  ConsentFormCreate,
+  EvolutionNoteDetail,
+} from '@/components/notas'
 import { EvolutionNoteForm, type EvolutionNoteData } from '@/components/notas/EvolutionNoteForm'
 import { PrescriptionForm } from '@/components/notas/PrescriptionForm'
 import {
   createEvolutionNote,
+  updateEvolutionNote,
+  signEvolutionNoteInDB,
+  createAddendum,
   createPrescription,
   createConsentForm,
   signPrescriptionInDB,
   signConsentInDB,
 } from '@/app/actions/notas'
-import type { Prescription, ConsentForm, CurrentPatient, EvolutionNote, PrescriptionMedication } from '@/lib/notas-types'
+import type {
+  Prescription,
+  ConsentForm,
+  CurrentPatient,
+  EvolutionNote,
+  PrescriptionMedication,
+} from '@/lib/notas-types'
 
-type View = 'list' | 'prescription' | 'consent' | 'new-note' | 'new-prescription' | 'new-consent'
+type View = 'list' | 'note-detail' | 'prescription' | 'consent' | 'new-note' | 'new-prescription' | 'new-consent'
 
 interface Props {
   currentPatient: CurrentPatient
   evolutionNotes: EvolutionNote[]
   initialPrescriptions: Prescription[]
   initialConsentForms: ConsentForm[]
+  currentUserRole: 'medico' | 'enfermera' | 'recepcionista'
 }
 
 function nowCDMX(): string {
@@ -31,21 +47,66 @@ export function NotasClient({
   evolutionNotes: initialNotes,
   initialPrescriptions,
   initialConsentForms,
+  currentUserRole,
 }: Props) {
   const [view, setView] = useState<View>('list')
   const [selectedRxId, setSelectedRxId] = useState<string | null>(null)
   const [selectedConsentId, setSelectedConsentId] = useState<string | null>(null)
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
   const [prescriptions, setPrescriptions] = useState<Prescription[]>(initialPrescriptions)
   const [consentForms, setConsentForms] = useState<ConsentForm[]>(initialConsentForms)
   const [evolutionNotes, setEvolutionNotes] = useState<EvolutionNote[]>(initialNotes)
 
+  const isMedico = currentUserRole === 'medico'
   const selectedRx = prescriptions.find(r => r.id === selectedRxId) ?? null
   const selectedConsent = consentForms.find(c => c.id === selectedConsentId) ?? null
+  const selectedNote = evolutionNotes.find(n => n.id === selectedNoteId) ?? null
+
+  function replaceNote(updated: EvolutionNote) {
+    setEvolutionNotes(prev => prev.map(n => (n.id === updated.id ? updated : n)))
+  }
 
   async function handleCreateNote(data: EvolutionNoteData) {
-    const note = await createEvolutionNote(currentPatient.id, data)
+    const note = await createEvolutionNote(currentPatient.id, {
+      motivoConsulta: data.subjective,
+      subjetivo: data.subjective,
+      objetivo: data.objective,
+      analisis: data.assessment,
+      plan: data.plan,
+      diagnosticos: data.diagnosticos.map(d => ({
+        codigo: d.codigo,
+        descripcion: d.descripcion,
+      })),
+      vitals: data.vitals,
+    })
     setEvolutionNotes(prev => [note, ...prev])
-    setView('list')
+    setSelectedNoteId(note.id)
+    setView('note-detail')
+  }
+
+  async function handleSaveNote(noteId: string, data: {
+    motivoConsulta: string
+    subjetivo: string
+    objetivo: string
+    analisis: string
+    plan: string
+  }): Promise<EvolutionNote> {
+    const updated = await updateEvolutionNote(noteId, data)
+    replaceNote(updated)
+    return updated
+  }
+
+  async function handleSignNote(noteId: string): Promise<EvolutionNote> {
+    const signed = await signEvolutionNoteInDB(noteId)
+    replaceNote(signed)
+    return signed
+  }
+
+  async function handleAddAddendum(noteId: string, contenido: string) {
+    const addendum = await createAddendum(noteId, contenido)
+    setEvolutionNotes(prev =>
+      prev.map(n => (n.id === noteId ? { ...n, addendums: [...n.addendums, addendum] } : n)),
+    )
   }
 
   async function handleCreatePrescription(medications: PrescriptionMedication[], diagnosis: string) {
@@ -95,6 +156,19 @@ export function NotasClient({
     )
   }
 
+  if (view === 'note-detail' && selectedNote) {
+    return (
+      <EvolutionNoteDetail
+        note={selectedNote}
+        canEdit={isMedico}
+        onBack={() => setView('list')}
+        onSave={(data) => handleSaveNote(selectedNote.id, data)}
+        onSign={() => handleSignNote(selectedNote.id)}
+        onAddAddendum={(c) => handleAddAddendum(selectedNote.id, c)}
+      />
+    )
+  }
+
   if (view === 'new-prescription') {
     return (
       <PrescriptionForm
@@ -138,11 +212,12 @@ export function NotasClient({
       evolutionNotes={evolutionNotes}
       prescriptions={prescriptions}
       consentForms={consentForms}
+      onViewNote={(id) => { setSelectedNoteId(id); setView('note-detail') }}
       onViewPrescription={id => { setSelectedRxId(id); setView('prescription') }}
       onViewConsent={id => { setSelectedConsentId(id); setView('consent') }}
-      onNewNote={() => setView('new-note')}
-      onNewPrescription={() => setView('new-prescription')}
-      onNewConsent={() => setView('new-consent')}
+      onNewNote={isMedico ? () => setView('new-note') : undefined}
+      onNewPrescription={isMedico ? () => setView('new-prescription') : undefined}
+      onNewConsent={isMedico ? () => setView('new-consent') : undefined}
     />
   )
 }

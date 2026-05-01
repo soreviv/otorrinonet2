@@ -4,6 +4,14 @@ export type ConsentStatus = 'pendiente' | 'firmado-presencial' | 'firmado-correo
 
 export type SignatureMethod = 'presencial' | 'correo' | null
 
+export interface NoteAddendum {
+  id: string
+  contenido: string
+  authorName: string
+  fecha: string
+  firmaHash: string | null
+}
+
 export interface EvolutionNote {
   id: string
   patientId: string
@@ -15,6 +23,12 @@ export interface EvolutionNote {
   updatedDiagnosis: string
   plan: string
   authorName: string
+  authorId: string | null
+  signed: boolean
+  signedAt: string | null
+  firmaHash: string | null
+  firmaUserId: string | null
+  addendums: NoteAddendum[]
   createdAt: string
 }
 
@@ -42,9 +56,12 @@ export interface Prescription {
   doctorLicense: string
   doctorSpecialtyLicense: string
   doctorUniversity: string
+  doctorUniversityLogoUrl?: string | null
   clinicName: string
   clinicAddress: string
   clinicPhone: string
+  clinicEmail?: string | null
+  clinicLogoUrl?: string | null
   clinicCofepris?: string
   signatureData: string | null
   signedAt: string | null

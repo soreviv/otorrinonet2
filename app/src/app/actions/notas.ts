@@ -6,7 +6,7 @@ import { verifySession } from '@/lib/dal'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import { logAction } from '@/lib/audit'
 import { computeNoteSignatureHash } from '@/lib/crypto'
-import type { EvolutionNote, Prescription, PrescriptionMedication, ConsentForm } from '@/lib/notas-types'
+import type { EvolutionNote, NoteAddendum, Prescription, PrescriptionMedication, ConsentForm } from '@/lib/notas-types'
 
 // ─── Helpers de nombre de paciente ───────────────────────────────────────────
 
@@ -16,11 +16,44 @@ function patientFullName(p: { nombre: string; apellidoPaterno: string; apellidoM
 
 // ─── Mappers ──────────────────────────────────────────────────────────────────
 
-function mapEvolution(n: {
-  id: string; patientId: string; motivoConsulta: string | null; subjetivo: string | null;
-  objetivo: string | null; analisis: string | null; plan: string | null;
-  firmada: boolean; firmaHash: string | null; fechaFirma: Date | null; fecha: Date
-}, patientName: string, authorName: string): EvolutionNote {
+interface MedicalNoteRow {
+  id: string
+  patientId: string
+  motivoConsulta: string | null
+  subjetivo: string | null
+  objetivo: string | null
+  analisis: string | null
+  plan: string | null
+  firmada: boolean
+  firmaHash: string | null
+  fechaFirma: Date | null
+  firmaUserId: string | null
+  medicoId: string
+  fecha: Date
+}
+
+function mapAddendum(a: {
+  id: string
+  contenido: string
+  authorId: string | null
+  fecha: Date
+  firmaHash: string | null
+}, authorName: string): NoteAddendum {
+  return {
+    id: a.id,
+    contenido: a.contenido,
+    authorName,
+    fecha: a.fecha.toISOString(),
+    firmaHash: a.firmaHash,
+  }
+}
+
+function mapEvolution(
+  n: MedicalNoteRow,
+  patientName: string,
+  authorName: string,
+  addendums: NoteAddendum[] = [],
+): EvolutionNote {
   return {
     id: n.id,
     patientId: n.patientId,
@@ -32,6 +65,12 @@ function mapEvolution(n: {
     updatedDiagnosis: n.analisis ?? '',
     plan: n.plan ?? '',
     authorName,
+    authorId: n.medicoId,
+    signed: n.firmada,
+    signedAt: n.fechaFirma?.toISOString() ?? null,
+    firmaHash: n.firmaHash,
+    firmaUserId: n.firmaUserId,
+    addendums,
     createdAt: n.fecha.toISOString(),
   }
 }
@@ -70,9 +109,12 @@ function mapPrescription(
     doctorLicense: (clinicCfg.doctorLicense as string) ?? '',
     doctorSpecialtyLicense: (clinicCfg.doctorSpecialtyLicense as string) ?? '',
     doctorUniversity: (clinicCfg.doctorUniversity as string) ?? '',
+    doctorUniversityLogoUrl: (clinicCfg.doctorUniversityLogoUrl as string) ?? null,
     clinicName: (clinicCfg.clinicName as string) ?? '',
     clinicAddress: (clinicCfg.clinicAddress as string) ?? '',
     clinicPhone: (clinicCfg.clinicPhone as string) ?? '',
+    clinicEmail: (clinicCfg.clinicEmail as string) ?? null,
+    clinicLogoUrl: (clinicCfg.clinicLogoUrl as string) ?? null,
     clinicCofepris: (clinicCfg.clinicCofepris as string) ?? '',
     signatureData: null,
     signedAt: first.fechaFirma?.toISOString() ?? null,
@@ -112,6 +154,12 @@ export async function getNotasData(patientId: string) {
     prisma.medicalNote.findMany({
       where: { patientId, tipo: 'nota_evolucion' },
       orderBy: { fecha: 'desc' },
+      include: {
+        medico: { select: { id: true, name: true } },
+        addendums: {
+          orderBy: { fecha: 'asc' },
+        },
+      },
     }),
     prisma.prescription.findMany({
       where: { patientId },
@@ -129,6 +177,18 @@ export async function getNotasData(patientId: string) {
   const pName = patientFullName(patient)
   void logAction({ action: 'vista', resource: 'patient', resourceId: patientId, userId: session.userId })
 
+  // Resolver autores de addendums
+  const addendumAuthorIds = Array.from(new Set(
+    evolutionNotes.flatMap(n => n.addendums.map(a => a.authorId).filter((x): x is string => !!x)),
+  ))
+  const addendumAuthors = addendumAuthorIds.length
+    ? await prisma.staffUser.findMany({
+        where: { id: { in: addendumAuthorIds } },
+        select: { id: true, name: true },
+      })
+    : []
+  const authorNameById = new Map(addendumAuthors.map(u => [u.id, u.name]))
+
   // Agrupar recetas por recetaId
   const recetaMap = new Map<string, typeof prescriptionRows>()
   for (const row of prescriptionRows) {
@@ -142,7 +202,12 @@ export async function getNotasData(patientId: string) {
 
   return {
     patient: { id: patient.id, name: pName, expedienteNumber: patient.expedienteNumber },
-    evolutionNotes: evolutionNotes.map(n => mapEvolution(n, pName, session.name)),
+    evolutionNotes: evolutionNotes.map(n => {
+      const addendums = n.addendums.map(a =>
+        mapAddendum(a, authorNameById.get(a.authorId ?? '') ?? 'Sistema'),
+      )
+      return mapEvolution(n, pName, n.medico?.name ?? session.name, addendums)
+    }),
     prescriptions,
     consentForms: consents.map(c => mapConsent(c, pName, session.name)),
   }
@@ -215,42 +280,51 @@ export async function createEvolutionNote(
 
   void logAction({ action: 'creacion', resource: 'medical_note', resourceId: note.id, userId: session.userId })
   const pName = patient ? patientFullName(patient) : ''
-  return mapEvolution(note, pName, session.name)
+  return mapEvolution(note, pName, session.name, [])
 }
 
-export async function createSurgicalNote(
-  patientId: string,
-  data: {
-    subtipo?: string
-    operacionPlaneada?: string
-    diagnosticoPreoperatorio?: string
-    hallazgosTransoperatorios?: string
-    indicacionTerapeutica?: string
-    complicaciones?: string
-  },
-): Promise<SurgicalNote> {
-  const session = await verifySession()
+// ─── Edición pre-firma ────────────────────────────────────────────────────────
 
-  const [patient, note] = await Promise.all([
-    prisma.patient.findUnique({ where: { id: patientId } }),
-    prisma.medicalNote.create({
+export async function updateEvolutionNote(
+  noteId: string,
+  data: {
+    motivoConsulta?: string
+    subjetivo?: string
+    objetivo?: string
+    analisis?: string
+    plan?: string
+  },
+): Promise<EvolutionNote> {
+  const session = await verifySession()
+  if (session.role !== 'medico') throw new Error('Solo el médico puede modificar notas.')
+
+  const existing = await prisma.medicalNote.findUnique({
+    where: { id: noteId },
+    select: { firmada: true, medicoId: true, patientId: true },
+  })
+  if (!existing) throw new Error('Nota no encontrada.')
+  if (existing.firmada) {
+    throw new Error('Esta nota ya fue firmada y no se puede modificar. Use un adendum.')
+  }
+
+  const [patient, updated] = await Promise.all([
+    prisma.patient.findUnique({ where: { id: existing.patientId } }),
+    prisma.medicalNote.update({
+      where: { id: noteId },
       data: {
-        patientId,
-        medicoId: session.userId,
-        tipo: 'nota_quirurgica',
-        subtipo: data.subtipo ?? 'preoperatoria',
-        operacionPlaneada: data.operacionPlaneada || null,
-        diagnosticoPreoperatorio: data.diagnosticoPreoperatorio || null,
-        hallazgosTransoperatorios: data.hallazgosTransoperatorios || null,
-        indicacionTerapeutica: data.indicacionTerapeutica || null,
-        complicaciones: data.complicaciones || null,
+        motivoConsulta: data.motivoConsulta ?? null,
+        subjetivo: data.subjetivo ?? null,
+        objetivo: data.objetivo ?? null,
+        analisis: data.analisis ?? null,
+        plan: data.plan ?? null,
       },
+      include: { medico: { select: { name: true } } },
     }),
   ])
 
-  void logAction({ action: 'creacion', resource: 'medical_note', resourceId: note.id, userId: session.userId })
+  void logAction({ action: 'modificacion', resource: 'medical_note', resourceId: noteId, userId: session.userId })
   const pName = patient ? patientFullName(patient) : ''
-  return mapSurgical(note, pName, session.name)
+  return mapEvolution(updated, pName, updated.medico?.name ?? session.name, [])
 }
 
 export async function createPrescription(
@@ -311,20 +385,49 @@ export async function createConsentForm(
 
 // ─── Firma electrónica ────────────────────────────────────────────────────────
 
-export async function signEvolutionNoteInDB(id: string): Promise<{ firmaHash: string }> {
+export async function signEvolutionNoteInDB(id: string): Promise<EvolutionNote> {
   const session = await verifySession()
-  const existing = await prisma.medicalNote.findUnique({ where: { id }, select: { firmada: true } })
-  if (existing?.firmada) throw new Error('Esta nota ya fue firmada')
+  if (session.role !== 'medico') throw new Error('Solo el médico puede firmar notas.')
+
+  const existing = await prisma.medicalNote.findUnique({
+    where: { id },
+    select: { firmada: true, patientId: true },
+  })
+  if (!existing) throw new Error('Nota no encontrada.')
+  if (existing.firmada) throw new Error('Esta nota ya fue firmada.')
 
   const isoTs = new Date().toISOString()
   const hash = computeNoteSignatureHash(id, session.userId, isoTs)
 
-  await prisma.medicalNote.update({
-    where: { id },
-    data: { firmada: true, firmaHash: hash, fechaFirma: new Date(isoTs), firmaUserId: session.userId },
+  const [patient, signed] = await Promise.all([
+    prisma.patient.findUnique({ where: { id: existing.patientId } }),
+    prisma.medicalNote.update({
+      where: { id },
+      data: { firmada: true, firmaHash: hash, fechaFirma: new Date(isoTs), firmaUserId: session.userId },
+      include: {
+        medico: { select: { name: true } },
+        addendums: { orderBy: { fecha: 'asc' } },
+      },
+    }),
+  ])
+
+  void logAction({
+    action: 'firma',
+    resource: 'medical_note',
+    resourceId: id,
+    userId: session.userId,
+    details: { firmaHash: hash, fechaFirma: isoTs },
   })
-  void logAction({ action: 'firma', resource: 'medical_note', resourceId: id, userId: session.userId })
-  return { firmaHash: hash }
+
+  const pName = patient ? patientFullName(patient) : ''
+  const addAuthorIds = Array.from(new Set(signed.addendums.map(a => a.authorId).filter((x): x is string => !!x)))
+  const addAuthors = addAuthorIds.length
+    ? await prisma.staffUser.findMany({ where: { id: { in: addAuthorIds } }, select: { id: true, name: true } })
+    : []
+  const nameById = new Map(addAuthors.map(u => [u.id, u.name]))
+  const addendums = signed.addendums.map(a => mapAddendum(a, nameById.get(a.authorId ?? '') ?? 'Sistema'))
+
+  return mapEvolution(signed, pName, signed.medico?.name ?? session.name, addendums)
 }
 
 export async function signPrescriptionInDB(recetaId: string): Promise<{ firmaHash: string }> {
@@ -357,10 +460,43 @@ export async function signConsentInDB(id: string): Promise<void> {
 
 // ─── Adenda ───────────────────────────────────────────────────────────────────
 
-export async function createAddendum(noteId: string, contenido: string): Promise<void> {
+export async function createAddendum(noteId: string, contenido: string): Promise<NoteAddendum> {
   const session = await verifySession()
-  await prisma.medicalNoteAddendum.create({
-    data: { noteId, contenido, authorId: session.userId },
+  if (session.role !== 'medico') throw new Error('Solo el médico puede agregar adendums.')
+
+  const trimmed = contenido.trim()
+  if (trimmed.length < 5) throw new Error('El contenido del adendum es demasiado corto.')
+  if (trimmed.length > 5000) throw new Error('El adendum excede 5000 caracteres.')
+
+  const note = await prisma.medicalNote.findUnique({
+    where: { id: noteId },
+    select: { id: true, firmada: true },
   })
-  void logAction({ action: 'creacion', resource: 'addendum', resourceId: noteId, userId: session.userId })
+  if (!note) throw new Error('Nota no encontrada.')
+  if (!note.firmada) {
+    throw new Error('Solo se pueden agregar adendums a notas firmadas. Edite la nota directamente.')
+  }
+
+  const isoTs = new Date().toISOString()
+  const hash = computeNoteSignatureHash(`${noteId}:addendum:${randomUUID()}`, session.userId, isoTs)
+
+  const addendum = await prisma.medicalNoteAddendum.create({
+    data: {
+      noteId,
+      contenido: trimmed,
+      authorId: session.userId,
+      firmaHash: hash,
+      fecha: new Date(isoTs),
+    },
+  })
+
+  void logAction({
+    action: 'creacion',
+    resource: 'addendum',
+    resourceId: addendum.id,
+    userId: session.userId,
+    details: { noteId, firmaHash: hash },
+  })
+
+  return mapAddendum(addendum, session.name)
 }

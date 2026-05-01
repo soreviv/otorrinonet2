@@ -354,11 +354,14 @@ model ClinicConfig {
   clinicName             String   @default("Clínica ORL Viveros")
   clinicAddress          String?
   clinicPhone            String?
+  clinicEmail            String?
   clinicCofepris         String?
+  clinicLogoUrl          String?  @db.Text
   doctorName             String   @default("Dr. Alejandro Viveros Domínguez")
   doctorLicense          String?
   doctorSpecialtyLicense String?
   doctorUniversity       String?
+  doctorUniversityLogoUrl String? @db.Text
   portalEnabled          Boolean  @default(false)
   portalTitle            String?
   portalTagline          String?

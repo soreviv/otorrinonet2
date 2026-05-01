@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import { verifySession } from '@/lib/dal'
 import { getPatients } from '@/app/actions/ehr'
 import { getNotasData } from '@/app/actions/notas'
 import { NotasClient } from './NotasClient'
@@ -8,6 +9,8 @@ interface Props {
 }
 
 async function NotasLoader({ patientId }: { patientId: string | undefined }) {
+  const session = await verifySession()
+
   if (!patientId) {
     const patients = await getPatients()
     if (patients.length === 0) {
@@ -36,6 +39,7 @@ async function NotasLoader({ patientId }: { patientId: string | undefined }) {
       evolutionNotes={data.evolutionNotes}
       initialPrescriptions={data.prescriptions}
       initialConsentForms={data.consentForms}
+      currentUserRole={session.role}
     />
   )
 }

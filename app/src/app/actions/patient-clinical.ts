@@ -54,7 +54,20 @@ export async function getPatientEvolutionNotes(patientId: string): Promise<Evolu
   const notes = await prisma.medicalNote.findMany({
     where: { patientId, tipo: 'nota_evolucion' },
     orderBy: { fecha: 'desc' },
+    include: {
+      medico: { select: { name: true } },
+      addendums: { orderBy: { fecha: 'asc' } },
+    },
   })
+
+  // Resolver autores de adendums
+  const authorIds = Array.from(new Set(
+    notes.flatMap(n => n.addendums.map(a => a.authorId).filter((x): x is string => !!x)),
+  ))
+  const authors = authorIds.length
+    ? await prisma.staffUser.findMany({ where: { id: { in: authorIds } }, select: { id: true, name: true } })
+    : []
+  const nameById = new Map(authors.map(u => [u.id, u.name]))
 
   return notes.map(n => ({
     id: n.id,
@@ -66,9 +79,19 @@ export async function getPatientEvolutionNotes(patientId: string): Promise<Evolu
     findings: n.objetivo ?? '',
     updatedDiagnosis: n.analisis ?? '',
     plan: n.plan ?? '',
-    authorName: session.name,
+    authorName: n.medico?.name ?? session.name,
+    authorId: n.medicoId,
+    signed: n.firmada,
     signedAt: n.fechaFirma?.toISOString() ?? null,
     firmaHash: n.firmaHash ?? null,
+    firmaUserId: n.firmaUserId,
+    addendums: n.addendums.map(a => ({
+      id: a.id,
+      contenido: a.contenido,
+      authorName: nameById.get(a.authorId ?? '') ?? 'Sistema',
+      fecha: a.fecha.toISOString(),
+      firmaHash: a.firmaHash,
+    })),
     createdAt: n.fecha.toISOString(),
   }))
 }
@@ -114,9 +137,12 @@ export async function getPatientPrescriptions(patientId: string): Promise<Prescr
       doctorLicense: clinicCfg.doctorLicense ?? '',
       doctorSpecialtyLicense: clinicCfg.doctorSpecialtyLicense ?? '',
       doctorUniversity: clinicCfg.doctorUniversity ?? '',
+      doctorUniversityLogoUrl: clinicCfg.doctorUniversityLogoUrl ?? null,
       clinicName: clinicCfg.clinicName ?? '',
       clinicAddress: clinicCfg.clinicAddress ?? '',
       clinicPhone: clinicCfg.clinicPhone ?? '',
+      clinicEmail: clinicCfg.clinicEmail ?? null,
+      clinicLogoUrl: clinicCfg.clinicLogoUrl ?? null,
       clinicCofepris: clinicCfg.clinicCofepris ?? '',
       signatureData: null,
       signedAt: first.fechaFirma?.toISOString() ?? null,

@@ -3,12 +3,13 @@
 import { useState, useTransition } from 'react'
 import {
   Building2, Stethoscope, Users, Shield, Plus, UserCheck, UserX,
-  Save, RefreshCw, Search,
+  Save, RefreshCw, Search, Mail, Phone, MapPin, FileText, GraduationCap,
 } from 'lucide-react'
 import {
   saveClinicConfig, createStaffUser, toggleStaffUserStatus,
   type ClinicConfigData, type StaffUserData, type AuditLogRecord,
 } from '@/app/actions/configuracion'
+import { LogoUploader } from '@/components/configuracion/LogoUploader'
 
 interface Props {
   clinicConfig: ClinicConfigData
@@ -50,59 +51,155 @@ function Card({ title, icon, children }: { title: string; icon: React.ReactNode;
 function EstablecimientoTab({ initial }: { initial: ClinicConfigData }) {
   const [form, setForm] = useState({ ...initial })
   const [saved, setSaved] = useState(false)
+  const [err, setErr] = useState('')
   const [isPending, startTransition] = useTransition()
 
-  const set = (k: keyof ClinicConfigData, v: string) => { setForm(f => ({ ...f, [k]: v })); setSaved(false) }
+  const set = (k: keyof ClinicConfigData, v: string) => {
+    setForm(f => ({ ...f, [k]: v }))
+    setSaved(false)
+    setErr('')
+  }
 
   function handleSave() {
+    setErr('')
     startTransition(async () => {
-      await saveClinicConfig(form)
-      setSaved(true)
+      try {
+        await saveClinicConfig(form)
+        setSaved(true)
+      } catch (e) {
+        setErr(e instanceof Error ? e.message : 'Error al guardar.')
+      }
     })
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="establecimiento-tab">
       <Card title="Datos del Establecimiento" icon={<Building2 className="w-4 h-4" strokeWidth={1.75} />}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Nombre del consultorio">
-            <input className={INPUT} value={form.clinicName} onChange={e => set('clinicName', e.target.value)} />
-          </Field>
-          <Field label="Teléfono">
-            <input className={INPUT} value={form.clinicPhone} onChange={e => set('clinicPhone', e.target.value)} />
-          </Field>
-          <Field label="Domicilio">
-            <input className={INPUT} value={form.clinicAddress} onChange={e => set('clinicAddress', e.target.value)} />
+            <input className={INPUT} value={form.clinicName} onChange={e => set('clinicName', e.target.value)} data-testid="input-clinic-name" />
           </Field>
           <Field label="Autorización COFEPRIS">
-            <input className={INPUT} placeholder="Núm. de autorización sanitaria" value={form.clinicCofepris} onChange={e => set('clinicCofepris', e.target.value)} />
+            <input className={INPUT} placeholder="Núm. de autorización sanitaria" value={form.clinicCofepris} onChange={e => set('clinicCofepris', e.target.value)} data-testid="input-clinic-cofepris" />
           </Field>
+          <div className="sm:col-span-2">
+            <Field label="Domicilio">
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" strokeWidth={1.75} />
+                <input className={`${INPUT} pl-9`} placeholder="Calle, número, colonia, alcaldía/municipio, ciudad, C.P." value={form.clinicAddress} onChange={e => set('clinicAddress', e.target.value)} data-testid="input-clinic-address" />
+              </div>
+            </Field>
+          </div>
+          <Field label="Teléfono">
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" strokeWidth={1.75} />
+              <input className={`${INPUT} pl-9 font-mono`} placeholder="55 1234 5678" value={form.clinicPhone} onChange={e => set('clinicPhone', e.target.value)} data-testid="input-clinic-phone" />
+            </div>
+          </Field>
+          <Field label="Correo de contacto">
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" strokeWidth={1.75} />
+              <input type="email" className={`${INPUT} pl-9`} placeholder="contacto@otorrinonet.com" value={form.clinicEmail} onChange={e => set('clinicEmail', e.target.value)} data-testid="input-clinic-email" />
+            </div>
+          </Field>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+          <LogoUploader
+            label="Logo del consultorio"
+            helper="Aparecerá en el encabezado de las recetas e impresos del consultorio."
+            value={form.clinicLogoUrl}
+            onChange={(v) => set('clinicLogoUrl', v)}
+          />
         </div>
       </Card>
 
+      <SaveBar saved={saved} err={err} pending={isPending} onSave={handleSave} />
+    </div>
+  )
+}
+
+// ─── Médico tab ───────────────────────────────────────────────────────────────
+
+function MedicoTab({ initial }: { initial: ClinicConfigData }) {
+  const [form, setForm] = useState({ ...initial })
+  const [saved, setSaved] = useState(false)
+  const [err, setErr] = useState('')
+  const [isPending, startTransition] = useTransition()
+
+  const set = (k: keyof ClinicConfigData, v: string) => {
+    setForm(f => ({ ...f, [k]: v }))
+    setSaved(false)
+    setErr('')
+  }
+
+  function handleSave() {
+    setErr('')
+    startTransition(async () => {
+      try {
+        await saveClinicConfig(form)
+        setSaved(true)
+      } catch (e) {
+        setErr(e instanceof Error ? e.message : 'Error al guardar.')
+      }
+    })
+  }
+
+  return (
+    <div className="space-y-4" data-testid="medico-tab">
       <Card title="Datos del Médico" icon={<Stethoscope className="w-4 h-4" strokeWidth={1.75} />}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Nombre completo con título">
-            <input className={INPUT} value={form.doctorName} onChange={e => set('doctorName', e.target.value)} />
-          </Field>
-          <Field label="Universidad">
-            <input className={INPUT} value={form.doctorUniversity} onChange={e => set('doctorUniversity', e.target.value)} />
-          </Field>
-          <Field label="Cédula de medicina general">
-            <input className={INPUT} placeholder="Núm. cédula profesional" value={form.doctorLicense} onChange={e => set('doctorLicense', e.target.value)} />
+          <div className="sm:col-span-2">
+            <Field label="Nombre completo con título">
+              <input className={INPUT} value={form.doctorName} onChange={e => set('doctorName', e.target.value)} data-testid="input-doctor-name" />
+            </Field>
+          </div>
+          <Field label="Cédula profesional (medicina general)">
+            <div className="relative">
+              <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" strokeWidth={1.75} />
+              <input className={`${INPUT} pl-9 font-mono`} placeholder="Núm. cédula profesional" value={form.doctorLicense} onChange={e => set('doctorLicense', e.target.value)} data-testid="input-doctor-license" />
+            </div>
           </Field>
           <Field label="Cédula de especialidad">
-            <input className={INPUT} placeholder="Núm. cédula de especialidad" value={form.doctorSpecialtyLicense} onChange={e => set('doctorSpecialtyLicense', e.target.value)} />
+            <div className="relative">
+              <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" strokeWidth={1.75} />
+              <input className={`${INPUT} pl-9 font-mono`} placeholder="Núm. cédula de especialidad" value={form.doctorSpecialtyLicense} onChange={e => set('doctorSpecialtyLicense', e.target.value)} data-testid="input-doctor-specialty-license" />
+            </div>
           </Field>
+          <div className="sm:col-span-2">
+            <Field label="Universidad">
+              <div className="relative">
+                <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" strokeWidth={1.75} />
+                <input className={`${INPUT} pl-9`} placeholder="Ej. Universidad Nacional Autónoma de México" value={form.doctorUniversity} onChange={e => set('doctorUniversity', e.target.value)} data-testid="input-doctor-university" />
+              </div>
+            </Field>
+          </div>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+          <LogoUploader
+            label="Escudo de la universidad"
+            helper="Se imprimirá junto a las cédulas profesionales en las recetas."
+            value={form.doctorUniversityLogoUrl}
+            onChange={(v) => set('doctorUniversityLogoUrl', v)}
+          />
         </div>
       </Card>
 
-      <div className="flex justify-end">
-        <button className={BTN_PRIMARY} onClick={handleSave} disabled={isPending}>
-          {isPending ? <RefreshCw className="w-4 h-4 animate-spin" strokeWidth={2} /> : <Save className="w-4 h-4" strokeWidth={2} />}
-          {saved ? 'Guardado' : 'Guardar cambios'}
-        </button>
-      </div>
+      <SaveBar saved={saved} err={err} pending={isPending} onSave={handleSave} />
+    </div>
+  )
+}
+
+function SaveBar({ saved, err, pending, onSave }: { saved: boolean; err: string; pending: boolean; onSave: () => void }) {
+  return (
+    <div className="flex items-center justify-end gap-3">
+      {err && <p className="text-xs text-rose-600 dark:text-rose-400">{err}</p>}
+      {saved && !err && <p className="text-xs text-emerald-600 dark:text-emerald-400">Cambios guardados ✓</p>}
+      <button className={BTN_PRIMARY} onClick={onSave} disabled={pending} data-testid="save-config-button">
+        {pending ? <RefreshCw className="w-4 h-4 animate-spin" strokeWidth={2} /> : <Save className="w-4 h-4" strokeWidth={2} />}
+        {pending ? 'Guardando…' : 'Guardar cambios'}
+      </button>
     </div>
   )
 }
@@ -321,8 +418,11 @@ export function ConfiguracionClient({ clinicConfig, staffUsers, auditLogs, curre
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
-        {(tab === 'establecimiento' || tab === 'medico') && (
+        {tab === 'establecimiento' && (
           <EstablecimientoTab initial={clinicConfig} />
+        )}
+        {tab === 'medico' && (
+          <MedicoTab initial={clinicConfig} />
         )}
         {tab === 'usuarios' && (
           <UsuariosTab initial={staffUsers} currentUserId={currentUserId} />

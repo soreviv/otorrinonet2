@@ -9,11 +9,14 @@ export interface ClinicConfigData {
   clinicName: string
   clinicAddress: string
   clinicPhone: string
+  clinicEmail: string
   clinicCofepris: string
+  clinicLogoUrl: string
   doctorName: string
   doctorLicense: string
   doctorSpecialtyLicense: string
   doctorUniversity: string
+  doctorUniversityLogoUrl: string
 }
 
 export interface StaffUserData {
@@ -53,17 +56,35 @@ export async function getClinicConfig(): Promise<ClinicConfigData> {
     clinicName: cfg?.clinicName ?? 'Clínica ORL Viveros',
     clinicAddress: cfg?.clinicAddress ?? '',
     clinicPhone: cfg?.clinicPhone ?? '',
+    clinicEmail: cfg?.clinicEmail ?? '',
     clinicCofepris: cfg?.clinicCofepris ?? '',
+    clinicLogoUrl: cfg?.clinicLogoUrl ?? '',
     doctorName: cfg?.doctorName ?? 'Dr. Alejandro Viveros Domínguez',
     doctorLicense: cfg?.doctorLicense ?? '',
     doctorSpecialtyLicense: cfg?.doctorSpecialtyLicense ?? '',
     doctorUniversity: cfg?.doctorUniversity ?? '',
+    doctorUniversityLogoUrl: cfg?.doctorUniversityLogoUrl ?? '',
+  }
+}
+
+const MAX_LOGO_SIZE = 250 * 1024 // 250 KB en data URL
+
+function validateDataUrl(value: string, field: string): void {
+  if (!value) return
+  if (!value.startsWith('data:image/')) {
+    throw new Error(`${field}: formato inválido (debe ser PNG/JPG/WEBP/SVG).`)
+  }
+  if (value.length > MAX_LOGO_SIZE * 1.4) {
+    throw new Error(`${field}: imagen demasiado grande (máx ~250 KB).`)
   }
 }
 
 export async function saveClinicConfig(data: ClinicConfigData): Promise<void> {
   const session = await verifySession()
   if (session.role !== 'medico') throw new Error('Sin autorización')
+
+  validateDataUrl(data.clinicLogoUrl, 'Logo del consultorio')
+  validateDataUrl(data.doctorUniversityLogoUrl, 'Escudo de la universidad')
 
   await prisma.clinicConfig.upsert({
     where: { id: 'singleton' },

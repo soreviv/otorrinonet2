@@ -41,15 +41,21 @@ export function printPrescription(rx: Prescription): void {
   @page { size: letter; margin: 15mm; }
 
   /* Header */
-  .header { background: #0369a1; color: #fff; padding: 14px 18px; border-radius: 4px 4px 0 0; }
+  .header { background: #0369a1; color: #fff; padding: 14px 18px; border-radius: 4px 4px 0 0; display: flex; align-items: center; gap: 14px; }
+  .header .clinic-logo { width: 56px; height: 56px; background: #fff; border-radius: 8px; padding: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .header .clinic-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .header .clinic-info { flex: 1; min-width: 0; }
   .header h1 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
   .header .sub { font-size: 10px; opacity: .85; display: flex; gap: 16px; flex-wrap: wrap; }
 
   /* Doctor strip */
-  .doc-strip { background: #e0f2fe; padding: 10px 18px; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #bae6fd; }
+  .doc-strip { background: #e0f2fe; padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid #bae6fd; }
+  .doc-strip .doc-info { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
+  .doc-strip .uni-logo { width: 38px; height: 38px; background: #fff; border-radius: 6px; padding: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid #bae6fd; }
+  .doc-strip .uni-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
   .doc-strip .name { font-weight: 700; font-size: 13px; color: #0c4a6e; }
   .doc-strip .uni { font-size: 10px; color: #64748b; margin-top: 2px; }
-  .doc-strip .cedulas { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+  .doc-strip .cedulas { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
   .ced { font-family: monospace; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
   .ced.general { background: #f1f5f9; color: #475569; }
   .ced.especialidad { background: #dbeafe; color: #1e40af; }
@@ -94,22 +100,29 @@ export function printPrescription(rx: Prescription): void {
 <body>
   <!-- Header: Clinic -->
   <div class="header">
-    <h1>${esc(rx.clinicName)}</h1>
-    <div class="sub">
-      ${rx.clinicAddress ? `<span>📍 ${esc(rx.clinicAddress)}</span>` : ''}
-      ${rx.clinicPhone ? `<span>📞 ${esc(rx.clinicPhone)}</span>` : ''}
-      ${rx.clinicCofepris ? `<span>COFEPRIS AF: ${esc(rx.clinicCofepris)}</span>` : ''}
+    ${rx.clinicLogoUrl ? `<div class="clinic-logo"><img src="${esc(rx.clinicLogoUrl)}" alt="Logo del consultorio"/></div>` : ''}
+    <div class="clinic-info">
+      <h1>${esc(rx.clinicName)}</h1>
+      <div class="sub">
+        ${rx.clinicAddress ? `<span>${esc(rx.clinicAddress)}</span>` : ''}
+        ${rx.clinicPhone ? `<span>Tel. ${esc(rx.clinicPhone)}</span>` : ''}
+        ${rx.clinicEmail ? `<span>${esc(rx.clinicEmail)}</span>` : ''}
+        ${rx.clinicCofepris ? `<span>COFEPRIS AF: ${esc(rx.clinicCofepris)}</span>` : ''}
+      </div>
     </div>
   </div>
 
   <!-- Doctor strip -->
   <div class="doc-strip">
-    <div>
-      <div class="name">${esc(rx.doctorName)}</div>
-      ${rx.doctorUniversity ? `<div class="uni">${esc(rx.doctorUniversity)}</div>` : ''}
+    <div class="doc-info">
+      ${rx.doctorUniversityLogoUrl ? `<div class="uni-logo"><img src="${esc(rx.doctorUniversityLogoUrl)}" alt="Escudo universidad"/></div>` : ''}
+      <div>
+        <div class="name">${esc(rx.doctorName)}</div>
+        ${rx.doctorUniversity ? `<div class="uni">${esc(rx.doctorUniversity)}</div>` : ''}
+      </div>
     </div>
     <div class="cedulas">
-      ${rx.doctorLicense ? `<span class="ced general">Céd. Med. ${esc(rx.doctorLicense)}</span>` : ''}
+      ${rx.doctorLicense ? `<span class="ced general">Céd. Prof. ${esc(rx.doctorLicense)}</span>` : ''}
       ${rx.doctorSpecialtyLicense ? `<span class="ced especialidad">Céd. Esp. ${esc(rx.doctorSpecialtyLicense)}</span>` : ''}
     </div>
   </div>
