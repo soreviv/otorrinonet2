@@ -36,3 +36,12 @@ next-env.d.ts
 
 # Misc
 product-plan.zip
+-e 
+# Environment and credential files
+.env
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
