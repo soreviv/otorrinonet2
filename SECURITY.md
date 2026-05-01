@@ -21,6 +21,15 @@ Incluye en tu reporte:
 
 Recibirás una respuesta en un plazo máximo de **72 horas**. Una vez confirmada y corregida la vulnerabilidad, se reconocerá tu contribución responsable.
 
+## Proceso de divulgación
+
+| Plazo | Acción |
+|---|---|
+| 0–72 h | Confirmación de recepción |
+| 1–7 días | Evaluación de severidad y plan de mitigación |
+| 7–30 días | Corrección, pruebas y despliegue |
+| Tras el despliegue | Notificación al investigador y publicación del aviso (si aplica) |
+
 ## Alcance
 
 Este sistema maneja información clínica protegida (ICP) de pacientes. Las siguientes áreas son de especial interés para reporte:
