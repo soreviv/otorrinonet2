@@ -1,24 +1,29 @@
 'use client'
 
-import { useActionState } from 'react'
-import { redirect } from 'next/navigation'
+import { useActionState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { verify2faAction } from '@/app/actions/auth'
 
 export default function Verify2faPage() {
+  const router = useRouter()
   const [state, action, pending] = useActionState(verify2faAction, null)
+
+  useEffect(() => {
+    if (state && 'ok' in state) router.replace('/staff')
+  }, [state, router])
 
   return (
     <div className="w-full max-w-sm">
       <div className="text-center mb-8">
-        <div className="w-12 h-12 rounded-2xl bg-sky-600 mx-auto flex items-center justify-center mb-4">
+        <div className="w-12 h-12 rounded-2xl bg-white/20 mx-auto flex items-center justify-center mb-4">
           <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
             <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>
         </div>
-        <h1 className="text-xl font-bold text-slate-900 font-[family-name:var(--font-dm-sans)]">
+        <h1 className="text-xl font-bold text-white font-[family-name:var(--font-dm-sans)]">
           Verificación 2FA
         </h1>
-        <p className="text-sm text-slate-500 mt-1">Ingresa el código de tu app autenticadora</p>
+        <p className="text-sm text-sky-200 mt-1">Ingresa el código de tu app autenticadora</p>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
@@ -60,8 +65,8 @@ export default function Verify2faPage() {
 
       <p className="text-center mt-4">
         <button
-          onClick={() => redirect('/login')}
-          className="text-xs text-slate-400 hover:text-slate-600 hover:underline"
+          onClick={() => router.push('/login')}
+          className="text-xs text-sky-200 hover:text-white hover:underline"
         >
           ← Volver al inicio de sesión
         </button>

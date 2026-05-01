@@ -1,10 +1,13 @@
 'use client'
 
 import { useActionState, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import QRCode from 'qrcode'
 import { confirmSetup2faAction } from '@/app/actions/auth'
 
 export function Setup2faForm({ otpauth, secret }: { otpauth: string; secret: string }) {
+  const router = useRouter()
   const [state, action, pending] = useActionState(confirmSetup2faAction, null)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [showSecret, setShowSecret] = useState(false)
@@ -13,12 +16,16 @@ export function Setup2faForm({ otpauth, secret }: { otpauth: string; secret: str
     QRCode.toDataURL(otpauth, { width: 180, margin: 1 }).then(setQrDataUrl)
   }, [otpauth])
 
+  useEffect(() => {
+    if (state && 'ok' in state) router.replace('/staff')
+  }, [state, router])
+
   return (
     <div className="w-full space-y-5">
       {/* QR Code */}
       <div className="flex flex-col items-center gap-3">
         {qrDataUrl ? (
-          <img src={qrDataUrl} alt="QR 2FA" className="rounded-xl border border-slate-200 shadow-sm" width={180} height={180} />
+          <Image src={qrDataUrl} alt="QR 2FA" className="rounded-xl border border-slate-200 shadow-sm" width={180} height={180} unoptimized />
         ) : (
           <div className="w-[180px] h-[180px] rounded-xl border border-slate-200 bg-slate-50 animate-pulse" />
         )}

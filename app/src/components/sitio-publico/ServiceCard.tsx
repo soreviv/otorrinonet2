@@ -1,12 +1,12 @@
 'use client'
 
-import { Stethoscope, Ear, Wind, Flower2, Scissors, Activity } from 'lucide-react'
+import { Stethoscope, Ear, Syringe, Flower2, Scissors, Activity } from 'lucide-react'
 import type { Service, ServiceIcon } from '@/lib/sitio-publico-types'
 
 const ICON_MAP: Record<ServiceIcon, React.ComponentType<{ className?: string }>> = {
   stethoscope: Stethoscope,
   ear: Ear,
-  nose: Wind,
+  syringe: Syringe,
   allergen: Flower2,
   surgery: Scissors,
   balance: Activity,

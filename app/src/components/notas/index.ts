@@ -1,3 +1,6 @@
 export { DocumentList } from './DocumentList'
 export { PrescriptionDetail } from './PrescriptionDetail'
 export { ConsentFormDetail } from './ConsentFormDetail'
+export { ConsentFormCreate } from './ConsentFormCreate'
+export { EvolutionNoteForm } from './EvolutionNoteForm'
+export { PrescriptionForm } from './PrescriptionForm'

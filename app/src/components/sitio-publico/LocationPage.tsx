@@ -1,8 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { PublicFooter } from './PublicFooter'
 import {
-  Stethoscope, Calendar, Menu, X, MapPin,
+  Calendar, Menu, X, MapPin,
   Phone, MessageCircle, Mail, Clock, Navigation,
   ChevronRight, ArrowLeft, ExternalLink,
 } from 'lucide-react'
@@ -28,15 +31,9 @@ export function LocationPage({ contactInfo, onBookAppointment }: LocationPagePro
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100 dark:bg-slate-900/95 dark:border-slate-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <a href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center shadow-sm group-hover:bg-sky-700 transition-colors">
-                <Stethoscope className="w-4 h-4 text-white" />
-              </div>
-              <div className="leading-tight">
-                <p className="text-sm font-bold text-slate-900 dark:text-white">Dr. Viveros</p>
-                <p className="text-[10px] text-sky-600 font-semibold uppercase tracking-widest">ORL · CDMX</p>
-              </div>
-            </a>
+            <Link href="/" className="flex items-center group">
+              <Image src="/assets/logo-consultorio.png" alt="Logotipo del consultorio del Dr. Alejandro Viveros Domínguez, otorrinolaringólogo" width={40} height={40} className="h-10 w-auto" priority />
+            </Link>
 
             <div className="hidden md:flex items-center gap-7">
               {NAV_LINKS.map(({ label, href }) => (
@@ -99,10 +96,10 @@ export function LocationPage({ contactInfo, onBookAppointment }: LocationPagePro
       <div className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center gap-1.5 text-xs text-slate-400">
-            <a href="/" className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors flex items-center gap-1">
+            <Link href="/" className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors flex items-center gap-1">
               <ArrowLeft className="w-3 h-3" />
               Inicio
-            </a>
+            </Link>
             <ChevronRight className="w-3 h-3" />
             <span className="text-slate-600 dark:text-slate-300 font-medium">Ubicación y Horarios</span>
           </div>
@@ -141,12 +138,11 @@ export function LocationPage({ contactInfo, onBookAppointment }: LocationPagePro
                 src={contactInfo.googleMapsEmbedUrl}
                 width="100%"
                 height="100%"
-                style={{ border: 0 }}
+                className="border-0 w-full h-full"
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 title="Ubicación del consultorio"
-                className="w-full h-full"
               />
             </div>
 
@@ -250,23 +246,7 @@ export function LocationPage({ contactInfo, onBookAppointment }: LocationPagePro
         </div>
       </div>
 
-      {/* ── FOOTER ───────────────────────────────────────────────── */}
-      <footer className="bg-slate-900 py-8 mt-4">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <a href="/" className="flex items-center gap-2.5 group">
-              <div className="w-7 h-7 rounded-lg bg-sky-600 flex items-center justify-center group-hover:bg-sky-500 transition-colors">
-                <Stethoscope className="w-3.5 h-3.5 text-white" />
-              </div>
-              <div className="leading-tight">
-                <p className="text-sm font-bold text-white">Dr. Alejandro Viveros ORL</p>
-                <p className="text-[10px] text-slate-500">Otorrinolaringología · Ciudad de México</p>
-              </div>
-            </a>
-            <p className="text-[11px] text-slate-600">© 2026 Dr. Alejandro Viveros</p>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
 
     </div>
   )

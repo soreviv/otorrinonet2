@@ -35,7 +35,6 @@ const defaultNavItems: PatientNavItem[] = [
 
 const defaultLegalItems: LegalItem[] = [
   { label: 'Aviso de privacidad', href: '/legal/privacidad' },
-  { label: 'Términos y condiciones', href: '/legal/terminos' },
   { label: 'Política de cookies', href: '/legal/cookies' },
 ]
 
@@ -169,11 +168,11 @@ export function PatientShell({
                         <p className="text-xs text-slate-500 dark:text-slate-400">Paciente</p>
                       </div>
                       <button
-                        onClick={() => handleNavigate('/mis-citas')}
+                        onClick={() => handleNavigate('/agendar')}
                         className="w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                       >
                         <CalendarCheck className="w-4 h-4" strokeWidth={1.75} />
-                        Mis Citas
+                        Agendar Cita
                       </button>
                       <button
                         onClick={onLogout}
@@ -184,22 +183,13 @@ export function PatientShell({
                       </button>
                     </>
                   ) : (
-                    <>
-                      <button
-                        onClick={() => handleNavigate('/login')}
-                        className="w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                      >
-                        <User className="w-4 h-4" strokeWidth={1.75} />
-                        Iniciar sesión
-                      </button>
-                      <button
-                        onClick={() => handleNavigate('/registro')}
-                        className="w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-sm text-sky-700 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/30 transition-colors font-medium"
-                      >
-                        <CalendarCheck className="w-4 h-4" strokeWidth={1.75} />
-                        Crear cuenta
-                      </button>
-                    </>
+                    <button
+                      onClick={() => handleNavigate('/login')}
+                      className="w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      <User className="w-4 h-4" strokeWidth={1.75} />
+                      Iniciar sesión
+                    </button>
                   )}
                 </div>
               )}

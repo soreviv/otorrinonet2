@@ -122,6 +122,8 @@ export const SAMPLE_APPOINTMENTS: Appointment[] = [
       'Dolor de oído persistente en oído derecho desde hace dos semanas. También presenta reducción de audición al hablar por teléfono.',
     status: 'confirmada',
     privacyAccepted: true,
+    bookingSource: 'staff',
+    patientConfirmed: true,
     createdAt: '2026-04-18T10:30:00Z',
   },
   {
@@ -137,6 +139,8 @@ export const SAMPLE_APPOINTMENTS: Appointment[] = [
       'Episodios de vértigo con náuseas al cambiar de posición, especialmente al levantarse por las mañanas.',
     status: 'pendiente',
     privacyAccepted: true,
+    bookingSource: 'staff',
+    patientConfirmed: true,
     createdAt: '2026-04-18T14:15:00Z',
   },
   {
@@ -151,6 +155,8 @@ export const SAMPLE_APPOINTMENTS: Appointment[] = [
     reason: 'Seguimiento de tratamiento de inmunoterapia, segunda dosis del ciclo mensual.',
     status: 'confirmada',
     privacyAccepted: true,
+    bookingSource: 'staff',
+    patientConfirmed: true,
     createdAt: '2026-04-15T09:00:00Z',
   },
   {
@@ -165,6 +171,8 @@ export const SAMPLE_APPOINTMENTS: Appointment[] = [
     reason: 'Zumbido constante en oído izquierdo desde hace un mes aproximadamente. No presenta dolor.',
     status: 'pendiente',
     privacyAccepted: true,
+    bookingSource: 'staff',
+    patientConfirmed: true,
     createdAt: '2026-04-17T16:45:00Z',
   },
   {
@@ -179,6 +187,8 @@ export const SAMPLE_APPOINTMENTS: Appointment[] = [
     reason: 'Consulta preoperatoria para septoplastia indicada por médico de cabecera.',
     status: 'confirmada',
     privacyAccepted: true,
+    bookingSource: 'staff',
+    patientConfirmed: true,
     createdAt: '2026-04-10T11:00:00Z',
   },
   {
@@ -193,6 +203,8 @@ export const SAMPLE_APPOINTMENTS: Appointment[] = [
     reason: 'Revisión postoperatoria.',
     status: 'cancelada',
     privacyAccepted: true,
+    bookingSource: 'staff',
+    patientConfirmed: true,
     createdAt: '2026-04-14T08:30:00Z',
   },
   {
@@ -207,6 +219,8 @@ export const SAMPLE_APPOINTMENTS: Appointment[] = [
     reason: 'Vacuna contra influenza y neumococo según esquema indicado.',
     status: 'confirmada',
     privacyAccepted: true,
+    bookingSource: 'staff',
+    patientConfirmed: true,
     createdAt: '2026-04-16T13:20:00Z',
   },
   {
@@ -221,6 +235,8 @@ export const SAMPLE_APPOINTMENTS: Appointment[] = [
     reason: 'Primera consulta para evaluación de poliposis nasal con obstrucción bilateral.',
     status: 'reprogramada',
     privacyAccepted: true,
+    bookingSource: 'staff',
+    patientConfirmed: true,
     createdAt: '2026-04-12T15:00:00Z',
   },
   {
@@ -235,6 +251,8 @@ export const SAMPLE_APPOINTMENTS: Appointment[] = [
     reason: 'Faringitis recurrente.',
     status: 'pendiente',
     privacyAccepted: true,
+    bookingSource: 'staff',
+    patientConfirmed: true,
     createdAt: '2026-04-18T17:00:00Z',
   },
   {
@@ -249,6 +267,8 @@ export const SAMPLE_APPOINTMENTS: Appointment[] = [
     reason: 'Inicio de ciclo de inmunoterapia para alergia a ácaros del polvo, derivado por alergólogo.',
     status: 'confirmada',
     privacyAccepted: true,
+    bookingSource: 'staff',
+    patientConfirmed: true,
     createdAt: '2026-04-13T10:00:00Z',
   },
   {
@@ -263,6 +283,8 @@ export const SAMPLE_APPOINTMENTS: Appointment[] = [
     reason: 'Consulta por ronquido nocturno y somnolencia diurna.',
     status: 'confirmada',
     privacyAccepted: true,
+    bookingSource: 'staff',
+    patientConfirmed: true,
     createdAt: '2026-04-19T09:15:00Z',
   },
   {
@@ -278,6 +300,8 @@ export const SAMPLE_APPOINTMENTS: Appointment[] = [
       'Hipoacusia bilateral progresiva de 3 años de evolución. Solicita evaluación para auxiliar auditivo.',
     status: 'pendiente',
     privacyAccepted: true,
+    bookingSource: 'staff',
+    patientConfirmed: true,
     createdAt: '2026-04-20T11:00:00Z',
   },
 ]

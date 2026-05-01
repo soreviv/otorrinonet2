@@ -1,4 +1,4 @@
-export type AppointmentStatus = 'pendiente' | 'confirmada' | 'cancelada' | 'reprogramada'
+export type AppointmentStatus = 'pendiente' | 'confirmada' | 'cancelada' | 'reprogramada' | 'completada'
 
 export interface Service {
   id: string
@@ -12,13 +12,15 @@ export interface Appointment {
   patientName: string
   phone: string
   email: string
-  serviceId: string
+  serviceId: string | null
   serviceName: string
   date: string
   time: string
   reason: string
   status: AppointmentStatus
   privacyAccepted: boolean
+  bookingSource: string        // "staff" | "portal"
+  patientConfirmed: boolean
   createdAt: string
 }
 

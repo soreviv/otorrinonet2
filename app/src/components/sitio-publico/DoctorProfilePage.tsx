@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { PublicFooter } from './PublicFooter'
 import {
   Stethoscope, Calendar, Menu, X, GraduationCap,
   Award, Building2, ChevronRight, ArrowLeft,
@@ -30,15 +33,9 @@ export function DoctorProfilePage({
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100 dark:bg-slate-900/95 dark:border-slate-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <a href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center shadow-sm group-hover:bg-sky-700 transition-colors">
-                <Stethoscope className="w-4 h-4 text-white" />
-              </div>
-              <div className="leading-tight">
-                <p className="text-sm font-bold text-slate-900 dark:text-white">Dr. Viveros</p>
-                <p className="text-[10px] text-sky-600 font-semibold uppercase tracking-widest">ORL · CDMX</p>
-              </div>
-            </a>
+            <Link href="/" className="flex items-center group">
+              <Image src="/assets/logo-consultorio.png" alt="Logotipo del consultorio del Dr. Alejandro Viveros Domínguez, otorrinolaringólogo" width={40} height={40} className="h-10 w-auto" priority />
+            </Link>
 
             <div className="hidden md:flex items-center gap-7">
               {NAV_LINKS.map(({ label, href }) => (
@@ -101,10 +98,10 @@ export function DoctorProfilePage({
       <div className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center gap-1.5 text-xs text-slate-400">
-            <a href="/" className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors flex items-center gap-1">
+            <Link href="/" className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors flex items-center gap-1">
               <ArrowLeft className="w-3 h-3" />
               Inicio
-            </a>
+            </Link>
             <ChevronRight className="w-3 h-3" />
             <span className="text-slate-600 dark:text-slate-300 font-medium">Perfil del Doctor</span>
           </div>
@@ -120,7 +117,7 @@ export function DoctorProfilePage({
               <div className="w-40 h-40 md:w-52 md:h-52 rounded-3xl overflow-hidden bg-gradient-to-br from-sky-400 to-sky-700 shadow-xl">
                 {!imgError && (
                   <img
-                    src={doctorProfile.photo}
+                    src={doctorProfile.photoProfile}
                     alt={doctorProfile.fullName}
                     onError={() => setImgError(true)}
                     className="w-full h-full object-cover"
@@ -266,10 +263,7 @@ export function DoctorProfilePage({
             )}
 
             <div className="relative overflow-hidden bg-sky-600 rounded-2xl p-6 text-center">
-              <div
-                className="absolute inset-0 opacity-20 pointer-events-none"
-                style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '20px 20px' }}
-              />
+              <div className="absolute inset-0 opacity-20 pointer-events-none dots-overlay-20" />
               <div className="relative">
                 <p className="text-xs font-bold text-sky-100 uppercase tracking-widest mb-2">Agenda tu consulta</p>
                 <p className="text-sm text-sky-50 mb-4 leading-relaxed">
@@ -289,23 +283,7 @@ export function DoctorProfilePage({
         </div>
       </div>
 
-      {/* ── FOOTER ───────────────────────────────────────────────── */}
-      <footer className="bg-slate-900 py-8 mt-4">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <a href="/" className="flex items-center gap-2.5 group">
-              <div className="w-7 h-7 rounded-lg bg-sky-600 flex items-center justify-center group-hover:bg-sky-500 transition-colors">
-                <Stethoscope className="w-3.5 h-3.5 text-white" />
-              </div>
-              <div className="leading-tight">
-                <p className="text-sm font-bold text-white">Dr. Alejandro Viveros ORL</p>
-                <p className="text-[10px] text-slate-500">Otorrinolaringología · Ciudad de México</p>
-              </div>
-            </a>
-            <p className="text-[11px] text-slate-600">© 2026 Dr. Alejandro Viveros</p>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
 
     </div>
   )

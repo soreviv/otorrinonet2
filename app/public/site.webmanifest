@@ -1,0 +1,24 @@
+{
+  "name": "Dr. Alejandro Viveros Domínguez ORL",
+  "short_name": "Dr. Viveros ORL",
+  "description": "Otorrinolaringólogo y Cirujano de Cabeza y Cuello en Lindavista, Ciudad de México",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#0284c7",
+  "background_color": "#f8fafc",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/"
+}

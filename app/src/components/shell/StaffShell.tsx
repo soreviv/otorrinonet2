@@ -7,6 +7,7 @@ import {
   ClipboardList,
   ScrollText,
   Shield,
+  Settings,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -64,6 +65,13 @@ const defaultNavItems: StaffNavItem[] = [
     label: 'Administración',
     href: '/staff/admin',
     icon: Shield,
+    roles: ['medico'],
+  },
+  {
+    id: 'configuracion',
+    label: 'Configuración',
+    href: '/staff/configuracion',
+    icon: Settings,
     roles: ['medico'],
   },
 ]

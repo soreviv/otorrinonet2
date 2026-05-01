@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { PublicFooter } from './PublicFooter'
 import {
-  Stethoscope, Star, Calendar, ChevronRight,
+  Star, Calendar, ChevronRight,
   ArrowUpRight, Phone, Mail, Menu, X, MessageCircle,
 } from 'lucide-react'
 import type { HomePageProps, GoogleRatingSummary } from '@/lib/sitio-publico-types'
@@ -44,8 +46,10 @@ export function HomePage({
   googleReviews,
   googleRatingSummary,
   contactInfo,
-  onBookAppointment,
-  onViewDoctorProfile,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onBookAppointment: _onBookAppointment,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onViewDoctorProfile: _onViewDoctorProfile,
   onViewAllServices,
 }: HomePageProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -59,14 +63,8 @@ export function HomePage({
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
 
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center shadow-sm group-hover:bg-sky-700 transition-colors">
-                <Stethoscope className="w-4 h-4 text-white" />
-              </div>
-              <div className="leading-tight">
-                <p className="text-sm font-bold text-slate-900 dark:text-white">Dr. Viveros</p>
-                <p className="text-[10px] text-sky-600 font-semibold uppercase tracking-widest">ORL · CDMX</p>
-              </div>
+            <Link href="/" className="flex items-center group">
+              <Image src="/assets/logo-consultorio.png" alt="Logotipo del consultorio del Dr. Alejandro Viveros Domínguez, otorrinolaringólogo" width={40} height={40} className="h-10 w-auto" priority />
             </Link>
 
             <div className="hidden md:flex items-center gap-7">
@@ -128,18 +126,8 @@ export function HomePage({
 
       {/* ── HERO ───────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-white dark:bg-slate-900">
-        <div
-          className="absolute top-0 right-0 h-full w-[55%] bg-gradient-to-bl from-sky-600 to-sky-700 hidden md:block"
-          style={{ clipPath: 'polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%)' }}
-        />
-        <div
-          className="absolute top-0 right-0 h-full w-[55%] hidden md:block opacity-20"
-          style={{
-            clipPath: 'polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%)',
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-          }}
-        />
+        <div className="absolute top-0 right-0 h-full w-[55%] bg-gradient-to-bl from-sky-600 to-sky-700 hidden md:block hero-clip-diagonal" />
+        <div className="absolute top-0 right-0 h-full w-[55%] hidden md:block opacity-20 hero-clip-diagonal hero-grid-overlay" />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 lg:py-28">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 items-center">
@@ -191,11 +179,13 @@ export function HomePage({
               <div className="relative w-60 h-72 sm:w-72 sm:h-88 md:w-72 md:h-[360px] lg:w-80 lg:h-[400px]">
                 <div className="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-sky-400 to-sky-700">
                   {!imgError && (
-                    <img
+                    <Image
                       src={doctorProfile.photo}
-                      alt={doctorProfile.fullName}
+                      alt="Retrato del Dr. Alejandro Viveros Domínguez, médico otorrinolaringólogo especialista en cirugía de cabeza y cuello en Ciudad de México"
+                      fill
+                      className="object-cover z-10"
                       onError={() => setImgError(true)}
-                      className="absolute inset-0 w-full h-full object-cover z-10"
+                      priority
                     />
                   )}
                   <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 gap-3">
@@ -248,9 +238,15 @@ export function HomePage({
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-              {services.map(service => (
-                <ServiceCard key={service.id} service={service} />
-              ))}
+              {services.map(service =>
+                service.id === 'vacunacion' ? (
+                  <Link key={service.id} href="/vacunacion">
+                    <ServiceCard service={service} />
+                  </Link>
+                ) : (
+                  <ServiceCard key={service.id} service={service} />
+                )
+              )}
             </div>
 
             <div className="text-center mt-10">
@@ -303,14 +299,8 @@ export function HomePage({
 
       {/* ── BOTTOM CTA ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-sky-600 py-16 md:py-20">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse 70% 80% at 50% 50%, rgba(255,255,255,0.08) 0%, transparent 100%)' }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none opacity-20"
-          style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '28px 28px' }}
-        />
+        <div className="absolute inset-0 pointer-events-none cta-radial-glow" />
+        <div className="absolute inset-0 pointer-events-none opacity-20 dots-overlay-28" />
 
         <div className="relative max-w-2xl mx-auto text-center px-4 sm:px-6">
           <p className="text-[11px] font-bold text-sky-200 uppercase tracking-widest mb-4">Agenda tu consulta</p>
@@ -341,35 +331,7 @@ export function HomePage({
         </div>
       </section>
 
-      {/* ── FOOTER ─────────────────────────────────────────────────── */}
-      <footer className="bg-slate-900 py-8">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-7 h-7 rounded-lg bg-sky-600 flex items-center justify-center group-hover:bg-sky-500 transition-colors">
-                <Stethoscope className="w-3.5 h-3.5 text-white" />
-              </div>
-              <div className="leading-tight">
-                <p className="text-sm font-bold text-white">Dr. Alejandro Viveros ORL</p>
-                <p className="text-[10px] text-slate-500">Otorrinolaringología · Ciudad de México</p>
-              </div>
-            </Link>
-
-            <div className="flex items-center gap-5 text-slate-500 text-xs">
-              <a href={`tel:${contactInfo.phone}`} className="flex items-center gap-1.5 hover:text-sky-400 transition-colors">
-                <Phone className="w-3 h-3" />
-                {contactInfo.phone}
-              </a>
-              <a href={`mailto:${contactInfo.email}`} className="flex items-center gap-1.5 hover:text-sky-400 transition-colors">
-                <Mail className="w-3 h-3" />
-                {contactInfo.email}
-              </a>
-            </div>
-
-            <p className="text-[11px] text-slate-600">© 2026 Dr. Alejandro Viveros</p>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
 
     </div>
   )

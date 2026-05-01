@@ -1,17 +1,14 @@
-import { MetadataRoute } from "next";
-
-const BASE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.otorrinonet.com";
+import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/servicios", "/agendar", "/perfil", "/contacto", "/ubicacion"],
-        disallow: ["/staff/", "/login/", "/api/", "/(patient)/"],
+        allow: "/",
+        disallow: ["/staff/", "/login/", "/api/", "/actions/"],
       },
     ],
-    sitemap: `${BASE_URL}/sitemap.xml`,
+    sitemap: "https://otorrinonet.com/sitemap.xml",
   };
 }

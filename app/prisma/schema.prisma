@@ -7,107 +7,91 @@ datasource db {
   provider = "postgresql"
 }
 
-// ─── Enums ────────────────────────────────────────────────────────────────────
-
-enum UserRole {
-  medico
-  enfermera
-  recepcionista
-}
-
-enum UserStatus {
-  activo
-  inactivo
-}
-
-enum AppointmentStatus {
-  pendiente
-  confirmada
-  cancelada
-  completada
-}
-
-enum AuditAction {
-  acceso
-  creacion
-  modificacion
-  eliminacion
-  firma
-  exportacion_fhir
-}
-
-enum ArcoType {
-  acceso
-  rectificacion
-  cancelacion
-  oposicion
-}
-
-enum ArcoStatus {
-  pendiente
-  en_proceso
-  resuelta
-  rechazada
-}
-
-enum FhirExportType {
-  individual
-  masiva
-}
-
-enum FhirExportStatus {
-  en_proceso
-  completado
-  error
-}
-
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 model StaffUser {
-  id           String     @id @default(cuid())
-  email        String     @unique
-  name         String
-  role         UserRole
-  status       UserStatus @default(activo)
-  passwordHash String
-  totpSecret   String?
-  totpEnabled  Boolean    @default(false)
-  lastAccess   DateTime?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  name               String
+  role               String    @default("medico")
+  activo             Boolean   @default(true)
+  passwordHash       String
+  especialidad       String?
+  cedula             String?
+  cedulaEspecialidad String?
+  universidad        String?
+  logoUniversidadUrl String?
+  totpSecret         String?
+  totpEnabled        Boolean   @default(false)
+  lastAccess         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  auditLogs   AuditLog[]
-  fhirExports FhirExport[]
+  auditLogs           AuditLog[]
+  fhirExports         FhirExport[]
+  medicalNotes        MedicalNote[]
+  prescriptions       Prescription[]
+  labOrders           LabOrder[]
+  passwordResetTokens PasswordResetToken[]
 
   @@map("staff_users")
 }
 
-// ─── Patients ─────────────────────────────────────────────────────────────────
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user StaffUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+// ─── Pacientes — NOM-004-SSA3-2012 ────────────────────────────────────────────
 
 model Patient {
   id               String   @id @default(cuid())
   expedienteNumber String   @unique
-  firstName        String
-  lastName         String
-  dateOfBirth      DateTime
-  gender           String
-  curp             String?  @unique
-  phone            String?
+  nombre           String
+  apellidoPaterno  String
+  apellidoMaterno  String?
+  curp             String?
+  fechaNacimiento  DateTime
+  sexo             String
+  grupoSanguineo   String?
+  telefono         String?
   email            String?
-  address          String?
-  bloodType        String?
-  allergies        String[]
+  direccion        String?
+  ocupacion        String?
+  estadoCivil      String?
+  escolaridad      String?
+  religion         String?
+  lugarNacimiento  String?
+  antecedentesHeredoFamiliares        String?
+  antecedentesPersonalesPatologicos   String?
+  antecedentesPersonalesNoPatologicos String?
+  antecedentesGinecoObstetricos       String?
+  alergias                            String[]
+  contactoEmergencia                  String?
+  telefonoEmergencia                  String?
+  status           String   @default("activo")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  appointments   Appointment[]
-  evolutionNotes EvolutionNote[]
-  surgicalNotes  SurgicalNote[]
-  prescriptions  Prescription[]
-  consentForms   ConsentForm[]
-  arcoRequests   ArcoRequest[]
-  fhirExports    FhirExport[]
+  appointments    Appointment[]
+  medicalNotes    MedicalNote[]
+  prescriptions   Prescription[]
+  patientConsents PatientConsent[]
+  arcoRequests    ArcoRequest[]
+  fhirExports     FhirExport[]
+  vitals          Vitals[]
+  labOrders       LabOrder[]
 
+  @@index([apellidoPaterno])
+  @@index([nombre])
   @@map("patients")
 }
 
@@ -127,112 +111,294 @@ model Service {
 }
 
 model Appointment {
-  id          String            @id @default(cuid())
-  patientId   String
-  serviceId   String
-  scheduledAt DateTime
-  status      AppointmentStatus @default(pendiente)
-  notes       String?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  id               String    @id @default(cuid())
+  patientId        String?
+  medicoId         String?
+  serviceId        String?
+  scheduledAt      DateTime
+  status           String    @default("pendiente")
+  notes            String?
+  bookingSource    String    @default("staff")
+  patientName      String?
+  patientEmail     String?
+  patientPhone     String?
+  appointmentType  String?
+  actionToken      String?   @unique
+  patientConfirmed Boolean   @default(false)
+  reminderSent     Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  service Service @relation(fields: [serviceId], references: [id])
+  patient Patient? @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  service Service? @relation(fields: [serviceId], references: [id])
 
+  @@index([scheduledAt])
   @@map("appointments")
 }
 
-// ─── Clinical Documents ───────────────────────────────────────────────────────
+// ─── CIE-10 ───────────────────────────────────────────────────────────────────
 
-model EvolutionNote {
-  id          String    @id @default(cuid())
-  patientId   String
-  subjective  String
-  objective   String
-  assessment  String
-  plan        String
-  diagnosis   String[]
-  signedAt    DateTime?
-  signedById  String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+model Cie10 {
+  codigo      String  @id
+  descripcion String
+  categoria   String?
+
+  medicalNoteDiagnoses MedicalNoteDiagnosis[]
+
+  @@map("cie10_catalog")
+}
+
+// ─── Vitales ──────────────────────────────────────────────────────────────────
+
+model Vitals {
+  id                     String   @id @default(cuid())
+  patientId              String
+  fecha                  DateTime @default(now())
+  presionSistolica       Int?
+  presionDiastolica      Int?
+  frecuenciaCardiaca     Int?
+  frecuenciaRespiratoria Int?
+  temperatura            Float?
+  saturacionOxigeno      Int?
+  peso                   Float?
+  talla                  Float?
+  glucosa                Int?
+  registradoPorId        String?
+  createdAt              DateTime @default(now())
 
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
-  @@map("evolution_notes")
+  @@index([patientId])
+  @@map("vitals")
 }
 
-model SurgicalNote {
-  id           String    @id @default(cuid())
-  patientId    String
-  type         String
-  procedure    String
-  findings     String?
-  instructions String?
-  signedAt     DateTime?
-  signedById   String?
+// ─── Notas Médicas — NOM-004-SSA3-2012 ───────────────────────────────────────
+
+model MedicalNote {
+  id        String   @id @default(cuid())
+  patientId String
+  medicoId  String
+  tipo      String
+  subtipo   String?
+  fecha     DateTime @default(now())
+  motivoConsulta               String?
+  padecimientoActual           String?
+  habitusExterior              String?
+  exploracionFisica            String?
+  signosVitalesTexto           String?
+  subjetivo                    String?
+  objetivo                     String?
+  analisis                     String?
+  plan                         String?
+  pronostico                   String?
+  indicacionTerapeutica        String?
+  planEstudios                 String?
+  diagnosticoPreoperatorio     String?
+  operacionPlaneada            String?
+  operacionRealizada           String?
+  diagnosticoPostoperatorio    String?
+  descripcionTecnicaQuirurgica String?
+  hallazgosTransoperatorios    String?
+  complicaciones               String?
+  sangradoAproximado           String?
+  firmada      Boolean   @default(false)
+  firmaHash    String?
+  fechaFirma   DateTime?
+  firmaUserId  String?
   createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patient   Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  medico    StaffUser @relation(fields: [medicoId], references: [id])
+  diagnoses MedicalNoteDiagnosis[]
+  addendums MedicalNoteAddendum[]
 
-  @@map("surgical_notes")
+  @@index([patientId])
+  @@index([fecha])
+  @@map("medical_notes")
 }
+
+model MedicalNoteAddendum {
+  id        String   @id @default(cuid())
+  noteId    String
+  contenido String
+  authorId  String?
+  firmaHash String?
+  fecha     DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  note MedicalNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@map("medical_note_addendums")
+}
+
+model MedicalNoteDiagnosis {
+  id              String   @id @default(cuid())
+  noteId          String
+  cie10Codigo     String
+  tipoDiagnostico String   @default("presuntivo")
+  createdAt       DateTime @default(now())
+
+  note  MedicalNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  cie10 Cie10       @relation(fields: [cie10Codigo], references: [codigo])
+
+  @@map("medical_note_diagnoses")
+}
+
+// ─── Recetas — un registro por medicamento ────────────────────────────────────
 
 model Prescription {
-  id          String    @id @default(cuid())
-  patientId   String
-  medications Json
-  diagnosis   String
-  notes       String?
-  signedAt    DateTime?
-  signedById  String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id                     String    @id @default(cuid())
+  recetaId               String
+  patientId              String
+  medicoId               String
+  medicamento            String
+  nombreComercial        String?
+  presentacion           String?
+  dosis                  String
+  via                    String?
+  frecuencia             String
+  duracion               String?
+  indicaciones           String?
+  instruccionesGenerales String?
+  status                 String    @default("activa")
+  firmada                Boolean   @default(false)
+  firmaHash              String?
+  fechaFirma             DateTime?
+  firmaUserId            String?
+  createdAt              DateTime  @default(now())
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patient Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  medico  StaffUser @relation(fields: [medicoId], references: [id])
 
+  @@index([recetaId])
+  @@index([patientId])
   @@map("prescriptions")
 }
 
-model ConsentForm {
-  id              String    @id @default(cuid())
-  patientId       String
-  type            String
-  content         String
-  patientSignedAt DateTime?
-  doctorSignedAt  DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+// ─── Consentimientos — NOM-004 ────────────────────────────────────────────────
+
+model PatientConsent {
+  id                      String    @id @default(cuid())
+  patientId               String
+  medicoId                String?
+  tipoConsentimiento      String
+  version                 String    @default("1.0")
+  procedimiento           String?
+  riesgos                 String?
+  beneficios              String?
+  alternativas            String?
+  consentTexto            String?
+  autorizaContingencias   Boolean   @default(true)
+  nombreFirmante          String?
+  parentescoRepresentante String?
+  nombreTestigo1          String?
+  nombreTestigo2          String?
+  aceptado                Boolean   @default(false)
+  fechaAceptacion         DateTime?
+  lugarFirma              String?
+  ipAddress               String?
+  createdAt               DateTime  @default(now())
 
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
-  @@map("consent_forms")
+  @@map("patient_consents")
 }
 
-// ─── Compliance & Admin ───────────────────────────────────────────────────────
+// ─── Órdenes de Laboratorio ───────────────────────────────────────────────────
+
+model LabOrder {
+  id                    String    @id @default(cuid())
+  patientId             String
+  medicoId              String
+  estudios              String[]
+  diagnosticoPresuntivo String?
+  indicacionesClinicas  String?
+  urgente               Boolean   @default(false)
+  ayuno                 Boolean   @default(false)
+  status                String    @default("pendiente")
+  resultados            String?
+  fechaResultados       DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  patient Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  medico  StaffUser @relation(fields: [medicoId], references: [id])
+
+  @@index([patientId])
+  @@map("lab_orders")
+}
+
+// ─── Auditoría — NOM-024-SSA3-2012 ───────────────────────────────────────────
 
 model AuditLog {
-  id        String      @id @default(cuid())
-  action    AuditAction
-  resource  String
-  userId    String
-  ipAddress String
-  timestamp DateTime    @default(now())
+  id        String   @id @default(cuid())
+  userId    String?
+  accion    String
+  entidad   String
+  entidadId String?
+  detalles  String?
+  ipAddress String?
+  userAgent String?
+  fecha     DateTime @default(now())
 
-  user StaffUser @relation(fields: [userId], references: [id])
+  user StaffUser? @relation(fields: [userId], references: [id])
 
+  @@index([fecha])
   @@map("audit_logs")
 }
 
+// ─── Configuración ────────────────────────────────────────────────────────────
+
+model ClinicConfig {
+  id                     String   @id @default("singleton")
+  clinicName             String   @default("Clínica ORL Viveros")
+  clinicAddress          String?
+  clinicPhone            String?
+  clinicCofepris         String?
+  doctorName             String   @default("Dr. Alejandro Viveros Domínguez")
+  doctorLicense          String?
+  doctorSpecialtyLicense String?
+  doctorUniversity       String?
+  portalEnabled          Boolean  @default(false)
+  portalTitle            String?
+  portalTagline          String?
+  appointmentDurationMin Int      @default(30)
+  bookingAdvanceDays     Int      @default(30)
+  bookingBufferMin       Int      @default(0)
+  horarios               Json?
+  diasFeriados           Json?
+  notificationEmail      String?
+  updatedAt              DateTime @updatedAt
+
+  @@map("clinic_config")
+}
+
+// ─── Mensajes de Contacto ─────────────────────────────────────────────────────
+
+model ContactMessage {
+  id        String    @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  read      Boolean   @default(false)
+  repliedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("contact_messages")
+}
+
+// ─── ARCO / FHIR ─────────────────────────────────────────────────────────────
+
 model ArcoRequest {
-  id          String     @id @default(cuid())
-  type        ArcoType
+  id          String    @id @default(cuid())
+  type        String
   patientId   String
   description String
-  status      ArcoStatus @default(pendiente)
+  status      String    @default("pendiente")
   notes       String?
-  submittedAt DateTime   @default(now())
+  submittedAt DateTime  @default(now())
   resolvedAt  DateTime?
 
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
@@ -241,19 +407,19 @@ model ArcoRequest {
 }
 
 model FhirExport {
-  id            String           @id @default(cuid())
-  type          FhirExportType
+  id            String    @id @default(cuid())
+  type          String
   patientId     String?
   dateRangeFrom DateTime?
   dateRangeTo   DateTime?
   requestedById String
-  status        FhirExportStatus @default(en_proceso)
+  status        String    @default("en_proceso")
   fileSize      String?
-  requestedAt   DateTime         @default(now())
+  requestedAt   DateTime  @default(now())
   completedAt   DateTime?
 
-  patient     Patient?   @relation(fields: [patientId], references: [id], onDelete: SetNull)
-  requestedBy StaffUser  @relation(fields: [requestedById], references: [id])
+  patient     Patient?  @relation(fields: [patientId], references: [id], onDelete: SetNull)
+  requestedBy StaffUser @relation(fields: [requestedById], references: [id])
 
   @@map("fhir_exports")
 }
