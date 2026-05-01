@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { decrypt } from '@/lib/crypto'
 import type { Appointment, Service } from '@/lib/agenda-types'
 
 export async function getAppointments(): Promise<Appointment[]> {
@@ -9,24 +10,40 @@ export async function getAppointments(): Promise<Appointment[]> {
     orderBy: { scheduledAt: 'asc' },
   })
 
-  return apts.map(apt => ({
-    id: apt.id,
-    patientName: `${apt.patient.firstName} ${apt.patient.lastName}`,
-    phone: apt.patient.phone ?? '',
-    email: apt.patient.email ?? '',
-    serviceId: apt.serviceId,
-    serviceName: apt.service.name,
-    date: apt.scheduledAt.toISOString().split('T')[0],
-    time: apt.scheduledAt.toLocaleTimeString('es-MX', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'America/Mexico_City',
-    }),
-    reason: apt.notes ?? '',
-    status: apt.status as Appointment['status'],
-    privacyAccepted: true,
-    createdAt: apt.createdAt.toISOString(),
-  }))
+  return apts.map(apt => {
+    const patientName = apt.patient
+      ? [apt.patient.nombre, apt.patient.apellidoPaterno, apt.patient.apellidoMaterno].filter(Boolean).join(' ')
+      : apt.patientName ?? 'Paciente portal'
+
+    const phone = apt.patient
+      ? (apt.patient.telefono ? decrypt(apt.patient.telefono) : '')
+      : apt.patientPhone ?? ''
+
+    const email = apt.patient
+      ? (apt.patient.email ? decrypt(apt.patient.email) : '')
+      : apt.patientEmail ?? ''
+
+    return {
+      id: apt.id,
+      patientName,
+      phone,
+      email,
+      serviceId: apt.serviceId ?? null,
+      serviceName: apt.service?.name ?? '—',
+      date: apt.scheduledAt.toISOString().split('T')[0],
+      time: apt.scheduledAt.toLocaleTimeString('es-MX', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'America/Mexico_City',
+      }),
+      reason: apt.notes ?? '',
+      status: apt.status as Appointment['status'],
+      privacyAccepted: true,
+      bookingSource: apt.bookingSource,
+      patientConfirmed: apt.patientConfirmed,
+      createdAt: apt.createdAt.toISOString(),
+    }
+  })
 }
 
 export async function getServices(): Promise<Service[]> {

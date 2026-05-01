@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto'
+import { createCipheriv, createDecipheriv, createHash, randomBytes, scryptSync } from 'crypto'
 
 const algorithm = 'aes-256-gcm'
 
@@ -28,6 +28,16 @@ export function encrypt(text: string): string {
   encrypted += cipher.final('hex')
   const authTag = cipher.getAuthTag().toString('hex')
   return `${iv.toString('hex')}:${authTag}:${encrypted}`
+}
+
+export function computeNoteSignatureHash(
+  resourceId: string,
+  userId: string,
+  isoTimestamp: string,
+): string {
+  const secret = process.env.SESSION_SECRET ?? 'dev-secret-not-for-production'
+  const payload = `${resourceId}|${userId}|${isoTimestamp}|${secret}`
+  return createHash('sha256').update(payload).digest('hex')
 }
 
 export function decrypt(data: string): string {

@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
+import { logAction } from '@/lib/audit'
 import bcrypt from 'bcryptjs'
 
 export interface ClinicConfigData {
@@ -20,13 +21,30 @@ export interface StaffUserData {
   email: string
   name: string
   role: string
-  status: string
+  status: string              // 'activo' | 'inactivo' (derivado de activo boolean)
+  especialidad?: string | null
+  cedula?: string | null
+  cedulaEspecialidad?: string | null
+  universidad?: string | null
   totpEnabled: boolean
   lastAccess: string | null
   createdAt: string
 }
 
-// ─── Clinic Config ────────────────────────────────────────────────────────────
+export interface AuditLogRecord {
+  id: string
+  action: string
+  resource: string
+  resourceId: string | null
+  userId: string | null
+  userName: string | null
+  details: string | null
+  ipAddress: string | null
+  userAgent: string | null
+  timestamp: string
+}
+
+// ─── Configuración de clínica ─────────────────────────────────────────────────
 
 export async function getClinicConfig(): Promise<ClinicConfigData> {
   await verifySession()
@@ -52,9 +70,10 @@ export async function saveClinicConfig(data: ClinicConfigData): Promise<void> {
     create: { id: 'singleton', ...data },
     update: data,
   })
+  void logAction({ action: 'modificacion', resource: 'clinic_config', userId: session.userId })
 }
 
-// ─── Staff Users ──────────────────────────────────────────────────────────────
+// ─── Usuarios del staff ───────────────────────────────────────────────────────
 
 export async function getStaffUsers(): Promise<StaffUserData[]> {
   const session = await verifySession()
@@ -66,7 +85,11 @@ export async function getStaffUsers(): Promise<StaffUserData[]> {
     email: u.email,
     name: u.name,
     role: u.role,
-    status: u.status,
+    status: u.activo ? 'activo' : 'inactivo',
+    especialidad: u.especialidad,
+    cedula: u.cedula,
+    cedulaEspecialidad: u.cedulaEspecialidad,
+    universidad: u.universidad,
     totpEnabled: u.totpEnabled,
     lastAccess: u.lastAccess?.toISOString() ?? null,
     createdAt: u.createdAt.toISOString(),
@@ -78,6 +101,10 @@ export async function createStaffUser(data: {
   name: string
   role: string
   password: string
+  especialidad?: string
+  cedula?: string
+  cedulaEspecialidad?: string
+  universidad?: string
 }): Promise<void> {
   const session = await verifySession()
   if (session.role !== 'medico') throw new Error('Sin autorización')
@@ -87,11 +114,30 @@ export async function createStaffUser(data: {
     data: {
       email: data.email.toLowerCase().trim(),
       name: data.name,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      role: data.role as any,
+      role: data.role,
       passwordHash,
+      especialidad: data.especialidad ?? null,
+      cedula: data.cedula ?? null,
+      cedulaEspecialidad: data.cedulaEspecialidad ?? null,
+      universidad: data.universidad ?? null,
     },
   })
+  void logAction({ action: 'creacion', resource: 'staff_user', userId: session.userId })
+}
+
+export async function updateStaffUser(userId: string, data: {
+  name?: string
+  especialidad?: string | null
+  cedula?: string | null
+  cedulaEspecialidad?: string | null
+  universidad?: string | null
+  logoUniversidadUrl?: string | null
+}): Promise<void> {
+  const session = await verifySession()
+  if (session.role !== 'medico' && session.userId !== userId) throw new Error('Sin autorización')
+
+  await prisma.staffUser.update({ where: { id: userId }, data })
+  void logAction({ action: 'modificacion', resource: 'staff_user', resourceId: userId, userId: session.userId })
 }
 
 export async function toggleStaffUserStatus(userId: string): Promise<void> {
@@ -102,47 +148,32 @@ export async function toggleStaffUserStatus(userId: string): Promise<void> {
   const user = await prisma.staffUser.findUnique({ where: { id: userId } })
   if (!user) throw new Error('Usuario no encontrado')
 
-  await prisma.staffUser.update({
-    where: { id: userId },
-    data: { status: user.status === 'activo' ? 'inactivo' : 'activo' },
-  })
+  await prisma.staffUser.update({ where: { id: userId }, data: { activo: !user.activo } })
+  void logAction({ action: 'modificacion', resource: 'staff_user', resourceId: userId, userId: session.userId })
 }
 
-// ─── Audit Logs ───────────────────────────────────────────────────────────────
-
-export interface AuditLogRecord {
-  id: string
-  action: string
-  resource: string
-  resourceId: string | null
-  userId: string | null
-  userName: string | null
-  details: string | null
-  ipAddress: string | null
-  userAgent: string | null
-  timestamp: string
-}
+// ─── Auditoría ────────────────────────────────────────────────────────────────
 
 export async function getAuditLogs(limit = 200): Promise<AuditLogRecord[]> {
   const session = await verifySession()
   if (session.role !== 'medico') throw new Error('Sin autorización')
 
   const logs = await prisma.auditLog.findMany({
-    orderBy: { timestamp: 'desc' },
+    orderBy: { fecha: 'desc' },
     take: limit,
     include: { user: { select: { name: true } } },
   })
 
   return logs.map(l => ({
     id: l.id,
-    action: l.action,
-    resource: l.resource,
-    resourceId: l.resourceId,
+    action: l.accion,
+    resource: l.entidad,
+    resourceId: l.entidadId,
     userId: l.userId,
     userName: l.user?.name ?? null,
-    details: l.details,
+    details: l.detalles,
     ipAddress: l.ipAddress,
     userAgent: l.userAgent,
-    timestamp: l.timestamp.toISOString(),
+    timestamp: l.fecha.toISOString(),
   }))
 }

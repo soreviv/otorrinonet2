@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
 import { logAction } from '@/lib/audit'
+import { getClinicConfigFromDB } from '@/lib/clinic-config'
 
 export interface LabOrderInput {
   estudios: string[]
@@ -15,7 +16,7 @@ export interface LabOrderInput {
 export interface LabOrderRecord {
   id: string
   patientId: string
-  requestedById: string
+  medicoId: string
   estudios: string[]
   diagnosticoPresuntivo: string | null
   indicacionesClinicas: string | null
@@ -30,7 +31,7 @@ export interface LabOrderRecord {
 function mapOrder(o: {
   id: string
   patientId: string
-  requestedById: string
+  medicoId: string
   estudios: string[]
   diagnosticoPresuntivo: string | null
   indicacionesClinicas: string | null
@@ -44,7 +45,7 @@ function mapOrder(o: {
   return {
     id: o.id,
     patientId: o.patientId,
-    requestedById: o.requestedById,
+    medicoId: o.medicoId,
     estudios: o.estudios,
     diagnosticoPresuntivo: o.diagnosticoPresuntivo,
     indicacionesClinicas: o.indicacionesClinicas,
@@ -66,13 +67,33 @@ export async function getPatientLabOrders(patientId: string): Promise<LabOrderRe
   return orders.map(mapOrder)
 }
 
+export async function getLabOrderWithClinicData(orderId: string): Promise<{
+  order: LabOrderRecord
+  patientName: string
+  clinic: Awaited<ReturnType<typeof getClinicConfigFromDB>>
+}> {
+  await verifySession()
+  const [raw, clinic] = await Promise.all([
+    prisma.labOrder.findUniqueOrThrow({
+      where: { id: orderId },
+      include: {
+        patient: { select: { nombre: true, apellidoPaterno: true, apellidoMaterno: true } },
+      },
+    }),
+    getClinicConfigFromDB(),
+  ])
+  const p = raw.patient
+  const patientName = [p.nombre, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' ')
+  return { order: mapOrder(raw), patientName, clinic }
+}
+
 export async function createLabOrder(patientId: string, input: LabOrderInput): Promise<LabOrderRecord> {
   const session = await verifySession()
 
   const order = await prisma.labOrder.create({
     data: {
       patientId,
-      requestedById: session.userId,
+      medicoId: session.userId,
       estudios: input.estudios,
       diagnosticoPresuntivo: input.diagnosticoPresuntivo || null,
       indicacionesClinicas: input.indicacionesClinicas || null,
@@ -81,6 +102,11 @@ export async function createLabOrder(patientId: string, input: LabOrderInput): P
     },
   })
 
-  await logAction({ action: 'creacion', resource: 'lab_order', resourceId: order.id, userId: session.userId })
+  void logAction({ action: 'creacion', resource: 'lab_order', resourceId: order.id, userId: session.userId })
   return mapOrder(order)
+}
+
+export async function updateLabOrderStatus(id: string, status: string): Promise<void> {
+  await verifySession()
+  await prisma.labOrder.update({ where: { id }, data: { status } })
 }

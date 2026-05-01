@@ -2,10 +2,9 @@
 
 import { headers } from 'next/headers'
 import { prisma } from '@/lib/prisma'
-import type { AuditAction } from '@/generated/prisma'
 
 export async function logAction(params: {
-  action: AuditAction
+  action: string
   resource: string
   resourceId?: string | null
   userId?: string | null
@@ -18,16 +17,16 @@ export async function logAction(params: {
 
     await prisma.auditLog.create({
       data: {
-        action: params.action,
-        resource: params.resource,
-        resourceId: params.resourceId ?? null,
+        accion: params.action,
+        entidad: params.resource,
+        entidadId: params.resourceId ?? null,
         userId: params.userId ?? null,
-        details: params.details ? JSON.stringify(params.details) : null,
+        detalles: params.details ? JSON.stringify(params.details) : null,
         ipAddress: ip,
         userAgent,
       },
     })
   } catch {
-    // Never let audit logging break the main flow
+    // Nunca interrumpir el flujo principal por un error de auditoría
   }
 }

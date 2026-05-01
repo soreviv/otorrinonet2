@@ -132,8 +132,12 @@ export function printPrescription(rx: Prescription): void {
     ${medsHtml}
   </div>
 
-  <!-- Signed timestamp -->
-  ${rx.signedAt ? `<div class="signed-ts">✓ Firmada electrónicamente · ${new Date(rx.signedAt).toLocaleString('es-MX', { timeZone: 'America/Mexico_City', dateStyle: 'long', timeStyle: 'short' })}</div>` : ''}
+  <!-- Firma electrónica -->
+  ${rx.signedAt ? `
+  <div class="signed-ts">
+    ✓ Firmada electrónicamente · ${new Date(rx.signedAt).toLocaleString('es-MX', { timeZone: 'America/Mexico_City', dateStyle: 'long', timeStyle: 'short' })}
+    ${rx.firmaHash ? `<br/>SHA-256: <span style="color:#475569">${rx.firmaHash}</span>` : ''}
+  </div>` : ''}
 
   <!-- Signature block -->
   <div class="sig-section">

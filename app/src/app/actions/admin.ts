@@ -10,7 +10,7 @@ export async function getSystemUsers(): Promise<SystemUser[]> {
     name: u.name,
     email: u.email,
     role: u.role as UserRole,
-    status: u.status as UserStatus,
+    status: (u.activo ? 'activo' : 'inactivo') as UserStatus,
     lastAccess: (u.lastAccess ?? u.createdAt).toISOString(),
     createdAt: u.createdAt.toISOString(),
   }))
@@ -19,17 +19,17 @@ export async function getSystemUsers(): Promise<SystemUser[]> {
 export async function getAuditLogs(): Promise<AuditLog[]> {
   const logs = await prisma.auditLog.findMany({
     include: { user: true },
-    orderBy: { timestamp: 'desc' },
+    orderBy: { fecha: 'desc' },
     take: 100,
   })
   return logs.map(l => ({
     id: l.id,
-    action: l.action.replace('_', '-') as AuditLog['action'],
-    resource: l.resource,
+    action: l.accion as AuditLog['action'],
+    resource: l.entidad,
     userId: l.userId,
     userName: l.user?.name ?? 'Sistema',
     ipAddress: l.ipAddress,
-    timestamp: l.timestamp.toISOString(),
+    timestamp: l.fecha.toISOString(),
   }))
 }
 
@@ -38,17 +38,21 @@ export async function getArcoRequests(): Promise<ArcoRequest[]> {
     include: { patient: true },
     orderBy: { submittedAt: 'desc' },
   })
-  return requests.map(r => ({
-    id: r.id,
-    type: r.type as ArcoRequest['type'],
-    patientName: `${r.patient.firstName} ${r.patient.lastName}`,
-    patientId: r.patientId,
-    description: r.description,
-    status: r.status.replace('_', '-') as ArcoStatus,
-    submittedAt: r.submittedAt.toISOString(),
-    resolvedAt: r.resolvedAt?.toISOString() ?? null,
-    notes: r.notes ?? null,
-  }))
+  return requests.map(r => {
+    const p = r.patient
+    const patientName = [p.nombre, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' ')
+    return {
+      id: r.id,
+      type: r.type as ArcoRequest['type'],
+      patientName,
+      patientId: r.patientId,
+      description: r.description,
+      status: r.status.replace('_', '-') as ArcoStatus,
+      submittedAt: r.submittedAt.toISOString(),
+      resolvedAt: r.resolvedAt?.toISOString() ?? null,
+      notes: r.notes ?? null,
+    }
+  })
 }
 
 export async function getFhirExports(): Promise<FhirExport[]> {
@@ -56,29 +60,31 @@ export async function getFhirExports(): Promise<FhirExport[]> {
     include: { patient: true, requestedBy: true },
     orderBy: { requestedAt: 'desc' },
   })
-  return exports.map(e => ({
-    id: e.id,
-    type: e.type as FhirExport['type'],
-    patientName: e.patient ? `${e.patient.firstName} ${e.patient.lastName}` : null,
-    patientId: e.patientId ?? null,
-    dateRangeFrom: e.dateRangeFrom?.toISOString(),
-    dateRangeTo: e.dateRangeTo?.toISOString(),
-    requestedBy: e.requestedBy.name,
-    status: e.status.replace('_', '-') as FhirExport['status'],
-    fileSize: e.fileSize ?? null,
-    requestedAt: e.requestedAt.toISOString(),
-    completedAt: e.completedAt?.toISOString() ?? null,
-  }))
+  return exports.map(e => {
+    const p = e.patient
+    const patientName = p ? [p.nombre, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' ') : null
+    return {
+      id: e.id,
+      type: e.type as FhirExport['type'],
+      patientName,
+      patientId: e.patientId ?? null,
+      dateRangeFrom: e.dateRangeFrom?.toISOString(),
+      dateRangeTo: e.dateRangeTo?.toISOString(),
+      requestedBy: e.requestedBy.name,
+      status: e.status.replace('_', '-') as FhirExport['status'],
+      fileSize: e.fileSize ?? null,
+      requestedAt: e.requestedAt.toISOString(),
+      completedAt: e.completedAt?.toISOString() ?? null,
+    }
+  })
 }
 
 export async function updateUserRole(userId: string, role: UserRole): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await prisma.staffUser.update({ where: { id: userId }, data: { role: role as any } })
+  await prisma.staffUser.update({ where: { id: userId }, data: { role } })
 }
 
 export async function updateUserStatus(userId: string, status: UserStatus): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await prisma.staffUser.update({ where: { id: userId }, data: { status: status as any } })
+  await prisma.staffUser.update({ where: { id: userId }, data: { activo: status === 'activo' } })
 }
 
 export async function updateArcoRequestStatus(
@@ -86,8 +92,7 @@ export async function updateArcoRequestStatus(
   status: ArcoStatus,
   notes?: string,
 ): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const dbStatus = status.replace('-', '_') as any
+  const dbStatus = status.replace('-', '_')
   await prisma.arcoRequest.update({
     where: { id: requestId },
     data: {

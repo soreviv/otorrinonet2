@@ -27,7 +27,7 @@ export async function loginAction(_prev: ActionResult | null, formData: FormData
 
   const user = await prisma.staffUser.findUnique({ where: { email } })
 
-  if (!user || user.status === 'inactivo') {
+  if (!user || user.activo === false) {
     await logAction({ action: 'login_fallido', resource: 'auth', details: { email, reason: 'user_not_found' } })
     return { error: 'Credenciales incorrectas.' }
   }
@@ -83,7 +83,8 @@ export async function confirmSetup2faAction(_prev: ActionResult | null, formData
   })
 
   await deletePendingSession()
-  await createSession({ userId: user.id, email: user.email, name: user.name, role: user.role })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await createSession({ userId: user.id, email: user.email, name: user.name, role: user.role as any })
   await logAction({ action: 'login_ok', resource: 'auth', userId: user.id, details: { method: '2fa_setup' } })
 
   return { ok: true }
@@ -108,7 +109,8 @@ export async function verify2faAction(_prev: ActionResult | null, formData: Form
   await prisma.staffUser.update({ where: { id: user.id }, data: { lastAccess: new Date() } })
 
   await deletePendingSession()
-  await createSession({ userId: user.id, email: user.email, name: user.name, role: user.role })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await createSession({ userId: user.id, email: user.email, name: user.name, role: user.role as any })
   await logAction({ action: 'login_ok', resource: 'auth', userId: user.id, details: { method: 'totp' } })
 
   return { ok: true }

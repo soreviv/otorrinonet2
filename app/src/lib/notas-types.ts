@@ -73,6 +73,7 @@ export interface Prescription {
   signatureData: string | null
   signedAt: string | null
   signatureTimestamp: string | null
+  firmaHash?: string | null
   createdAt: string
 }
 

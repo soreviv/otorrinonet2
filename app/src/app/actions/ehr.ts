@@ -6,62 +6,83 @@ import { encrypt, decrypt } from '@/lib/crypto'
 import { logAction } from '@/lib/audit'
 import type {
   Patient, PatientSex, FamilyHistory, PersonalHistory,
-  CurrentCondition, PhysicalExam, Diagnosis,
+  CurrentCondition, PhysicalExam,
 } from '@/lib/ehr-types'
 
 const EMPTY_FAMILY: FamilyHistory = { notes: '', relevantConditions: [] }
+const EMPTY_PERSONAL: Omit<PersonalHistory, 'allergies'> = { pathological: '', nonPathological: '', currentMedications: [] }
 const EMPTY_CONDITION: CurrentCondition = { chiefComplaint: '', onset: '', description: '', evolution: '' }
 const EMPTY_EXAM: PhysicalExam = {
   vitalSigns: { bloodPressure: '', heartRate: '', temperature: '', weight: '', height: '', bmi: '' },
   ears: '', noseAndSinuses: '', pharynxAndNeck: '',
 }
 
-// Encrypt sensitive PII fields before writing to DB
-function encryptFields(p: {
+function encryptPatient(p: {
   curp?: string | null
-  phone?: string | null
+  telefono?: string | null
   email?: string | null
-  address?: string | null
+  direccion?: string | null
+  contactoEmergencia?: string | null
+  telefonoEmergencia?: string | null
 }) {
   return {
     curp: p.curp ? encrypt(p.curp) : null,
-    phone: p.phone ? encrypt(p.phone) : null,
+    telefono: p.telefono ? encrypt(p.telefono) : null,
     email: p.email ? encrypt(p.email) : null,
-    address: p.address ? encrypt(p.address) : null,
+    direccion: p.direccion ? encrypt(p.direccion) : null,
+    contactoEmergencia: p.contactoEmergencia ? encrypt(p.contactoEmergencia) : null,
+    telefonoEmergencia: p.telefonoEmergencia ? encrypt(p.telefonoEmergencia) : null,
+  }
+}
+
+function decryptPatient<T extends {
+  curp: string | null
+  telefono: string | null
+  email: string | null
+  direccion: string | null
+  contactoEmergencia: string | null
+  telefonoEmergencia: string | null
+}>(p: T): T {
+  return {
+    ...p,
+    curp: p.curp ? decrypt(p.curp) : null,
+    telefono: p.telefono ? decrypt(p.telefono) : null,
+    email: p.email ? decrypt(p.email) : null,
+    direccion: p.direccion ? decrypt(p.direccion) : null,
+    contactoEmergencia: p.contactoEmergencia ? decrypt(p.contactoEmergencia) : null,
+    telefonoEmergencia: p.telefonoEmergencia ? decrypt(p.telefonoEmergencia) : null,
   }
 }
 
 function mapToFrontend(p: {
   id: string
   expedienteNumber: string
-  firstName: string
-  lastName: string
-  dateOfBirth: Date
-  gender: string
+  nombre: string
+  apellidoPaterno: string
+  apellidoMaterno: string | null
   curp: string | null
-  phone: string | null
+  fechaNacimiento: Date
+  sexo: string
+  telefono: string | null
   email: string | null
-  address: string | null
-  allergies: string[]
-  familyHistoryJson: unknown
-  personalHistoryJson: unknown
-  currentConditionJson: unknown
-  physicalExamJson: unknown
-  diagnosesJson: unknown
+  direccion: string | null
+  alergias: string[]
+  antecedentesHeredoFamiliares: string | null
+  antecedentesPersonalesPatologicos: string | null
+  antecedentesPersonalesNoPatologicos: string | null
   createdAt: Date
   updatedAt: Date
 }): Patient {
-  const familyHistory = (p.familyHistoryJson as FamilyHistory | null) ?? EMPTY_FAMILY
-  const personalHistoryStored = (p.personalHistoryJson as Omit<PersonalHistory, 'allergies'> | null)
-  const personalHistory: PersonalHistory = {
-    pathological: personalHistoryStored?.pathological ?? '',
-    nonPathological: personalHistoryStored?.nonPathological ?? '',
-    currentMedications: personalHistoryStored?.currentMedications ?? [],
-    allergies: p.allergies,
-  }
-  const currentCondition = (p.currentConditionJson as CurrentCondition | null) ?? EMPTY_CONDITION
-  const physicalExam = (p.physicalExamJson as PhysicalExam | null) ?? EMPTY_EXAM
-  const diagnoses = Array.isArray(p.diagnosesJson) ? (p.diagnosesJson as Diagnosis[]) : []
+  const decrypted = decryptPatient({
+    curp: p.curp,
+    telefono: p.telefono,
+    email: p.email,
+    direccion: p.direccion,
+    contactoEmergencia: null,
+    telefonoEmergencia: null,
+  })
+
+  const fullName = [p.nombre, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' ')
 
   return {
     id: p.id,
@@ -69,27 +90,75 @@ function mapToFrontend(p: {
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
     generalData: {
-      fullName: `${p.firstName} ${p.lastName}`,
-      birthDate: p.dateOfBirth.toISOString().split('T')[0],
-      sex: p.gender as PatientSex,
-      curp: p.curp ? decrypt(p.curp) : '',
-      phone: p.phone ? decrypt(p.phone) : '',
-      email: p.email ? decrypt(p.email) : '',
-      address: p.address ? decrypt(p.address) : '',
+      fullName,
+      birthDate: p.fechaNacimiento.toISOString().split('T')[0],
+      sex: p.sexo as PatientSex,
+      curp: decrypted.curp ?? '',
+      phone: decrypted.telefono ?? '',
+      email: decrypted.email ?? '',
+      address: decrypted.direccion ?? '',
     },
-    familyHistory,
-    personalHistory,
-    currentCondition,
-    physicalExam,
-    diagnoses,
+    familyHistory: {
+      notes: p.antecedentesHeredoFamiliares ?? '',
+      relevantConditions: [],
+    } satisfies FamilyHistory,
+    personalHistory: {
+      pathological: p.antecedentesPersonalesPatologicos ?? '',
+      nonPathological: p.antecedentesPersonalesNoPatologicos ?? '',
+      allergies: p.alergias,
+      currentMedications: [],
+    } satisfies PersonalHistory,
+    currentCondition: EMPTY_CONDITION,
+    physicalExam: EMPTY_EXAM,
+    diagnoses: [],
   }
+}
+
+export interface PatientSearchFilters {
+  query?: string
+  sexo?: string
+  fechaDesde?: string
+  fechaHasta?: string
 }
 
 export async function getPatients(): Promise<Patient[]> {
   const session = await verifySession()
-  const patients = await prisma.patient.findMany({ orderBy: { createdAt: 'desc' } })
-  await logAction({ action: 'acceso', resource: 'patients', userId: session.userId })
-  return patients.map(mapToFrontend)
+  const rows = await prisma.patient.findMany({ orderBy: { createdAt: 'desc' } })
+  void logAction({ action: 'acceso', resource: 'patients', userId: session.userId })
+  return rows.map(mapToFrontend)
+}
+
+export async function getPatient(id: string): Promise<Patient | null> {
+  const session = await verifySession()
+  const row = await prisma.patient.findUnique({ where: { id } })
+  if (!row) return null
+  void logAction({ action: 'vista', resource: 'patient', resourceId: id, userId: session.userId })
+  return mapToFrontend(row)
+}
+
+export async function searchPatientsAdvanced(filters: PatientSearchFilters): Promise<Patient[]> {
+  await verifySession()
+
+  const rows = await prisma.patient.findMany({
+    where: {
+      AND: [
+        filters.query?.trim() ? {
+          OR: [
+            { nombre: { contains: filters.query.trim(), mode: 'insensitive' } },
+            { apellidoPaterno: { contains: filters.query.trim(), mode: 'insensitive' } },
+            { expedienteNumber: { contains: filters.query.trim(), mode: 'insensitive' } },
+          ],
+        } : {},
+        filters.sexo ? { sexo: filters.sexo } : {},
+        filters.fechaDesde ? { createdAt: { gte: new Date(filters.fechaDesde) } } : {},
+        filters.fechaHasta ? { createdAt: { lte: new Date(filters.fechaHasta) } } : {},
+      ],
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 100,
+  })
+
+  return rows.map(mapToFrontend)
 }
 
 export async function savePatient(
@@ -97,49 +166,55 @@ export async function savePatient(
   id?: string,
 ): Promise<Patient> {
   const session = await verifySession()
-  const nameParts = data.generalData.fullName.trim().split(/\s+/)
-  const firstName = nameParts[0]
-  const lastName = nameParts.slice(1).join(' ') || '-'
 
-  const { allergies, currentMedications, pathological, nonPathological } = data.personalHistory
+  // Separar nombre completo en partes
+  const parts = data.generalData.fullName.trim().split(/\s+/)
+  const nombre = parts[0] ?? ''
+  const apellidoPaterno = parts[1] ?? ''
+  const apellidoMaterno = parts.slice(2).join(' ') || null
 
-  const encrypted = encryptFields({
-    curp: data.generalData.curp,
-    phone: data.generalData.phone,
-    email: data.generalData.email,
-    address: data.generalData.address,
+  const encrypted = encryptPatient({
+    curp: data.generalData.curp || null,
+    telefono: data.generalData.phone || null,
+    email: data.generalData.email || null,
+    direccion: data.generalData.address || null,
+    contactoEmergencia: null,
+    telefonoEmergencia: null,
   })
 
   const fields = {
-    firstName,
-    lastName,
-    dateOfBirth: new Date(data.generalData.birthDate),
-    gender: data.generalData.sex,
-    ...encrypted,
-    allergies,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    familyHistoryJson: data.familyHistory as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    personalHistoryJson: { pathological, nonPathological, currentMedications } as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    currentConditionJson: data.currentCondition as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    physicalExamJson: data.physicalExam as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    diagnosesJson: data.diagnoses as any,
+    nombre,
+    apellidoPaterno,
+    apellidoMaterno,
+    fechaNacimiento: new Date(data.generalData.birthDate),
+    sexo: data.generalData.sex,
+    curp: encrypted.curp,
+    telefono: encrypted.telefono,
+    email: encrypted.email,
+    direccion: encrypted.direccion,
+    alergias: data.personalHistory.allergies,
+    antecedentesHeredoFamiliares: data.familyHistory.notes || null,
+    antecedentesPersonalesPatologicos: data.personalHistory.pathological || null,
+    antecedentesPersonalesNoPatologicos: data.personalHistory.nonPathological || null,
   }
 
   if (id) {
     const updated = await prisma.patient.update({ where: { id }, data: fields })
-    await logAction({ action: 'modificacion', resource: 'patient', resourceId: id, userId: session.userId })
+    void logAction({ action: 'modificacion', resource: 'patient', resourceId: id, userId: session.userId })
     return mapToFrontend(updated)
   }
 
   const year = new Date().getFullYear()
   const count = await prisma.patient.count()
-  const expedienteNumber = `VIV-${year}-${String(count + 1).padStart(3, '0')}`
+  const expedienteNumber = `VIV-${year}-${String(count + 1).padStart(4, '0')}`
 
   const created = await prisma.patient.create({ data: { expedienteNumber, ...fields } })
-  await logAction({ action: 'creacion', resource: 'patient', resourceId: created.id, userId: session.userId })
+  void logAction({ action: 'creacion', resource: 'patient', resourceId: created.id, userId: session.userId })
   return mapToFrontend(created)
+}
+
+export async function deletePatient(id: string): Promise<void> {
+  const session = await verifySession()
+  await prisma.patient.delete({ where: { id } })
+  void logAction({ action: 'eliminacion', resource: 'patient', resourceId: id, userId: session.userId })
 }
