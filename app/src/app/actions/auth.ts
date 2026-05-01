@@ -1,6 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { randomBytes, createHash } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import { generateSecret, generateURI, verifySync } from 'otplib'
 import { prisma } from '@/lib/prisma'
@@ -12,6 +13,8 @@ import {
   deleteSession,
 } from '@/lib/session'
 import { logAction } from '@/lib/audit'
+import { sendPasswordResetEmail } from '@/lib/mailer'
+import { getClinicConfigFromDB } from '@/lib/clinic-config'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -121,4 +124,43 @@ export async function verify2faAction(_prev: ActionResult | null, formData: Form
 export async function logoutAction() {
   await deleteSession()
   redirect('/login')
+}
+
+// ─── Recuperación de contraseña ───────────────────────────────────────────────
+
+export async function requestPasswordResetAction(email: string): Promise<ActionResult> {
+  const user = await prisma.staffUser.findUnique({ where: { email: email.toLowerCase().trim() } })
+  if (user && user.activo) {
+    await prisma.passwordResetToken.deleteMany({ where: { userId: user.id } })
+    const plain = randomBytes(32).toString('hex')
+    const hash  = createHash('sha256').update(plain).digest('hex')
+    await prisma.passwordResetToken.create({
+      data: { userId: user.id, token: hash, expiresAt: new Date(Date.now() + 3_600_000) },
+    })
+    const cfg = await getClinicConfigFromDB()
+    await sendPasswordResetEmail(user.email, user.name, plain, cfg).catch(() => {})
+  }
+  return { ok: true }
+}
+
+export async function resetPasswordAction(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  const token    = formData.get('token')?.toString() ?? ''
+  const password = formData.get('password')?.toString() ?? ''
+  const confirm  = formData.get('confirm')?.toString() ?? ''
+
+  if (password.length < 8) return { error: 'La contraseña debe tener al menos 8 caracteres.' }
+  if (password !== confirm)  return { error: 'Las contraseñas no coinciden.' }
+
+  const tokenHash  = createHash('sha256').update(token).digest('hex')
+  const resetToken = await prisma.passwordResetToken.findUnique({ where: { token: tokenHash } })
+  if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
+    return { error: 'El enlace ha expirado o ya fue utilizado. Solicita uno nuevo.' }
+  }
+
+  const passwordHash = await bcrypt.hash(password, 12)
+  await prisma.$transaction([
+    prisma.staffUser.update({ where: { id: resetToken.userId }, data: { passwordHash } }),
+    prisma.passwordResetToken.update({ where: { id: resetToken.id }, data: { usedAt: new Date() } }),
+  ])
+  return { ok: true }
 }
