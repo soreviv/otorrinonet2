@@ -27,7 +27,9 @@ function loadDraft(): Partial<DraftData> {
 }
 
 const INITIAL_FORM: PatientFormData = {
-  patientName: '',
+  patientNombre: '',
+  patientApellidoPaterno: '',
+  patientApellidoMaterno: '',
   phone: '',
   email: '',
   reason: '',
@@ -49,8 +51,8 @@ export function AppointmentBookingForm({ onSubmit }: AppointmentBookingProps) {
 
   // Persist draft (explicit fields to avoid destructuring an unused variable)
   const draftSnapshot = useMemo<DraftData>(
-    () => ({ patientName: form.patientName, phone: form.phone, email: form.email, reason: form.reason }),
-    [form.patientName, form.phone, form.email, form.reason],
+    () => ({ patientNombre: form.patientNombre, patientApellidoPaterno: form.patientApellidoPaterno, patientApellidoMaterno: form.patientApellidoMaterno, phone: form.phone, email: form.email, reason: form.reason }),
+    [form.patientNombre, form.patientApellidoPaterno, form.patientApellidoMaterno, form.phone, form.email, form.reason],
   )
   useEffect(() => {
     if (submitted) return
@@ -102,10 +104,11 @@ export function AppointmentBookingForm({ onSubmit }: AppointmentBookingProps) {
       setSubmitError(null)
       setSubmitting(true)
 
+      const patientName = [form.patientNombre, form.patientApellidoPaterno, form.patientApellidoMaterno].filter(Boolean).join(' ')
       const result = await submitAppointmentRequest({
         date: selectedDate,
         time: selectedTime,
-        patientName: form.patientName,
+        patientName,
         phone: form.phone,
         email: form.email,
         reason: form.reason,
@@ -124,7 +127,7 @@ export function AppointmentBookingForm({ onSubmit }: AppointmentBookingProps) {
       const bookingData: BookingFormData = {
         date: selectedDate,
         time: selectedTime,
-        patientName: form.patientName,
+        patientName,
         phone: form.phone,
         email: form.email,
         reason: form.reason,
@@ -195,7 +198,7 @@ export function AppointmentBookingForm({ onSubmit }: AppointmentBookingProps) {
               data={{
                 date: selectedDate,
                 time: selectedTime,
-                patientName: form.patientName,
+                patientName: [form.patientNombre, form.patientApellidoPaterno, form.patientApellidoMaterno].filter(Boolean).join(' '),
                 phone: form.phone,
                 email: form.email,
                 reason: form.reason,

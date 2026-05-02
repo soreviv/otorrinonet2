@@ -75,24 +75,62 @@ export function StepPatientData({
       </p>
 
       <div className="space-y-4">
-        <Field
-          icon={<User className="w-4 h-4" strokeWidth={1.5} />}
-          label="Nombre completo"
-          id="patientName"
-          error={errors.patientName}
-        >
-          <input
-            id="patientName"
-            type="text"
-            autoComplete="name"
-            placeholder="Ej. María González Reyes"
-            value={data.patientName}
-            onChange={(e) => onChange('patientName', e.target.value)}
-            aria-invalid={!!errors.patientName}
-            aria-describedby={errors.patientName ? 'patientName-error' : undefined}
-            className={getInputClass(!!errors.patientName)}
-          />
-        </Field>
+        <div className="grid sm:grid-cols-3 gap-4">
+          <Field
+            icon={<User className="w-4 h-4" strokeWidth={1.5} />}
+            label="Nombre(s)"
+            id="patientNombre"
+            error={errors.patientNombre}
+          >
+            <input
+              id="patientNombre"
+              type="text"
+              autoComplete="given-name"
+              placeholder="Ej. María"
+              value={data.patientNombre}
+              onChange={(e) => onChange('patientNombre', e.target.value)}
+              aria-invalid={!!errors.patientNombre}
+              aria-describedby={errors.patientNombre ? 'patientNombre-error' : undefined}
+              className={getInputClass(!!errors.patientNombre)}
+            />
+          </Field>
+          <Field
+            icon={<User className="w-4 h-4" strokeWidth={1.5} />}
+            label="Primer apellido"
+            id="patientApellidoPaterno"
+            error={errors.patientApellidoPaterno}
+          >
+            <input
+              id="patientApellidoPaterno"
+              type="text"
+              autoComplete="family-name"
+              placeholder="Ej. González"
+              value={data.patientApellidoPaterno}
+              onChange={(e) => onChange('patientApellidoPaterno', e.target.value)}
+              aria-invalid={!!errors.patientApellidoPaterno}
+              aria-describedby={errors.patientApellidoPaterno ? 'patientApellidoPaterno-error' : undefined}
+              className={getInputClass(!!errors.patientApellidoPaterno)}
+            />
+          </Field>
+          <Field
+            icon={<User className="w-4 h-4" strokeWidth={1.5} />}
+            label="Segundo apellido"
+            id="patientApellidoMaterno"
+            error={errors.patientApellidoMaterno}
+          >
+            <input
+              id="patientApellidoMaterno"
+              type="text"
+              autoComplete="additional-name"
+              placeholder="Ej. Reyes"
+              value={data.patientApellidoMaterno}
+              onChange={(e) => onChange('patientApellidoMaterno', e.target.value)}
+              aria-invalid={!!errors.patientApellidoMaterno}
+              aria-describedby={errors.patientApellidoMaterno ? 'patientApellidoMaterno-error' : undefined}
+              className={getInputClass(!!errors.patientApellidoMaterno)}
+            />
+          </Field>
+        </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
           <Field

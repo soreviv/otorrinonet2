@@ -90,6 +90,9 @@ function mapToFrontend(p: {
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
     generalData: {
+      nombre: p.nombre,
+      apellidoPaterno: p.apellidoPaterno,
+      apellidoMaterno: p.apellidoMaterno ?? '',
       fullName,
       birthDate: p.fechaNacimiento.toISOString().split('T')[0],
       sex: p.sexo as PatientSex,
@@ -167,11 +170,9 @@ export async function savePatient(
 ): Promise<Patient> {
   const session = await verifySession()
 
-  // Separar nombre completo en partes
-  const parts = data.generalData.fullName.trim().split(/\s+/)
-  const nombre = parts[0] ?? ''
-  const apellidoPaterno = parts[1] ?? ''
-  const apellidoMaterno = parts.slice(2).join(' ') || null
+  const nombre = data.generalData.nombre.trim()
+  const apellidoPaterno = data.generalData.apellidoPaterno.trim()
+  const apellidoMaterno = data.generalData.apellidoMaterno.trim() || null
 
   const encrypted = encryptPatient({
     curp: data.generalData.curp || null,

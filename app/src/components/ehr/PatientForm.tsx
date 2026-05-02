@@ -142,7 +142,9 @@ function TagInput({
 }
 
 type FormState = {
-  fullName: string
+  nombre: string
+  apellidoPaterno: string
+  apellidoMaterno: string
   birthDate: string
   sex: string
   curp: string
@@ -173,7 +175,7 @@ type FormState = {
 }
 
 const EMPTY_FORM: FormState = {
-  fullName: '', birthDate: '', sex: 'femenino', curp: '', phone: '', email: '', address: '',
+  nombre: '', apellidoPaterno: '', apellidoMaterno: '', birthDate: '', sex: 'femenino', curp: '', phone: '', email: '', address: '',
   familyNotes: '', familyConditions: [],
   pathological: '', nonPathological: '', allergies: [],
   chiefComplaint: '', onset: '', description: '', evolution: '',
@@ -190,7 +192,9 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
     if (!patient) return EMPTY_FORM
     const p = patient
     return {
-      fullName: p.generalData.fullName,
+      nombre: p.generalData.nombre,
+      apellidoPaterno: p.generalData.apellidoPaterno,
+      apellidoMaterno: p.generalData.apellidoMaterno,
       birthDate: p.generalData.birthDate,
       sex: p.generalData.sex,
       curp: p.generalData.curp,
@@ -229,7 +233,10 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
     e.preventDefault()
     onSubmit?.({
       generalData: {
-        fullName: form.fullName,
+        nombre: form.nombre,
+        apellidoPaterno: form.apellidoPaterno,
+        apellidoMaterno: form.apellidoMaterno,
+        fullName: [form.nombre, form.apellidoPaterno, form.apellidoMaterno].filter(Boolean).join(' '),
         birthDate: form.birthDate,
         sex: form.sex as 'masculino' | 'femenino' | 'otro',
         curp: form.curp,
@@ -298,10 +305,18 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
           title="Datos Generales"
           accentColor="bg-sky-50 dark:bg-sky-950/30"
         >
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field id="fullName" label="Nombre completo *">
-              <input id="fullName" type="text" value={form.fullName} onChange={(e) => set('fullName', e.target.value)} placeholder="Nombre completo del paciente" className={inputCls} required />
+          <div className="grid sm:grid-cols-3 gap-4">
+            <Field id="nombre" label="Nombre(s) *">
+              <input id="nombre" type="text" value={form.nombre} onChange={(e) => set('nombre', e.target.value)} placeholder="Ej. María" className={inputCls} required />
             </Field>
+            <Field id="apellidoPaterno" label="Primer apellido *">
+              <input id="apellidoPaterno" type="text" value={form.apellidoPaterno} onChange={(e) => set('apellidoPaterno', e.target.value)} placeholder="Ej. González" className={inputCls} required />
+            </Field>
+            <Field id="apellidoMaterno" label="Segundo apellido">
+              <input id="apellidoMaterno" type="text" value={form.apellidoMaterno} onChange={(e) => set('apellidoMaterno', e.target.value)} placeholder="Ej. Reyes" className={inputCls} />
+            </Field>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
             <Field id="birthDate" label="Fecha de nacimiento *">
               <input id="birthDate" type="date" value={form.birthDate} onChange={(e) => set('birthDate', e.target.value)} className={inputCls} required />
             </Field>

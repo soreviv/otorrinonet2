@@ -7,6 +7,9 @@ export const SAMPLE_PATIENTS: Patient[] = [
     createdAt: '2024-03-15T10:00:00Z',
     updatedAt: '2026-04-18T09:30:00Z',
     generalData: {
+      nombre: 'María',
+      apellidoPaterno: 'González',
+      apellidoMaterno: 'Reyes',
       fullName: 'María González Reyes',
       birthDate: '1985-06-12',
       sex: 'femenino',
@@ -51,6 +54,9 @@ export const SAMPLE_PATIENTS: Patient[] = [
     createdAt: '2024-07-22T11:00:00Z',
     updatedAt: '2026-04-10T14:20:00Z',
     generalData: {
+      nombre: 'Carlos',
+      apellidoPaterno: 'Mendoza',
+      apellidoMaterno: 'Ortiz',
       fullName: 'Carlos Mendoza Ortiz',
       birthDate: '1972-11-03',
       sex: 'masculino',
@@ -93,6 +99,9 @@ export const SAMPLE_PATIENTS: Patient[] = [
     createdAt: '2025-01-10T09:15:00Z',
     updatedAt: '2026-03-20T16:00:00Z',
     generalData: {
+      nombre: 'Ana Sofía',
+      apellidoPaterno: 'Torres',
+      apellidoMaterno: 'Villarreal',
       fullName: 'Ana Sofía Torres Villarreal',
       birthDate: '1998-04-25',
       sex: 'femenino',
@@ -133,6 +142,9 @@ export const SAMPLE_PATIENTS: Patient[] = [
     createdAt: '2025-06-01T08:00:00Z',
     updatedAt: '2026-04-05T10:10:00Z',
     generalData: {
+      nombre: 'Roberto',
+      apellidoPaterno: 'Silva',
+      apellidoMaterno: 'Cárdenas',
       fullName: 'Roberto Silva Cárdenas',
       birthDate: '1968-09-17',
       sex: 'masculino',
@@ -176,6 +188,9 @@ export const SAMPLE_PATIENTS: Patient[] = [
     createdAt: '2026-01-08T13:30:00Z',
     updatedAt: '2026-04-15T11:45:00Z',
     generalData: {
+      nombre: 'Lucía',
+      apellidoPaterno: 'Ramírez',
+      apellidoMaterno: 'Fuentes',
       fullName: 'Lucía Ramírez Fuentes',
       birthDate: '1990-02-14',
       sex: 'femenino',

@@ -56,6 +56,9 @@ export interface Diagnosis {
 }
 
 export interface GeneralData {
+  nombre: string
+  apellidoPaterno: string
+  apellidoMaterno: string
   fullName: string
   birthDate: string
   sex: PatientSex
