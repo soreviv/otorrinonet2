@@ -356,32 +356,36 @@ export function ContactPage({ contactInfo, onSubmitContactForm, onBookAppointmen
             <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6">
               <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Contacto Directo</h2>
               <div className="flex flex-col gap-4">
-                <a
-                  href={`tel:${contactInfo.phone}`}
-                  className="flex items-center gap-3 group p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors -mx-1"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-950 flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">Teléfono</p>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">{contactInfo.phone}</p>
-                  </div>
-                </a>
-                <a
-                  href={`https://wa.me/${contactInfo.whatsapp.replace(/\D/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 group p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors -mx-1"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-950 flex items-center justify-center flex-shrink-0">
-                    <MessageCircle className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">WhatsApp</p>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">{contactInfo.whatsapp}</p>
-                  </div>
-                </a>
+                {contactInfo.phone && (
+                  <a
+                    href={`tel:${contactInfo.phone}`}
+                    className="flex items-center gap-3 group p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors -mx-1"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-950 flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">Teléfono</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">{contactInfo.phone}</p>
+                    </div>
+                  </a>
+                )}
+                {contactInfo.whatsapp && (
+                  <a
+                    href={`https://wa.me/${contactInfo.whatsapp.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 group p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors -mx-1"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-950 flex items-center justify-center flex-shrink-0">
+                      <MessageCircle className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">WhatsApp</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">{contactInfo.whatsapp}</p>
+                    </div>
+                  </a>
+                )}
                 <a
                   href={`mailto:${contactInfo.email}`}
                   className="flex items-center gap-3 group p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors -mx-1"

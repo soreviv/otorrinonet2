@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { PublicFooter } from './PublicFooter'
 import {
   Star, Calendar, ChevronRight,
-  ArrowUpRight, Phone, Mail, Menu, X, MessageCircle,
+  ArrowUpRight, MessageCircle, Menu, X,
 } from 'lucide-react'
 import type { HomePageProps, GoogleRatingSummary } from '@/lib/sitio-publico-types'
 import { ServiceCard } from './ServiceCard'
@@ -16,7 +16,10 @@ function RatingSummaryBadge({ summary }: { summary: GoogleRatingSummary }) {
   return (
     <div className="inline-flex items-center gap-3 bg-white border border-slate-200 rounded-2xl px-5 py-3 shadow-sm dark:bg-slate-800 dark:border-slate-700">
       <div className="flex flex-col">
-        <span className="text-2xl font-bold text-slate-900 leading-none dark:text-white">{summary.averageRating}</span>
+        <div className="flex items-baseline gap-1">
+          <span className="text-2xl font-bold text-slate-900 leading-none dark:text-white">{summary.averageRating}</span>
+          <span className="text-xs text-slate-400">/5</span>
+        </div>
         <span className="text-[11px] text-slate-400 mt-0.5">{summary.totalReviews} reseñas</span>
       </div>
       <div className="w-px h-8 bg-slate-200 dark:bg-slate-700" />
@@ -26,7 +29,7 @@ function RatingSummaryBadge({ summary }: { summary: GoogleRatingSummary }) {
             <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(summary.averageRating) ? 'fill-amber-400 text-amber-400' : 'fill-slate-200 text-slate-200'}`} />
           ))}
         </div>
-        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">en Google</span>
+        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Google</span>
       </div>
     </div>
   )
@@ -46,11 +49,6 @@ export function HomePage({
   googleReviews,
   googleRatingSummary,
   contactInfo,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onBookAppointment: _onBookAppointment,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onViewDoctorProfile: _onViewDoctorProfile,
-  onViewAllServices,
 }: HomePageProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [imgError, setImgError] = useState(false)
@@ -64,7 +62,7 @@ export function HomePage({
           <div className="flex items-center justify-between h-16">
 
             <Link href="/" className="flex items-center group">
-              <Image src="/assets/logo-consultorio.png" alt="Logotipo del consultorio del Dr. Alejandro Viveros Domínguez, otorrinolaringólogo" width={40} height={40} className="h-10 w-auto" priority />
+              <Image src="/assets/logo-consultorio.png" alt="Logotipo del consultorio del Dr. Alejandro Viveros Domínguez, otorrinolaringólogo" width={48} height={48} className="h-12 w-auto" priority />
             </Link>
 
             <div className="hidden md:flex items-center gap-7">
@@ -83,21 +81,12 @@ export function HomePage({
               ))}
             </div>
 
-            <div className="flex items-center gap-2">
-              <Link
-                href="/agendar"
-                className="hidden sm:flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm shadow-sky-200 dark:shadow-sky-900"
-              >
-                <Calendar className="w-3.5 h-3.5" />
-                Agendar Cita
-              </Link>
-              <button
-                onClick={() => setMobileOpen(!mobileOpen)}
-                className="md:hidden p-2 text-slate-500 hover:text-slate-800 transition-colors dark:text-slate-400 dark:hover:text-white"
-              >
-                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            </div>
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="md:hidden p-2 text-slate-500 hover:text-slate-800 transition-colors dark:text-slate-400 dark:hover:text-white"
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
 
@@ -130,7 +119,7 @@ export function HomePage({
         <div className="absolute top-0 right-0 h-full w-[55%] hidden md:block opacity-20 hero-clip-diagonal hero-grid-overlay" />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 lg:py-28">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-center">
 
             <div className="flex flex-col gap-5">
               <div className="inline-flex items-center gap-2 bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 text-xs font-bold px-3 py-1.5 rounded-full w-fit border border-sky-100 dark:border-sky-800">
@@ -139,7 +128,7 @@ export function HomePage({
               </div>
 
               <div>
-                <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white leading-[1.08] tracking-tight">
+                <h1 className="font-sans text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white leading-[1.08] tracking-tight">
                   {doctorProfile.fullName}
                 </h1>
                 <p className="text-lg text-sky-600 dark:text-sky-400 font-semibold mt-2">{doctorProfile.title}</p>
@@ -188,11 +177,13 @@ export function HomePage({
                       priority
                     />
                   )}
-                  <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 gap-3">
-                    <div className="w-28 h-28 rounded-full bg-white/15 border-4 border-white/30 flex items-center justify-center">
-                      <span className="text-5xl font-bold text-white/90">AV</span>
+                  {imgError && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                      <div className="w-28 h-28 rounded-full bg-white/15 border-4 border-white/30 flex items-center justify-center">
+                        <span className="text-5xl font-bold text-white/90">AV</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <div className="absolute -bottom-4 -left-4 sm:-left-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-3 flex items-center gap-2.5 border border-slate-100 dark:border-slate-700 z-20">
@@ -201,7 +192,7 @@ export function HomePage({
                   </div>
                   <div className="leading-tight">
                     <p className="text-sm font-bold text-slate-900 dark:text-white">{googleRatingSummary.averageRating} / 5</p>
-                    <p className="text-[10px] text-slate-400">{googleRatingSummary.totalReviews} reseñas</p>
+                    <p className="text-[10px] text-slate-400">{googleRatingSummary.totalReviews} reseñas · Google</p>
                   </div>
                 </div>
 
@@ -228,13 +219,13 @@ export function HomePage({
                   Atención integral en otorrinolaringología con tecnología de vanguardia para todas las edades.
                 </p>
               </div>
-              <button
-                onClick={onViewAllServices}
+              <Link
+                href="/servicios"
                 className="inline-flex items-center gap-1.5 text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 font-semibold text-sm transition-colors flex-shrink-0"
               >
                 Ver todos los servicios
                 <ArrowUpRight className="w-4 h-4" />
-              </button>
+              </Link>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
@@ -318,15 +309,17 @@ export function HomePage({
               <Calendar className="w-4 h-4" />
               Agendar Cita Ahora
             </Link>
-            <a
-              href={`https://wa.me/${contactInfo.whatsapp.replace(/\D/g, '')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 border-2 border-sky-400/60 text-white font-semibold px-7 py-3.5 rounded-xl transition-all hover:bg-sky-700/50 text-sm"
-            >
-              <MessageCircle className="w-4 h-4" />
-              WhatsApp
-            </a>
+            {contactInfo.whatsapp && (
+              <a
+                href={`https://wa.me/${contactInfo.whatsapp.replace(/\D/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 border-2 border-sky-400/60 text-white font-semibold px-7 py-3.5 rounded-xl transition-all hover:bg-sky-700/50 text-sm"
+              >
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp
+              </a>
+            )}
           </div>
         </div>
       </section>

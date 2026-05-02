@@ -21,6 +21,7 @@ const NAV_LINKS = [
 
 export function LocationPage({ contactInfo, onBookAppointment }: LocationPageProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [mapActive, setMapActive] = useState(false)
 
   const isClosed = (hours: string) => hours.toLowerCase() === 'cerrado'
 
@@ -133,17 +134,36 @@ export function LocationPage({ contactInfo, onBookAppointment }: LocationPagePro
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
           <div className="lg:col-span-3 flex flex-col gap-5">
-            <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video lg:aspect-auto lg:h-[420px]">
+            <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm bg-slate-100 dark:bg-slate-800 aspect-video lg:aspect-auto lg:h-[420px]">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-10 h-10 rounded-full border-2 border-sky-200 border-t-sky-500 animate-spin" />
+                  <p className="text-xs text-slate-400">Cargando mapa…</p>
+                </div>
+              </div>
               <iframe
                 src={contactInfo.googleMapsEmbedUrl}
                 width="100%"
                 height="100%"
-                className="border-0 w-full h-full"
+                className="relative z-10 border-0 w-full h-full"
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 title="Ubicación del consultorio"
               />
+              {!mapActive && (
+                <button
+                  type="button"
+                  onClick={() => setMapActive(true)}
+                  className="absolute inset-0 z-20 flex items-center justify-center bg-transparent cursor-pointer group"
+                  aria-label="Activar mapa interactivo"
+                >
+                  <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-2xl px-5 py-3 shadow-lg border border-slate-200 dark:border-slate-700 flex items-center gap-2 group-hover:shadow-xl transition-shadow">
+                    <Navigation className="w-4 h-4 text-sky-600 dark:text-sky-400 flex-shrink-0" />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Haz clic para interactuar con el mapa</span>
+                  </div>
+                </button>
+              )}
             </div>
 
             <a
@@ -210,27 +230,31 @@ export function LocationPage({ contactInfo, onBookAppointment }: LocationPagePro
             <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6">
               <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Contacto Directo</h2>
               <div className="flex flex-col gap-3">
-                <a href={`tel:${contactInfo.phone}`} className="flex items-center gap-3 group">
-                  <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-sky-50 dark:group-hover:bg-sky-950 flex items-center justify-center transition-colors flex-shrink-0">
-                    <Phone className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors" />
-                  </div>
-                  <span className="text-sm text-slate-600 dark:text-slate-300 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors font-medium">
-                    {contactInfo.phone}
-                  </span>
-                </a>
-                <a
-                  href={`https://wa.me/${contactInfo.whatsapp.replace(/\D/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 group"
-                >
-                  <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-sky-50 dark:group-hover:bg-sky-950 flex items-center justify-center transition-colors flex-shrink-0">
-                    <MessageCircle className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors" />
-                  </div>
-                  <span className="text-sm text-slate-600 dark:text-slate-300 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors font-medium">
-                    WhatsApp
-                  </span>
-                </a>
+                {contactInfo.phone && (
+                  <a href={`tel:${contactInfo.phone}`} className="flex items-center gap-3 group">
+                    <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-sky-50 dark:group-hover:bg-sky-950 flex items-center justify-center transition-colors flex-shrink-0">
+                      <Phone className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors" />
+                    </div>
+                    <span className="text-sm text-slate-600 dark:text-slate-300 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors font-medium">
+                      {contactInfo.phone}
+                    </span>
+                  </a>
+                )}
+                {contactInfo.whatsapp && (
+                  <a
+                    href={`https://wa.me/${contactInfo.whatsapp.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 group"
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-sky-50 dark:group-hover:bg-sky-950 flex items-center justify-center transition-colors flex-shrink-0">
+                      <MessageCircle className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors" />
+                    </div>
+                    <span className="text-sm text-slate-600 dark:text-slate-300 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors font-medium">
+                      WhatsApp
+                    </span>
+                  </a>
+                )}
                 <a href={`mailto:${contactInfo.email}`} className="flex items-center gap-3 group">
                   <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-sky-50 dark:group-hover:bg-sky-950 flex items-center justify-center transition-colors flex-shrink-0">
                     <Mail className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors" />
