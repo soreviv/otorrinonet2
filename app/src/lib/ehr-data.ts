@@ -31,22 +31,6 @@ export const SAMPLE_PATIENTS: Patient[] = [
       ],
       nonPathological: 'Tabaquismo negado. Alcoholismo social ocasional. Sedentaria.',
     },
-    currentCondition: {
-      chiefComplaint: 'Obstrucción nasal bilateral y rinorrea hialina de 3 semanas de evolución',
-      onset: '2026-03-28',
-      description: 'Paciente femenina de 40 años que refiere obstrucción nasal bilateral progresiva de 3 semanas de evolución, acompañada de rinorrea hialina abundante, estornudos en salva matutinos y prurito nasal y ocular.',
-      evolution: 'Progresiva',
-    },
-    physicalExam: {
-      vitalSigns: { bloodPressure: '118/76 mmHg', heartRate: '72 lpm', temperature: '36.5 °C', weight: '62 kg', height: '163 cm', bmi: '23.3' },
-      ears: 'Otoscopia bilateral: conductos auditivos externos sin alteraciones, membranas timpánicas íntegras, con buen cono de luz.',
-      noseAndSinuses: 'Tabique nasal desviado leve hacia la derecha. Cornetes inferiores hipertróficos bilaterales con mucosa pálida y edematosa.',
-      pharynxAndNeck: 'Orofaringe sin eritema. Amígdalas palatinas ausentes. Sin adenopatías cervicales palpables.',
-    },
-    diagnoses: [
-      { id: 'dx-001', code: 'J30.1', description: 'Rinitis alérgica debida a polen', status: 'activo', treatment: 'Se ajusta dosis de antihistamínico. Se indica lavados nasales con solución salina isotónica. Se agrega montelukast 10mg noche.', followUp: 'Control en 4 semanas. Se solicita pruebas de alergia.' },
-      { id: 'dx-002', code: 'J34.2', description: 'Desviación del tabique nasal', status: 'crónico', treatment: 'Manejo conservador por el momento. Se comentan opciones quirúrgicas (septoplastia).', followUp: 'Reevaluación en próxima consulta.' },
-    ],
   },
   {
     id: 'exp-002',
@@ -77,21 +61,6 @@ export const SAMPLE_PATIENTS: Patient[] = [
       ],
       nonPathological: 'Tabaquismo 10 años, suspendido hace 5 años. Ingesta de alcohol moderada los fines de semana.',
     },
-    currentCondition: {
-      chiefComplaint: 'Episodios de vértigo con náuseas de 2 meses de evolución',
-      onset: '2026-02-10',
-      description: 'Paciente masculino de 53 años que refiere episodios de vértigo de inicio súbito, de segundos a un minuto de duración, desencadenados al levantarse de la cama o al voltear la cabeza.',
-      evolution: 'Episódica, sin mejoría espontánea',
-    },
-    physicalExam: {
-      vitalSigns: { bloodPressure: '132/84 mmHg', heartRate: '78 lpm', temperature: '36.7 °C', weight: '84 kg', height: '175 cm', bmi: '27.4' },
-      ears: 'Otoscopia bilateral sin alteraciones. Prueba de Dix-Hallpike positiva del lado derecho con nistagmo rotatorio de latencia corta y fatigable.',
-      noseAndSinuses: 'Sin alteraciones.',
-      pharynxAndNeck: 'Sin alteraciones en orofaringe ni laringe. Sin adenopatías. Tiroides normal.',
-    },
-    diagnoses: [
-      { id: 'dx-003', code: 'H81.1', description: 'Vértigo posicional paroxístico benigno (VPPB), canal semicircular posterior derecho', status: 'activo', treatment: 'Maniobra de reposición de Epley realizada en consultorio. Se indica evitar posiciones desencadenantes por 48 horas.', followUp: 'Control en 2 semanas para confirmar resolución.' },
-    ],
   },
   {
     id: 'exp-003',
@@ -120,21 +89,6 @@ export const SAMPLE_PATIENTS: Patient[] = [
       currentMedications: [],
       nonPathological: 'Niega tabaquismo y alcoholismo. Activa físicamente.',
     },
-    currentCondition: {
-      chiefComplaint: 'Rinitis alérgica persistente con respuesta insuficiente a tratamiento farmacológico',
-      onset: '2025-01-01',
-      description: 'Paciente femenina de 28 años con rinitis alérgica de larga evolución que persiste sintomática a pesar de tratamiento con antihistamínicos y corticosteroides intranasales.',
-      evolution: 'Crónica con exacerbaciones',
-    },
-    physicalExam: {
-      vitalSigns: { bloodPressure: '110/70 mmHg', heartRate: '68 lpm', temperature: '36.4 °C', weight: '57 kg', height: '165 cm', bmi: '20.9' },
-      ears: 'Sin alteraciones. Otoscopia bilateral normal.',
-      noseAndSinuses: 'Cornetes inferiores con mucosa pálida y edema moderado. Rinorrea hialina escasa. Tabique central.',
-      pharynxAndNeck: 'Orofaringe con leve granulación en pared posterior. Sin adenopatías cervicales.',
-    },
-    diagnoses: [
-      { id: 'dx-004', code: 'J30.9', description: 'Rinitis alérgica perenne', status: 'activo', treatment: 'Inicio de inmunoterapia subcutánea con extracto de ácaros. Protocolo de inducción semanal por 16 semanas.', followUp: 'Próxima dosis en 1 semana. Control médico mensual durante fase de inducción.' },
-    ],
   },
   {
     id: 'exp-004',
@@ -165,22 +119,6 @@ export const SAMPLE_PATIENTS: Patient[] = [
       ],
       nonPathological: 'Exposición laboral a ruido en planta industrial por más de 15 años. Usa protección auditiva desde hace 3 años.',
     },
-    currentCondition: {
-      chiefComplaint: 'Acúfeno continuo en oído izquierdo de 1 mes de evolución',
-      onset: '2026-03-15',
-      description: 'Paciente masculino de 57 años refiere acúfeno de tono agudo, continuo, no pulsátil, en oído izquierdo de aparición gradual hace un mes.',
-      evolution: 'Progresiva lenta',
-    },
-    physicalExam: {
-      vitalSigns: { bloodPressure: '138/88 mmHg', heartRate: '76 lpm', temperature: '36.6 °C', weight: '91 kg', height: '172 cm', bmi: '30.8' },
-      ears: 'Otoscopia bilateral: oído derecho sin alteraciones. Oído izquierdo con leve retracción de membrana timpánica. Audiometría: hipoacusia neurosensorial leve en frecuencias agudas del lado izquierdo.',
-      noseAndSinuses: 'Sin alteraciones.',
-      pharynxAndNeck: 'Sin alteraciones. Sin adenopatías ni masas cervicales.',
-    },
-    diagnoses: [
-      { id: 'dx-005', code: 'H93.1', description: 'Tinnitus unilateral izquierdo', status: 'activo', treatment: 'Se solicita audiometría completa y potenciales evocados auditivos. Inicio de betahistina 24mg cada 12 horas.', followUp: 'Revisión con resultados de estudios en 3 semanas.' },
-      { id: 'dx-006', code: 'H90.3', description: 'Hipoacusia neurosensorial unilateral izquierda', status: 'activo', treatment: 'Expectante pendiente de estudios complementarios.', followUp: 'Según resultados de audiometría completa.' },
-    ],
   },
   {
     id: 'exp-005',
@@ -209,20 +147,5 @@ export const SAMPLE_PATIENTS: Patient[] = [
       currentMedications: [],
       nonPathological: 'No fuma. No consume alcohol. Practica yoga 3 veces por semana.',
     },
-    currentCondition: {
-      chiefComplaint: 'Obstrucción nasal crónica y dificultad respiratoria nasal bilateral',
-      onset: '2025-09-01',
-      description: 'Paciente femenina de 36 años con historia de obstrucción nasal bilateral crónica que no mejora con tratamiento médico. Refiere respiración bucal durante la noche y ronquido leve.',
-      evolution: 'Crónica, sin mejoría con tratamiento',
-    },
-    physicalExam: {
-      vitalSigns: { bloodPressure: '112/72 mmHg', heartRate: '66 lpm', temperature: '36.3 °C', weight: '60 kg', height: '167 cm', bmi: '21.5' },
-      ears: 'Sin alteraciones bilaterales.',
-      noseAndSinuses: 'Desviación septal severa hacia la izquierda con espolón óseo. Cornetes inferiores hipertróficos. Permeabilidad muy reducida del lado izquierdo.',
-      pharynxAndNeck: 'Orofaringe con úvula de tamaño normal. Amígdalas grado I. Sin adenopatías.',
-    },
-    diagnoses: [
-      { id: 'dx-007', code: 'J34.2', description: 'Desviación del tabique nasal con obstrucción significativa', status: 'activo', treatment: 'Se indica septoplastia + turbinoplastia bilateral. Se realizan estudios preoperatorios. Suspender AINE por alergia.', followUp: 'Programación de cirugía. Cita preoperatoria con anestesiología.' },
-    ],
   },
 ]

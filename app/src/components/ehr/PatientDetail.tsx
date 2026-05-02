@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { PatientDetailProps, DiagnosisStatus } from '@/lib/ehr-types'
+import type { PatientDetailProps } from '@/lib/ehr-types'
 import type { EvolutionNote, Prescription } from '@/lib/notas-types'
 import type { VitalsRecord } from '@/app/actions/patient-clinical'
 import { getPatientVitals, getPatientEvolutionNotes, getPatientPrescriptions } from '@/app/actions/patient-clinical'
@@ -9,11 +9,11 @@ import { getPatientLabOrders, type LabOrderRecord } from '@/app/actions/lab-orde
 import { printPrescription } from '@/lib/print-prescription'
 import {
   ChevronDown, ArrowLeft, Pencil, User, HeartPulse, ClipboardList,
-  Stethoscope, Pill, AlertTriangle, Lock, Calendar, Phone, Mail,
+  Pill, Lock, Phone, Mail,
   MapPin, FileText, Printer, ScrollText, FlaskConical, AlertCircle,
 } from 'lucide-react'
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function calculateAge(birthDate: string): number {
   const today = new Date()
@@ -34,12 +34,6 @@ function formatDateTime(iso: string) {
 
 function formatDateShort(iso: string) {
   return new Date(iso + (iso.length === 10 ? 'T00:00:00' : '')).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
-const DX_STATUS: Record<DiagnosisStatus, { label: string; bg: string; text: string }> = {
-  activo: { label: 'Activo', bg: 'bg-sky-100 dark:bg-sky-900/40', text: 'text-sky-700 dark:text-sky-300' },
-  crónico: { label: 'Crónico', bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-700 dark:text-amber-300' },
-  resuelto: { label: 'Resuelto', bg: 'bg-slate-100 dark:bg-slate-800', text: 'text-slate-500 dark:text-slate-400' },
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -505,45 +499,6 @@ export function PatientDetail({ patient, currentUserRole, onEdit, onViewDocument
                     </div>
                   </div>
                 )}
-              </div>
-            </Section>
-
-            <Section icon={<AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" strokeWidth={1.5} />} title="Padecimiento Actual" accentColor="bg-amber-50 dark:bg-amber-950/30">
-              <InfoGrid>
-                <InfoRow label="Motivo de consulta" value={<span className="font-semibold text-slate-900 dark:text-slate-100">{p.currentCondition.chiefComplaint || <span className="italic font-normal text-slate-400">Sin registrar</span>}</span>} />
-                <InfoRow label="Inicio" value={p.currentCondition.onset ? <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" strokeWidth={1.5} />{formatDate(p.currentCondition.onset)}</span> : <span className="italic text-slate-400">—</span>} />
-                <InfoRow label="Evolución" value={p.currentCondition.evolution || <span className="italic text-slate-400">—</span>} />
-                <InfoRow label="Descripción" value={p.currentCondition.description || <span className="italic text-slate-400">—</span>} />
-              </InfoGrid>
-            </Section>
-
-            <Section icon={<Stethoscope className="w-4 h-4 text-sky-600 dark:text-sky-400" strokeWidth={1.5} />} title="Exploración Física ORL" accentColor="bg-sky-50 dark:bg-sky-950/30">
-              <InfoGrid>
-                <InfoRow label="Oídos (otoscopia)" value={p.physicalExam.ears || <span className="italic text-slate-400">—</span>} />
-                <InfoRow label="Nariz y senos paranasales" value={p.physicalExam.noseAndSinuses || <span className="italic text-slate-400">—</span>} />
-                <InfoRow label="Faringe, laringe y cuello" value={p.physicalExam.pharynxAndNeck || <span className="italic text-slate-400">—</span>} />
-              </InfoGrid>
-            </Section>
-
-            <Section icon={<Pill className="w-4 h-4 text-slate-600 dark:text-slate-400" strokeWidth={1.5} />} title="Diagnósticos y Plan" accentColor="bg-slate-100 dark:bg-slate-800" locked={!isMedico} lockedMessage="Solo el médico puede ver los diagnósticos.">
-              <div className="space-y-4">
-                {p.diagnoses.map(dx => {
-                  const cfg = DX_STATUS[dx.status]
-                  return (
-                    <div key={dx.id} className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-                      <div className="flex items-start gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-800/50">
-                        <span className="font-mono text-xs font-bold text-sky-700 dark:text-sky-400 bg-sky-100 dark:bg-sky-900/40 px-2 py-1 rounded-md shrink-0">{dx.code}</span>
-                        <div className="flex-1 min-w-0"><p className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-snug">{dx.description}</p></div>
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>
-                      </div>
-                      <div className="px-4 py-3 space-y-2 bg-white dark:bg-slate-900">
-                        <div><p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1">Tratamiento</p><p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{dx.treatment}</p></div>
-                        <div><p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1">Seguimiento</p><p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed italic">{dx.followUp}</p></div>
-                      </div>
-                    </div>
-                  )
-                })}
-                {p.diagnoses.length === 0 && <p className="text-sm text-slate-400 dark:text-slate-600 italic text-center py-4">Sin diagnósticos registrados</p>}
               </div>
             </Section>
 

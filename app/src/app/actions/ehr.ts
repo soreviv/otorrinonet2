@@ -6,16 +6,10 @@ import { encrypt, decrypt } from '@/lib/crypto'
 import { logAction } from '@/lib/audit'
 import type {
   Patient, PatientSex, FamilyHistory, PersonalHistory,
-  CurrentCondition, PhysicalExam,
 } from '@/lib/ehr-types'
 
 const EMPTY_FAMILY: FamilyHistory = { notes: '', relevantConditions: [] }
 const EMPTY_PERSONAL: Omit<PersonalHistory, 'allergies'> = { pathological: '', nonPathological: '', currentMedications: [] }
-const EMPTY_CONDITION: CurrentCondition = { chiefComplaint: '', onset: '', description: '', evolution: '' }
-const EMPTY_EXAM: PhysicalExam = {
-  vitalSigns: { bloodPressure: '', heartRate: '', temperature: '', weight: '', height: '', bmi: '' },
-  ears: '', noseAndSinuses: '', pharynxAndNeck: '',
-}
 
 function encryptPatient(p: {
   curp?: string | null
@@ -111,9 +105,6 @@ function mapToFrontend(p: {
       allergies: p.alergias,
       currentMedications: [],
     } satisfies PersonalHistory,
-    currentCondition: EMPTY_CONDITION,
-    physicalExam: EMPTY_EXAM,
-    diagnoses: [],
   }
 }
 

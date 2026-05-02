@@ -28,11 +28,6 @@ function getInitials(name: string): string {
   return name.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase()
 }
 
-function getActiveDiagnosis(patient: Patient): string | null {
-  const active = patient.diagnoses.find((d) => d.status === 'activo' || d.status === 'crónico')
-  return active ? active.description : null
-}
-
 interface PatientRowProps {
   patient: Patient
   onView?: () => void
@@ -41,7 +36,6 @@ interface PatientRowProps {
 function PatientRow({ patient, onView }: PatientRowProps) {
   const p = patient
   const age = calculateAge(p.generalData.birthDate)
-  const activeDx = getActiveDiagnosis(p)
 
   return (
     <button
@@ -65,23 +59,12 @@ function PatientRow({ patient, onView }: PatientRowProps) {
           <span className="text-xs text-slate-500 dark:text-slate-400">
             {age} años · {p.generalData.sex.charAt(0).toUpperCase() + p.generalData.sex.slice(1)}
           </span>
-          {activeDx && (
-            <>
-              <span className="text-slate-300 dark:text-slate-700">·</span>
-              <span className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-xs">
-                {activeDx}
-              </span>
-            </>
-          )}
         </div>
       </div>
 
       <div className="hidden sm:block text-right shrink-0">
         <p className="text-xs text-slate-400 dark:text-slate-500">
           {formatRelativeDate(p.updatedAt)}
-        </p>
-        <p className="text-xs text-slate-300 dark:text-slate-700 mt-0.5">
-          {p.diagnoses.length} dx
         </p>
       </div>
 
@@ -117,8 +100,7 @@ export function PatientList({ patients, currentUserRole, onView, onCreate, onSea
     return patients.filter(
       (p) =>
         p.generalData.fullName.toLowerCase().includes(q) ||
-        p.expedienteNumber.toLowerCase().includes(q) ||
-        p.diagnoses.some((d) => d.description.toLowerCase().includes(q))
+        p.expedienteNumber.toLowerCase().includes(q)
     )
   }, [patients, query])
 

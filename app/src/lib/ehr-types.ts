@@ -1,7 +1,5 @@
 export type UserRole = 'medico' | 'enfermera'
 
-export type DiagnosisStatus = 'activo' | 'crónico' | 'resuelto'
-
 export type PatientSex = 'masculino' | 'femenino' | 'otro'
 
 export interface Medication {
@@ -9,22 +7,6 @@ export interface Medication {
   dose: string
   frequency: string
   indication: string
-}
-
-export interface VitalSigns {
-  bloodPressure: string
-  heartRate: string
-  temperature: string
-  weight: string
-  height: string
-  bmi: string
-}
-
-export interface PhysicalExam {
-  vitalSigns: VitalSigns
-  ears: string
-  noseAndSinuses: string
-  pharynxAndNeck: string
 }
 
 export interface FamilyHistory {
@@ -37,22 +19,6 @@ export interface PersonalHistory {
   allergies: string[]
   currentMedications: Medication[]
   nonPathological: string
-}
-
-export interface CurrentCondition {
-  chiefComplaint: string
-  onset: string
-  description: string
-  evolution: string
-}
-
-export interface Diagnosis {
-  id: string
-  code: string
-  description: string
-  status: DiagnosisStatus
-  treatment: string
-  followUp: string
 }
 
 export interface GeneralData {
@@ -76,9 +42,6 @@ export interface Patient {
   generalData: GeneralData
   familyHistory: FamilyHistory
   personalHistory: PersonalHistory
-  currentCondition: CurrentCondition
-  physicalExam: PhysicalExam
-  diagnoses: Diagnosis[]
 }
 
 export interface PatientListProps {
