@@ -25,6 +25,7 @@ export function PublicFooter() {
                   alt="Logotipo del consultorio del Dr. Alejandro Viveros Domínguez, otorrinolaringólogo"
                   width={36}
                   height={36}
+                  sizes="36px"
                   className="h-9 w-auto"
                 />
               </div>

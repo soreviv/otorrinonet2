@@ -62,7 +62,7 @@ export function HomePage({
           <div className="flex items-center justify-between h-16">
 
             <Link href="/" className="flex items-center group">
-              <Image src="/assets/logo-consultorio.png" alt="Logotipo del consultorio del Dr. Alejandro Viveros Domínguez, otorrinolaringólogo" width={48} height={48} className="h-12 w-auto" priority />
+              <Image src="/assets/logo-consultorio.png" alt="Logotipo del consultorio del Dr. Alejandro Viveros Domínguez, otorrinolaringólogo" width={48} height={48} sizes="48px" className="h-12 w-auto" priority />
             </Link>
 
             <div className="hidden md:flex items-center gap-7">
@@ -172,6 +172,7 @@ export function HomePage({
                       src={doctorProfile.photo}
                       alt="Retrato del Dr. Alejandro Viveros Domínguez, médico otorrinolaringólogo especialista en cirugía de cabeza y cuello en Ciudad de México"
                       fill
+                      sizes="(max-width: 640px) 240px, (max-width: 768px) 288px, (max-width: 1024px) 288px, 320px"
                       className="object-cover z-10"
                       onError={() => setImgError(true)}
                       priority
