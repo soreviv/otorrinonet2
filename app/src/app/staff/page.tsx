@@ -4,8 +4,18 @@ import {
   Users, Calendar, FileText, AlertCircle, Pill,
   Clock, Activity, TrendingUp, ChevronRight,
 } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { getDashboardMetrics, getCitasHoy, getPacientesRecientes } from '@/app/actions/dashboard'
-import { CitasPorDiaChart, CitasPorEstadoChart } from '@/components/dashboard/DashboardCharts'
+import type { DashboardMetrics } from '@/app/actions/dashboard'
+
+const CitasPorDiaChart = dynamic<{ data: DashboardMetrics['citasPorDia'] }>(
+  () => import('@/components/dashboard/DashboardCharts').then(m => m.CitasPorDiaChart),
+  { ssr: false }
+)
+const CitasPorEstadoChart = dynamic<{ data: DashboardMetrics['citasPorEstado'] }>(
+  () => import('@/components/dashboard/DashboardCharts').then(m => m.CitasPorEstadoChart),
+  { ssr: false }
+)
 
 const STATUS_LABELS: Record<string, string> = {
   pendiente: 'Pendiente', confirmada: 'Confirmada', completada: 'Completada', cancelada: 'Cancelada',
