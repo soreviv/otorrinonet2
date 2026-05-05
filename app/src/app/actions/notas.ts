@@ -76,16 +76,31 @@ function mapEvolution(
 }
 
 
+function calcAge(dob: Date): number {
+  const today = new Date()
+  let age = today.getFullYear() - dob.getFullYear()
+  const m = today.getMonth() - dob.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--
+  return age
+}
+
 function mapPrescription(
   rows: Array<{
     id: string; recetaId: string; patientId: string;
     medicamento: string; nombreComercial: string | null; presentacion: string | null;
     dosis: string; frecuencia: string; duracion: string | null; indicaciones: string | null;
-    instruccionesGenerales: string | null; firmada: boolean; firmaHash: string | null;
+    instruccionesGenerales: string | null; via: string | null; firmada: boolean; firmaHash: string | null;
     fechaFirma: Date | null; createdAt: Date
   }>,
   patientName: string,
   clinicCfg: Record<string, unknown>,
+  patientData?: {
+    fechaNacimiento: Date; sexo: string; alergias: string[]
+  },
+  vitals?: {
+    peso: number | null; talla: number | null; temperatura: number | null;
+    presionSistolica: number | null; presionDiastolica: number | null
+  } | null,
 ): Prescription {
   const first = rows[0]
   const medications: PrescriptionMedication[] = rows.map(r => ({
@@ -96,7 +111,19 @@ function mapPrescription(
     frequency: r.frecuencia,
     duration: r.duracion ?? '',
     instructions: r.indicaciones ?? '',
+    route: r.via ?? undefined,
   }))
+
+  let patientBMI: number | undefined
+  if (vitals?.peso && vitals?.talla) {
+    const tallam = vitals.talla / 100
+    patientBMI = Math.round((vitals.peso / (tallam * tallam)) * 10) / 10
+  }
+
+  const bp =
+    vitals?.presionSistolica && vitals?.presionDiastolica
+      ? `${vitals.presionSistolica}/${vitals.presionDiastolica} mmHg`
+      : undefined
 
   return {
     id: first.recetaId,
@@ -121,6 +148,15 @@ function mapPrescription(
     signatureTimestamp: first.fechaFirma?.toISOString() ?? null,
     firmaHash: first.firmaHash ?? null,
     createdAt: first.createdAt.toISOString(),
+    diagnosis: first.instruccionesGenerales ?? undefined,
+    patientAge: patientData ? calcAge(patientData.fechaNacimiento) : undefined,
+    patientSex: patientData?.sexo,
+    patientAllergies: patientData?.alergias?.length ? patientData.alergias : undefined,
+    patientWeight: vitals?.peso ?? undefined,
+    patientHeight: vitals?.talla ?? undefined,
+    patientBMI,
+    patientTemperature: vitals?.temperatura ?? undefined,
+    patientBloodPressure: bp,
   } as Prescription
 }
 
@@ -149,7 +185,7 @@ function mapConsent(c: {
 export async function getNotasData(patientId: string) {
   const session = await verifySession()
 
-  const [patient, evolutionNotes, prescriptionRows, consents, clinicCfg] = await Promise.all([
+  const [patient, evolutionNotes, prescriptionRows, consents, clinicCfg, latestVitals] = await Promise.all([
     prisma.patient.findUnique({ where: { id: patientId } }),
     prisma.medicalNote.findMany({
       where: { patientId, tipo: 'nota_evolucion' },
@@ -170,6 +206,11 @@ export async function getNotasData(patientId: string) {
       orderBy: { createdAt: 'desc' },
     }),
     getClinicConfigFromDB(),
+    prisma.vitals.findFirst({
+      where: { patientId },
+      orderBy: { createdAt: 'desc' },
+      select: { peso: true, talla: true, temperatura: true, presionSistolica: true, presionDiastolica: true },
+    }),
   ])
 
   if (!patient) return null
@@ -195,9 +236,12 @@ export async function getNotasData(patientId: string) {
     if (!recetaMap.has(row.recetaId)) recetaMap.set(row.recetaId, [])
     recetaMap.get(row.recetaId)!.push(row)
   }
+  const patientClinical = patient
+    ? { fechaNacimiento: patient.fechaNacimiento, sexo: patient.sexo, alergias: patient.alergias }
+    : undefined
   const prescriptions = Array.from(recetaMap.values()).map(rows =>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mapPrescription(rows, pName, clinicCfg as any)
+    mapPrescription(rows, pName, clinicCfg as any, patientClinical ?? undefined, latestVitals)
   )
 
   return {
@@ -330,12 +374,12 @@ export async function updateEvolutionNote(
 export async function createPrescription(
   patientId: string,
   medications: PrescriptionMedication[],
-  _diagnosis?: string,
+  diagnosis?: string,
 ): Promise<Prescription> {
   const session = await verifySession()
   const recetaId = randomUUID()
 
-  const [patient, , clinicCfg] = await Promise.all([
+  const [patient, , clinicCfg, latestVitals] = await Promise.all([
     prisma.patient.findUnique({ where: { id: patientId } }),
     prisma.prescription.createMany({
       data: medications.map(med => ({
@@ -346,19 +390,29 @@ export async function createPrescription(
         nombreComercial: med.brandName ?? null,
         presentacion: med.presentation ?? null,
         dosis: med.dose,
+        via: med.route ?? null,
         frecuencia: med.frequency,
         duracion: med.duration ?? null,
         indicaciones: med.instructions ?? null,
+        instruccionesGenerales: diagnosis ?? null,
       })),
     }),
     getClinicConfigFromDB(),
+    prisma.vitals.findFirst({
+      where: { patientId },
+      orderBy: { createdAt: 'desc' },
+      select: { peso: true, talla: true, temperatura: true, presionSistolica: true, presionDiastolica: true },
+    }),
   ])
 
   const rows = await prisma.prescription.findMany({ where: { recetaId } })
   void logAction({ action: 'creacion', resource: 'prescription', resourceId: recetaId, userId: session.userId })
   const pName = patient ? patientFullName(patient) : ''
+  const patientClinical = patient
+    ? { fechaNacimiento: patient.fechaNacimiento, sexo: patient.sexo, alergias: patient.alergias }
+    : undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return mapPrescription(rows, pName, clinicCfg as any)
+  return mapPrescription(rows, pName, clinicCfg as any, patientClinical, latestVitals)
 }
 
 export async function createConsentForm(
