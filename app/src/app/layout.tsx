@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Inter, IBM_Plex_Mono } from "next/font/google";
 import { headers } from "next/headers";
+import Script from "next/script";
 import "./globals.css";
-import { CookieBanner } from "@/components/CookieBanner";
 import { SiteJsonLd } from "@/components/JsonLd";
 
 const inter = Inter({
@@ -118,8 +118,11 @@ export default async function RootLayout({
     >
       <body className="min-h-screen antialiased">
         {children}
-        <CookieBanner />
         <SiteJsonLd nonce={nonce} />
+        <Script
+          src="https://acct.acceptrics.com/d7ba6fe"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

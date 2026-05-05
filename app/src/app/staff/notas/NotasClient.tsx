@@ -20,6 +20,9 @@ import {
   signPrescriptionInDB,
   signConsentInDB,
 } from '@/app/actions/notas'
+import { printEvolutionNote } from '@/lib/print-evolution-note'
+import { printPrescription } from '@/lib/print-prescription'
+import type { CLINIC_CONFIG } from '@/lib/clinic-config'
 import type {
   Prescription,
   ConsentForm,
@@ -32,6 +35,7 @@ type View = 'list' | 'note-detail' | 'prescription' | 'consent' | 'new-note' | '
 
 interface Props {
   currentPatient: CurrentPatient
+  clinicConfig: typeof CLINIC_CONFIG
   evolutionNotes: EvolutionNote[]
   initialPrescriptions: Prescription[]
   initialConsentForms: ConsentForm[]
@@ -44,6 +48,7 @@ function nowCDMX(): string {
 
 export function NotasClient({
   currentPatient,
+  clinicConfig,
   evolutionNotes: initialNotes,
   initialPrescriptions,
   initialConsentForms,
@@ -84,6 +89,25 @@ export function NotasClient({
     setView('note-detail')
   }
 
+  async function handleCreateAndSignNote(data: EvolutionNoteData) {
+    const note = await createEvolutionNote(currentPatient.id, {
+      motivoConsulta: data.subjective,
+      subjetivo: data.subjective,
+      objetivo: data.objective,
+      analisis: data.assessment,
+      plan: data.plan,
+      diagnosticos: data.diagnosticos.map(d => ({
+        codigo: d.codigo,
+        descripcion: d.descripcion,
+      })),
+      vitals: data.vitals,
+    })
+    const signed = await signEvolutionNoteInDB(note.id)
+    setEvolutionNotes(prev => [signed, ...prev])
+    setSelectedNoteId(signed.id)
+    setView('note-detail')
+  }
+
   async function handleSaveNote(noteId: string, data: {
     motivoConsulta: string
     subjetivo: string
@@ -118,12 +142,14 @@ export function NotasClient({
 
   async function handleSignPrescription(id: string, signatureData: string) {
     const signedAt = nowCDMX()
+    const { firmaHash } = await signPrescriptionInDB(id, signatureData)
     setPrescriptions(prev =>
       prev.map(rx =>
-        rx.id === id ? { ...rx, status: 'firmada', signatureData, signedAt, signatureTimestamp: new Date().toISOString() } : rx,
+        rx.id === id
+          ? { ...rx, status: 'firmada', signatureData, signedAt, signatureTimestamp: new Date().toISOString(), firmaHash }
+          : rx,
       ),
     )
-    await signPrescriptionInDB(id)
   }
 
   async function handleCreateConsent(type: string, content: string) {
@@ -151,6 +177,7 @@ export function NotasClient({
       <EvolutionNoteForm
         patientName={currentPatient.name}
         onSave={handleCreateNote}
+        onSaveAndSign={handleCreateAndSignNote}
         onCancel={() => setView('list')}
       />
     )
@@ -165,6 +192,7 @@ export function NotasClient({
         onSave={(data) => handleSaveNote(selectedNote.id, data)}
         onSign={() => handleSignNote(selectedNote.id)}
         onAddAddendum={(c) => handleAddAddendum(selectedNote.id, c)}
+        onPrint={selectedNote.signed ? () => printEvolutionNote(selectedNote, clinicConfig) : undefined}
       />
     )
   }
@@ -184,7 +212,7 @@ export function NotasClient({
       <PrescriptionDetail
         prescription={selectedRx}
         onSign={handleSignPrescription}
-        onPrint={() => window.print()}
+        onPrint={() => { void printPrescription(selectedRx) }}
         onBack={() => setView('list')}
       />
     )

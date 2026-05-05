@@ -263,6 +263,7 @@ model Prescription {
   status                 String    @default("activa")
   firmada                Boolean   @default(false)
   firmaHash              String?
+  firmaImagen            String?
   fechaFirma             DateTime?
   firmaUserId            String?
   createdAt              DateTime  @default(now())

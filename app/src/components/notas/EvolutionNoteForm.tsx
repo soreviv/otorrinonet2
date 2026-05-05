@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, FileSignature } from 'lucide-react'
 import { Cie10Search, type DiagnosticoSeleccionado } from '@/components/ehr/Cie10Search'
 
 const textareaCls =
@@ -30,6 +30,7 @@ export interface EvolutionNoteData {
 interface Props {
   patientName: string
   onSave: (data: EvolutionNoteData) => Promise<void>
+  onSaveAndSign: (data: EvolutionNoteData) => Promise<void>
   onCancel: () => void
 }
 
@@ -41,13 +42,14 @@ function Label({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function EvolutionNoteForm({ patientName, onSave, onCancel }: Props) {
+export function EvolutionNoteForm({ patientName, onSave, onSaveAndSign, onCancel }: Props) {
   const [subjective, setSubjective] = useState('')
   const [objective, setObjective] = useState('')
   const [assessment, setAssessment] = useState('')
   const [plan, setPlan] = useState('')
   const [diagnosticos, setDiagnosticos] = useState<DiagnosticoSeleccionado[]>([])
   const [saving, setSaving] = useState(false)
+  const [signing, setSigning] = useState(false)
 
   // Vitals (all optional)
   const [pSis, setPSis] = useState('')
@@ -60,29 +62,44 @@ export function EvolutionNoteForm({ patientName, onSave, onCancel }: Props) {
 
   const canSave = subjective.trim().length > 0
 
+  function buildData(): EvolutionNoteData {
+    return {
+      subjective,
+      objective,
+      assessment,
+      plan,
+      diagnosticos,
+      vitals: {
+        presionSistolica: pSis ? parseInt(pSis) : undefined,
+        presionDiastolica: pDia ? parseInt(pDia) : undefined,
+        frecuenciaCardiaca: fc ? parseInt(fc) : undefined,
+        temperatura: temp ? parseFloat(temp) : undefined,
+        saturacionOxigeno: spo2 ? parseInt(spo2) : undefined,
+        peso: peso ? parseFloat(peso) : undefined,
+        talla: talla ? parseFloat(talla) : undefined,
+      },
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!canSave) return
     setSaving(true)
     try {
-      await onSave({
-        subjective,
-        objective,
-        assessment,
-        plan,
-        diagnosticos,
-        vitals: {
-          presionSistolica: pSis ? parseInt(pSis) : undefined,
-          presionDiastolica: pDia ? parseInt(pDia) : undefined,
-          frecuenciaCardiaca: fc ? parseInt(fc) : undefined,
-          temperatura: temp ? parseFloat(temp) : undefined,
-          saturacionOxigeno: spo2 ? parseInt(spo2) : undefined,
-          peso: peso ? parseFloat(peso) : undefined,
-          talla: talla ? parseFloat(talla) : undefined,
-        },
-      })
+      await onSave(buildData())
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleSign(e: React.MouseEvent) {
+    e.preventDefault()
+    if (!canSave) return
+    setSigning(true)
+    try {
+      await onSaveAndSign(buildData())
+    } finally {
+      setSigning(false)
     }
   }
 
@@ -167,16 +184,27 @@ export function EvolutionNoteForm({ patientName, onSave, onCancel }: Props) {
           </div>
         </div>
 
-        <div className="flex gap-3">
-          <button type="button" onClick={onCancel}
-            className="px-4 py-2.5 rounded-xl text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-            Cancelar
-          </button>
-          <button type="submit" disabled={saving || !canSave}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-sky-600 hover:bg-sky-700 disabled:bg-sky-400 text-white transition-colors">
-            <Save className="w-4 h-4" strokeWidth={2} />
-            {saving ? 'Guardando…' : 'Guardar nota'}
-          </button>
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
+            <strong className="text-slate-600 dark:text-slate-300">Guardar borrador</strong> permite editar después.{' '}
+            <strong className="text-slate-600 dark:text-slate-300">Guardar y Firmar</strong> sella la nota con sello de tiempo y la hace inalterable (NOM-004-SSA3-2012).
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button type="button" onClick={onCancel}
+              className="px-4 py-2.5 rounded-xl text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+              Cancelar
+            </button>
+            <button type="submit" disabled={saving || signing || !canSave}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-700 hover:bg-slate-800 disabled:bg-slate-400 dark:bg-slate-700 dark:hover:bg-slate-600 text-white transition-colors">
+              <Save className="w-4 h-4" strokeWidth={2} />
+              {saving ? 'Guardando…' : 'Guardar borrador'}
+            </button>
+            <button type="button" onClick={handleSign} disabled={saving || signing || !canSave}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white transition-colors">
+              <FileSignature className="w-4 h-4" strokeWidth={2} />
+              {signing ? 'Firmando…' : 'Guardar y Firmar'}
+            </button>
+          </div>
         </div>
       </form>
     </div>

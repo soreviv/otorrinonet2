@@ -6,7 +6,7 @@ import { verifySession } from '@/lib/dal'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import { logAction } from '@/lib/audit'
 import { computeNoteSignatureHash } from '@/lib/crypto'
-import type { EvolutionNote, NoteAddendum, Prescription, PrescriptionMedication, ConsentForm } from '@/lib/notas-types'
+import type { EvolutionNote, NoteAddendum, NoteDiagnostico, Prescription, PrescriptionMedication, ConsentForm } from '@/lib/notas-types'
 
 // ─── Helpers de nombre de paciente ───────────────────────────────────────────
 
@@ -53,6 +53,7 @@ function mapEvolution(
   patientName: string,
   authorName: string,
   addendums: NoteAddendum[] = [],
+  diagnosticos: NoteDiagnostico[] = [],
 ): EvolutionNote {
   return {
     id: n.id,
@@ -64,6 +65,7 @@ function mapEvolution(
     findings: n.objetivo ?? '',
     updatedDiagnosis: n.analisis ?? '',
     plan: n.plan ?? '',
+    diagnosticos,
     authorName,
     authorId: n.medicoId,
     signed: n.firmada,
@@ -82,7 +84,7 @@ function mapPrescription(
     medicamento: string; nombreComercial: string | null; presentacion: string | null;
     dosis: string; frecuencia: string; duracion: string | null; indicaciones: string | null;
     instruccionesGenerales: string | null; firmada: boolean; firmaHash: string | null;
-    fechaFirma: Date | null; createdAt: Date
+    firmaImagen: string | null; fechaFirma: Date | null; createdAt: Date
   }>,
   patientName: string,
   clinicCfg: Record<string, unknown>,
@@ -116,7 +118,7 @@ function mapPrescription(
     clinicEmail: (clinicCfg.clinicEmail as string) ?? null,
     clinicLogoUrl: (clinicCfg.clinicLogoUrl as string) ?? null,
     clinicCofepris: (clinicCfg.clinicCofepris as string) ?? '',
-    signatureData: null,
+    signatureData: first.firmaImagen ?? null,
     signedAt: first.fechaFirma?.toISOString() ?? null,
     signatureTimestamp: first.fechaFirma?.toISOString() ?? null,
     firmaHash: first.firmaHash ?? null,
@@ -156,8 +158,10 @@ export async function getNotasData(patientId: string) {
       orderBy: { fecha: 'desc' },
       include: {
         medico: { select: { id: true, name: true } },
-        addendums: {
-          orderBy: { fecha: 'asc' },
+        addendums: { orderBy: { fecha: 'asc' } },
+        diagnoses: {
+          include: { cie10: { select: { descripcion: true } } },
+          orderBy: { createdAt: 'asc' },
         },
       },
     }),
@@ -202,11 +206,17 @@ export async function getNotasData(patientId: string) {
 
   return {
     patient: { id: patient.id, name: pName, expedienteNumber: patient.expedienteNumber },
+    clinicConfig: clinicCfg,
     evolutionNotes: evolutionNotes.map(n => {
       const addendums = n.addendums.map(a =>
         mapAddendum(a, authorNameById.get(a.authorId ?? '') ?? 'Sistema'),
       )
-      return mapEvolution(n, pName, n.medico?.name ?? session.name, addendums)
+      const diagnosticos: NoteDiagnostico[] = n.diagnoses.map(d => ({
+        codigo: d.cie10Codigo,
+        descripcion: d.cie10.descripcion,
+        tipo: d.tipoDiagnostico,
+      }))
+      return mapEvolution(n, pName, n.medico?.name ?? session.name, addendums, diagnosticos)
     }),
     prescriptions,
     consentForms: consents.map(c => mapConsent(c, pName, session.name)),
@@ -407,6 +417,10 @@ export async function signEvolutionNoteInDB(id: string): Promise<EvolutionNote> 
       include: {
         medico: { select: { name: true } },
         addendums: { orderBy: { fecha: 'asc' } },
+        diagnoses: {
+          include: { cie10: { select: { descripcion: true } } },
+          orderBy: { createdAt: 'asc' },
+        },
       },
     }),
   ])
@@ -426,11 +440,16 @@ export async function signEvolutionNoteInDB(id: string): Promise<EvolutionNote> 
     : []
   const nameById = new Map(addAuthors.map(u => [u.id, u.name]))
   const addendums = signed.addendums.map(a => mapAddendum(a, nameById.get(a.authorId ?? '') ?? 'Sistema'))
+  const diagnosticos: NoteDiagnostico[] = signed.diagnoses.map(d => ({
+    codigo: d.cie10Codigo,
+    descripcion: d.cie10.descripcion,
+    tipo: d.tipoDiagnostico,
+  }))
 
-  return mapEvolution(signed, pName, signed.medico?.name ?? session.name, addendums)
+  return mapEvolution(signed, pName, signed.medico?.name ?? session.name, addendums, diagnosticos)
 }
 
-export async function signPrescriptionInDB(recetaId: string): Promise<{ firmaHash: string }> {
+export async function signPrescriptionInDB(recetaId: string, firmaImagen?: string): Promise<{ firmaHash: string }> {
   const session = await verifySession()
   const existing = await prisma.prescription.findFirst({ where: { recetaId }, select: { firmada: true } })
   if (existing?.firmada) throw new Error('Esta receta ya fue firmada')
@@ -440,7 +459,7 @@ export async function signPrescriptionInDB(recetaId: string): Promise<{ firmaHas
 
   await prisma.prescription.updateMany({
     where: { recetaId },
-    data: { firmada: true, firmaHash: hash, fechaFirma: new Date(isoTs), firmaUserId: session.userId },
+    data: { firmada: true, firmaHash: hash, firmaImagen: firmaImagen ?? null, fechaFirma: new Date(isoTs), firmaUserId: session.userId },
   })
   void logAction({ action: 'firma', resource: 'prescription', resourceId: recetaId, userId: session.userId })
   return { firmaHash: hash }

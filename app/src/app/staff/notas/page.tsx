@@ -36,6 +36,7 @@ async function NotasLoader({ patientId }: { patientId: string | undefined }) {
   return (
     <NotasClient
       currentPatient={data.patient}
+      clinicConfig={data.clinicConfig}
       evolutionNotes={data.evolutionNotes}
       initialPrescriptions={data.prescriptions}
       initialConsentForms={data.consentForms}
