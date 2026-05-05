@@ -64,7 +64,9 @@
       "Bash(git -C /var/www/otorrinonet2 status)",
       "Bash(git -C /var/www/otorrinonet2 log --oneline -5)",
       "Bash(pm2 list *)",
-      "Bash(systemctl list-units *)"
+      "Bash(systemctl list-units *)",
+      "Bash(mkdir -p /root/.claude/plans)",
+      "Read(//root/.claude/plans/**)"
     ]
   },
   "outputStyle": "Learning"
