@@ -1,3 +1,4 @@
+import QRCode from 'qrcode'
 import type { Prescription } from '@/lib/notas-types'
 
 function esc(s: string): string {
@@ -10,9 +11,12 @@ function formatDateLong(iso: string): string {
   })
 }
 
-export function printPrescription(rx: Prescription): void {
+export async function printPrescription(rx: Prescription): Promise<void> {
   const win = window.open('', '_blank', 'width=800,height=900')
   if (!win) return
+
+  const verifyUrl = `${window.location.origin}/verificar/receta/${rx.id}${rx.firmaHash ? `?hash=${rx.firmaHash}` : ''}`
+  const qrDataUrl = await QRCode.toDataURL(verifyUrl, { width: 120, margin: 1, color: { dark: '#0c4a6e', light: '#ffffff' } })
 
   const medsHtml = rx.medications.map((med, i) => `
     <div class="med-card">
@@ -92,11 +96,15 @@ export function printPrescription(rx: Prescription): void {
   .med-grid .val { font-weight: 600; font-size: 11px; color: #334155; }
   .med-inst { font-size: 10px; color: #0369a1; margin-top: 6px; background: #e0f2fe; padding: 4px 8px; border-radius: 4px; }
 
-  /* Signature */
-  .sig-section { padding: 14px 18px; display: flex; justify-content: flex-end; }
+  /* Signature + QR */
+  .bottom-section { padding: 14px 18px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
   .sig-box { border-top: 1px solid #94a3b8; padding-top: 8px; width: 200px; text-align: center; }
+  .sig-box img.sig-img { max-width: 200px; max-height: 80px; object-fit: contain; display: block; margin: 0 auto 6px; }
   .sig-box .sig-name { font-weight: 700; font-size: 11px; color: #0c4a6e; }
   .sig-box .sig-sub { font-size: 9px; color: #64748b; margin-top: 2px; }
+  .qr-box { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .qr-box img { width: 90px; height: 90px; }
+  .qr-box .qr-label { font-size: 8px; color: #64748b; text-align: center; max-width: 90px; line-height: 1.3; }
 
   /* Signed timestamp */
   .signed-ts { margin: 0 18px 10px; font-size: 9px; font-family: monospace; color: #64748b; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; }
@@ -185,11 +193,16 @@ export function printPrescription(rx: Prescription): void {
     ${rx.firmaHash ? `<br/>SHA-256: <span style="color:#475569">${rx.firmaHash}</span>` : ''}
   </div>` : ''}
 
-  <!-- Signature block -->
-  <div class="sig-section">
+  <!-- Firma + QR -->
+  <div class="bottom-section">
+    <div class="qr-box">
+      <img src="${qrDataUrl}" alt="QR de verificación"/>
+      <div class="qr-label">Escanea para verificar autenticidad</div>
+    </div>
     <div class="sig-box">
+      ${rx.signatureData ? `<img class="sig-img" src="${rx.signatureData}" alt="Firma autógrafa"/>` : '<div style="height:80px"></div>'}
       <div class="sig-name">${esc(rx.doctorName)}</div>
-      <div class="sig-sub">Firma y sello</div>
+      <div class="sig-sub">Firma autógrafa y sello</div>
     </div>
   </div>
 

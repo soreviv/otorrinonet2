@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import {
   ArrowLeft, FileSignature, Lock, Pencil, Plus, X, ShieldCheck,
-  AlertTriangle, Clock, User as UserIcon, Save,
+  AlertTriangle, Clock, User as UserIcon, Save, Printer,
 } from 'lucide-react'
-import type { EvolutionNote } from '@/lib/notas-types'
+import type { EvolutionNote, NoteDiagnostico } from '@/lib/notas-types'
 
 interface Props {
   note: EvolutionNote
@@ -20,6 +20,7 @@ interface Props {
   }) => Promise<EvolutionNote>
   onSign: () => Promise<EvolutionNote>
   onAddAddendum: (contenido: string) => Promise<void>
+  onPrint?: () => void
 }
 
 const textareaCls =
@@ -44,7 +45,7 @@ function Label({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function EvolutionNoteDetail({ note, canEdit, onBack, onSave, onSign, onAddAddendum }: Props) {
+export function EvolutionNoteDetail({ note, canEdit, onBack, onSave, onSign, onAddAddendum, onPrint }: Props) {
   const [current, setCurrent] = useState<EvolutionNote>(note)
   const isSigned = current.signed
   const [editing, setEditing] = useState(false)
@@ -166,6 +167,17 @@ export function EvolutionNoteDetail({ note, canEdit, onBack, onSave, onSign, onA
             </p>
           </div>
           <SignatureBadge note={current} />
+          {onPrint && (
+            <button
+              type="button"
+              onClick={onPrint}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
+              title="Imprimir nota"
+            >
+              <Printer className="w-3.5 h-3.5" strokeWidth={2} />
+              <span className="hidden sm:inline">Imprimir</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -234,6 +246,9 @@ export function EvolutionNoteDetail({ note, canEdit, onBack, onSave, onSign, onA
                 <Label>P — Plan</Label>
                 <textarea rows={3} value={plan} onChange={(e) => setPlan(e.target.value)} className={textareaCls} data-testid="edit-plan" />
               </div>
+              {current.diagnosticos.length > 0 && (
+                <DiagnosticosDisplay diagnosticos={current.diagnosticos} />
+              )}
               {savingError && <p className="text-xs text-rose-600 dark:text-rose-400">{savingError}</p>}
               <div className="flex gap-2 justify-end">
                 <button
@@ -262,6 +277,9 @@ export function EvolutionNoteDetail({ note, canEdit, onBack, onSave, onSign, onA
               <Section label="O — Objetivo" value={current.findings} testId="note-objective" />
               <Section label="A — Análisis" value={current.updatedDiagnosis} testId="note-assessment" />
               <Section label="P — Plan" value={current.plan} testId="note-plan" />
+              {current.diagnosticos.length > 0 && (
+                <DiagnosticosDisplay diagnosticos={current.diagnosticos} />
+              )}
             </>
           )}
 
@@ -464,6 +482,28 @@ function Section({ label, value, testId }: { label: string; value: string; testI
       <Label>{label}</Label>
       <div className={readonlyCls} data-testid={testId}>
         {value || <span className="italic text-slate-400 dark:text-slate-600">Sin información</span>}
+      </div>
+    </div>
+  )
+}
+
+function DiagnosticosDisplay({ diagnosticos }: { diagnosticos: NoteDiagnostico[] }) {
+  return (
+    <div>
+      <Label>Diagnósticos CIE-10</Label>
+      <div className="flex flex-wrap gap-1.5" data-testid="note-diagnosticos">
+        {diagnosticos.map(dx => (
+          <span
+            key={dx.codigo}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-sky-800 dark:text-sky-300"
+          >
+            <span className="font-mono font-bold">{dx.codigo}</span>
+            <span className="text-sky-600 dark:text-sky-400">{dx.descripcion}</span>
+            {dx.tipo !== 'presuntivo' && (
+              <span className="text-[10px] text-sky-500 dark:text-sky-500 uppercase">{dx.tipo}</span>
+            )}
+          </span>
+        ))}
       </div>
     </div>
   )

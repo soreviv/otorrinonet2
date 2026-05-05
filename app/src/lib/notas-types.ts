@@ -12,6 +12,12 @@ export interface NoteAddendum {
   firmaHash: string | null
 }
 
+export interface NoteDiagnostico {
+  codigo: string
+  descripcion: string
+  tipo: string
+}
+
 export interface EvolutionNote {
   id: string
   patientId: string
@@ -22,6 +28,7 @@ export interface EvolutionNote {
   findings: string
   updatedDiagnosis: string
   plan: string
+  diagnosticos: NoteDiagnostico[]
   authorName: string
   authorId: string | null
   signed: boolean
