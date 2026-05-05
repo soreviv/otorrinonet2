@@ -5,7 +5,7 @@ import { AdminDashboard } from '@/components/admin'
 import { updateUserRole, updateUserStatus, updateArcoRequestStatus } from '@/app/actions/admin'
 import type {
   SystemUser, ArcoRequest, FhirExport, DashboardMetrics, ComplianceBadge,
-  AuditLog, PrivacyNotice, UserRole, UserStatus, ArcoStatus,
+  AuditLog, PrivacyNotice, UserRole, UserStatus, ArcoStatus, ClinicInfo,
 } from '@/lib/admin-types'
 
 interface Props {
@@ -16,6 +16,7 @@ interface Props {
   arcoRequests: ArcoRequest[]
   fhirExports: FhirExport[]
   privacyNotice: PrivacyNotice
+  clinicInfo: ClinicInfo
 }
 
 export function AdminClient({
@@ -26,6 +27,7 @@ export function AdminClient({
   arcoRequests: initialArco,
   fhirExports,
   privacyNotice,
+  clinicInfo,
 }: Props) {
   const [users, setUsers] = useState<SystemUser[]>(initialUsers)
   const [arcoRequests, setArcoRequests] = useState<ArcoRequest[]>(initialArco)
@@ -75,6 +77,7 @@ export function AdminClient({
       arcoRequests={arcoRequests}
       fhirExports={fhirExports}
       privacyNotice={privacyNotice}
+      clinicInfo={clinicInfo}
       onEditUser={handleEditUser}
       onDeactivateUser={handleDeactivateUser}
       onActivateUser={handleActivateUser}
