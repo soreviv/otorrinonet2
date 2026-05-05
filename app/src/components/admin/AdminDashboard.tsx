@@ -311,13 +311,13 @@ function DashboardTab({ metrics, complianceBadges, clinicInfo }: Pick<AdminDashb
           {clinicInfo.clinicPhone && (
             <div className="flex flex-col gap-0.5">
               <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Teléfono</span>
-              <span className="text-slate-600 dark:text-slate-400 font-mono">{clinicInfo.clinicPhone}</span>
+              <a href={`tel:${clinicInfo.clinicPhone}`} className="text-slate-600 dark:text-slate-400 font-mono hover:text-sky-600 transition-colors">{clinicInfo.clinicPhone}</a>
             </div>
           )}
           {clinicInfo.clinicEmail && (
             <div className="flex flex-col gap-0.5">
               <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Correo</span>
-              <span className="text-slate-600 dark:text-slate-400">{clinicInfo.clinicEmail}</span>
+              <a href={`mailto:${clinicInfo.clinicEmail}`} className="text-slate-600 dark:text-slate-400 hover:text-sky-600 transition-colors">{clinicInfo.clinicEmail}</a>
             </div>
           )}
         </div>
