@@ -28,6 +28,7 @@ export async function printPrescription(rx: Prescription): Promise<void> {
           <div><span class="lbl">Dosis</span><span class="val">${esc(med.dose)}</span></div>
           <div><span class="lbl">Frecuencia</span><span class="val">${esc(med.frequency)}</span></div>
           <div><span class="lbl">Duración</span><span class="val">${esc(med.duration || '—')}</span></div>
+          ${med.route ? `<div><span class="lbl">Vía</span><span class="val">${esc(med.route)}</span></div>` : ''}
         </div>
         ${med.instructions ? `<div class="med-inst">ℹ ${esc(med.instructions)}</div>` : ''}
       </div>
@@ -68,6 +69,18 @@ export async function printPrescription(rx: Prescription): Promise<void> {
   .patient-row { display: flex; justify-content: space-between; padding: 10px 18px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
   .patient-row .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; font-weight: 700; }
   .patient-row .val { font-weight: 600; font-size: 13px; color: #0f172a; margin-top: 2px; }
+
+  /* Clinical data */
+  .clinical-row { padding: 8px 18px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; flex-wrap: wrap; gap: 16px; }
+  .clinical-row .item .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; font-weight: 700; display: block; }
+  .clinical-row .item .val { font-size: 11px; font-weight: 600; color: #334155; }
+  .clinical-row .allergies { width: 100%; }
+  .clinical-row .allergies .val { color: #dc2626; }
+
+  /* Diagnosis */
+  .diag-row { padding: 8px 18px; background: #fffbeb; border-bottom: 1px solid #fde68a; }
+  .diag-row .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .05em; color: #92400e; font-weight: 700; }
+  .diag-row .val { font-size: 12px; font-weight: 600; color: #1c1917; margin-top: 2px; }
 
   /* Meds section */
   .meds-section { padding: 14px 18px; }
@@ -146,6 +159,26 @@ export async function printPrescription(rx: Prescription): Promise<void> {
       <div class="val">${formatDateLong(rx.date)}</div>
     </div>
   </div>
+
+  <!-- Clinical data -->
+  ${(rx.patientAge != null || rx.patientSex || rx.patientWeight || rx.patientHeight || rx.patientBMI != null || rx.patientTemperature != null || rx.patientBloodPressure || rx.patientAllergies?.length) ? `
+  <div class="clinical-row">
+    ${rx.patientAge != null ? `<div class="item"><span class="lbl">Edad</span><span class="val">${rx.patientAge} años</span></div>` : ''}
+    ${rx.patientSex ? `<div class="item"><span class="lbl">Sexo</span><span class="val">${esc(rx.patientSex)}</span></div>` : ''}
+    ${rx.patientWeight != null ? `<div class="item"><span class="lbl">Peso</span><span class="val">${rx.patientWeight} kg</span></div>` : ''}
+    ${rx.patientHeight != null ? `<div class="item"><span class="lbl">Talla</span><span class="val">${rx.patientHeight} cm</span></div>` : ''}
+    ${rx.patientBMI != null ? `<div class="item"><span class="lbl">IMC</span><span class="val">${rx.patientBMI}</span></div>` : ''}
+    ${rx.patientTemperature != null ? `<div class="item"><span class="lbl">Temperatura</span><span class="val">${rx.patientTemperature} °C</span></div>` : ''}
+    ${rx.patientBloodPressure ? `<div class="item"><span class="lbl">Presión arterial</span><span class="val">${esc(rx.patientBloodPressure)}</span></div>` : ''}
+    ${rx.patientAllergies?.length ? `<div class="item allergies"><span class="lbl">Alergias</span><span class="val">${rx.patientAllergies.map(esc).join(', ')}</span></div>` : ''}
+  </div>` : ''}
+
+  <!-- Diagnosis -->
+  ${rx.diagnosis ? `
+  <div class="diag-row">
+    <div class="lbl">Diagnóstico médico</div>
+    <div class="val">${esc(rx.diagnosis)}</div>
+  </div>` : ''}
 
   <!-- Medications -->
   <div class="meds-section">

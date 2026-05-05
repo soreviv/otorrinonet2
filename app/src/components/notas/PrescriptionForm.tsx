@@ -8,7 +8,7 @@ const inputCls =
   'w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 transition'
 
 const EMPTY_MED: PrescriptionMedication = {
-  name: '', brandName: '', presentation: '', dose: '', frequency: '', duration: '', instructions: '',
+  name: '', brandName: '', presentation: '', dose: '', frequency: '', duration: '', instructions: '', route: '',
 }
 
 interface Props {
@@ -140,7 +140,7 @@ export function PrescriptionForm({ patientName, onSave, onCancel }: Props) {
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
                       Dosis <span className="text-rose-500">*</span>
@@ -177,6 +177,18 @@ export function PrescriptionForm({ patientName, onSave, onCancel }: Props) {
                       onChange={e => setMed(i, 'duration', e.target.value)}
                       className={inputCls}
                       placeholder="7 días"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                      Vía de administración
+                    </label>
+                    <input
+                      type="text"
+                      value={med.route ?? ''}
+                      onChange={e => setMed(i, 'route', e.target.value)}
+                      className={inputCls}
+                      placeholder="Oral, IV, IM…"
                     />
                   </div>
                 </div>

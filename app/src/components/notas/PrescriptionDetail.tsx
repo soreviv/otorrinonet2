@@ -194,20 +194,83 @@ export function PrescriptionDetail({
           </div>
 
           {/* ── Datos del paciente y fecha ── */}
-          <div className="px-5 py-3 flex items-center justify-between border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-            <div>
-              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wide">Paciente</p>
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{rx.patientName}</p>
+          <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wide">Paciente</p>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{rx.patientName}</p>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wide">Fecha de expedición</p>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+                  {new Date(rx.date + 'T00:00:00').toLocaleDateString('es-MX', {
+                    day: '2-digit', month: 'long', year: 'numeric',
+                  })}
+                </p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wide">Fecha de expedición</p>
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
-                {new Date(rx.date + 'T00:00:00').toLocaleDateString('es-MX', {
-                  day: '2-digit', month: 'long', year: 'numeric',
-                })}
-              </p>
-            </div>
+            {/* Datos clínicos del paciente */}
+            {(rx.patientAge != null || rx.patientSex || rx.patientAllergies?.length || rx.patientWeight || rx.patientHeight || rx.patientTemperature || rx.patientBloodPressure) && (
+              <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2">
+                {rx.patientAge != null && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Edad</p>
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{rx.patientAge} años</p>
+                  </div>
+                )}
+                {rx.patientSex && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Sexo</p>
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{rx.patientSex}</p>
+                  </div>
+                )}
+                {rx.patientWeight != null && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Peso</p>
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{rx.patientWeight} kg</p>
+                  </div>
+                )}
+                {rx.patientHeight != null && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Talla</p>
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{rx.patientHeight} cm</p>
+                  </div>
+                )}
+                {rx.patientBMI != null && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">IMC</p>
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{rx.patientBMI}</p>
+                  </div>
+                )}
+                {rx.patientTemperature != null && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Temperatura</p>
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{rx.patientTemperature} °C</p>
+                  </div>
+                )}
+                {rx.patientBloodPressure && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Presión arterial</p>
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{rx.patientBloodPressure}</p>
+                  </div>
+                )}
+                {rx.patientAllergies?.length ? (
+                  <div className="col-span-2 sm:col-span-4">
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Alergias</p>
+                    <p className="text-xs font-medium text-rose-600 dark:text-rose-400">{rx.patientAllergies.join(', ')}</p>
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
+
+          {/* ── Diagnóstico ── */}
+          {rx.diagnosis && (
+            <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700 bg-amber-50 dark:bg-amber-900/10">
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-wide">Diagnóstico médico</p>
+              <p className="text-sm text-slate-800 dark:text-slate-200 mt-0.5">{rx.diagnosis}</p>
+            </div>
+          )}
 
           {/* ── Medicamentos ── */}
           <div className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -225,7 +288,7 @@ export function PrescriptionDetail({
                       )}
                       <p className="text-xs text-slate-500 dark:text-slate-400">{med.presentation}</p>
                     </div>
-                    <div className="mt-2 grid grid-cols-3 gap-x-4 gap-y-1">
+                    <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1">
                       <div>
                         <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Dosis</p>
                         <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{med.dose}</p>
@@ -236,8 +299,14 @@ export function PrescriptionDetail({
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Duración</p>
-                        <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{med.duration}</p>
+                        <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{med.duration || '—'}</p>
                       </div>
+                      {med.route && (
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Vía</p>
+                          <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{med.route}</p>
+                        </div>
+                      )}
                     </div>
                     {med.instructions && (
                       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 italic">

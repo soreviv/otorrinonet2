@@ -50,6 +50,8 @@ export interface PrescriptionMedication {
   frequency: string
   duration: string
   instructions: string
+  /** Vía de administración, ej. "Oral", "Sublingual", "Tópica" */
+  route?: string
 }
 
 export interface Prescription {
@@ -75,6 +77,24 @@ export interface Prescription {
   signatureTimestamp: string | null
   firmaHash?: string | null
   createdAt: string
+  /** Diagnóstico médico (instruccionesGenerales en BD) */
+  diagnosis?: string
+  /** Edad calculada al momento de expedir la receta */
+  patientAge?: number
+  /** Sexo del paciente */
+  patientSex?: string
+  /** Alergias conocidas */
+  patientAllergies?: string[]
+  /** Último peso registrado (kg) */
+  patientWeight?: number
+  /** Última talla registrada (cm) */
+  patientHeight?: number
+  /** IMC calculado */
+  patientBMI?: number
+  /** Última temperatura registrada (°C) */
+  patientTemperature?: number
+  /** Presión arterial, ej. "120/80 mmHg" */
+  patientBloodPressure?: string
 }
 
 export interface ConsentForm {
