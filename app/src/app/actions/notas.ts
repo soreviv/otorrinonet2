@@ -90,13 +90,8 @@ function mapPrescription(
     id: string; recetaId: string; patientId: string;
     medicamento: string; nombreComercial: string | null; presentacion: string | null;
     dosis: string; frecuencia: string; duracion: string | null; indicaciones: string | null;
-<<<<<<< claude/recipe-elements-plan-fpfx4
     instruccionesGenerales: string | null; via: string | null; firmada: boolean; firmaHash: string | null;
-    fechaFirma: Date | null; createdAt: Date
-=======
-    instruccionesGenerales: string | null; firmada: boolean; firmaHash: string | null;
     firmaImagen: string | null; fechaFirma: Date | null; createdAt: Date
->>>>>>> master
   }>,
   patientName: string,
   clinicCfg: Record<string, unknown>,
