@@ -76,11 +76,10 @@ function mapEvolution(
 }
 
 
-function calcAge(dob: Date): number {
-  const today = new Date()
-  let age = today.getFullYear() - dob.getFullYear()
-  const m = today.getMonth() - dob.getMonth()
-  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--
+function calcAge(dob: Date, referenceDate: Date): number {
+  let age = referenceDate.getFullYear() - dob.getFullYear()
+  const m = referenceDate.getMonth() - dob.getMonth()
+  if (m < 0 || (m === 0 && referenceDate.getDate() < dob.getDate())) age--
   return age
 }
 
@@ -149,7 +148,7 @@ function mapPrescription(
     firmaHash: first.firmaHash ?? null,
     createdAt: first.createdAt.toISOString(),
     diagnosis: first.instruccionesGenerales ?? undefined,
-    patientAge: patientData ? calcAge(patientData.fechaNacimiento) : undefined,
+    patientAge: patientData ? calcAge(patientData.fechaNacimiento, first.createdAt) : undefined,
     patientSex: patientData?.sexo,
     patientAllergies: patientData?.alergias?.length ? patientData.alergias : undefined,
     patientWeight: vitals?.peso ?? undefined,

@@ -140,11 +140,58 @@ export function PrescriptionForm({ patientName, onSave, onCancel }: Props) {
                   />
                 </div>
 
-                {/* TODO(human): Aquí van los campos Dosis, Frecuencia, Duración y Vía de administración.
-                    Decide cómo distribuirlos visualmente en la grilla (ej. 2×2, fila de 4, etc.)
-                    Cada campo sigue el mismo patrón: label + input con inputCls.
-                    El campo de vía usa: value={med.route ?? ''} onChange={e => setMed(i, 'route', e.target.value)}
-                    placeholder sugerido: "Oral", "Sublingual", "Tópica", "IV", "IM" */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                      Dosis <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={med.dose}
+                      onChange={e => setMed(i, 'dose', e.target.value)}
+                      className={inputCls}
+                      placeholder="500mg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                      Frecuencia <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={med.frequency}
+                      onChange={e => setMed(i, 'frequency', e.target.value)}
+                      className={inputCls}
+                      placeholder="c/8h"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                      Duración
+                    </label>
+                    <input
+                      type="text"
+                      value={med.duration}
+                      onChange={e => setMed(i, 'duration', e.target.value)}
+                      className={inputCls}
+                      placeholder="7 días"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                      Vía de administración
+                    </label>
+                    <input
+                      type="text"
+                      value={med.route ?? ''}
+                      onChange={e => setMed(i, 'route', e.target.value)}
+                      className={inputCls}
+                      placeholder="Oral, IV, IM…"
+                    />
+                  </div>
+                </div>
 
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
