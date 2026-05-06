@@ -119,6 +119,19 @@ export default async function RootLayout({
       <body className="min-h-screen antialiased">
         {children}
         <SiteJsonLd nonce={nonce} />
+        {/* GA4 Consent Mode v2: defaults denegados hasta que el usuario elija */}
+        <Script id="gtag-init" strategy="beforeInteractive" nonce={nonce}>{`
+          window.dataLayer=window.dataLayer||[];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('consent','default',{analytics_storage:'denied',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',wait_for_update:500});
+          gtag('js',new Date());
+          gtag('config','G-8LCGWFXXTS');
+        `}</Script>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-8LCGWFXXTS"
+          strategy="afterInteractive"
+          nonce={nonce}
+        />
         <Script
           src="https://acct.acceptrics.com/d7ba6fe"
           strategy="afterInteractive"

@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Cookie, X, ChevronDown, ChevronUp } from 'lucide-react'
 
 const STORAGE_KEY = 'cookie-consent'
+const TWELVE_MONTHS_MS = 365 * 24 * 60 * 60 * 1000
 
 type Preferences = {
   analytics: boolean
@@ -13,6 +15,7 @@ type Preferences = {
 type ConsentRecord = {
   choice: 'accepted' | 'declined' | 'custom'
   preferences: Preferences
+  savedAt: number
 }
 
 const CATEGORIES = [
@@ -36,16 +39,41 @@ const CATEGORIES = [
   },
 ]
 
-export function CookieBanner() {
-  const [visible, setVisible] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return !localStorage.getItem(STORAGE_KEY)
+function updateGtagConsent(prefs: Preferences) {
+  if (typeof window === 'undefined') return
+  const g = (window as Window & { gtag?: (...a: unknown[]) => void }).gtag
+  if (!g) return
+  g('consent', 'update', {
+    analytics_storage: prefs.analytics ? 'granted' : 'denied',
+    ad_storage: prefs.marketing ? 'granted' : 'denied',
+    ad_user_data: prefs.marketing ? 'granted' : 'denied',
+    ad_personalization: prefs.marketing ? 'granted' : 'denied',
   })
+}
+
+export function CookieBanner() {
+  const [visible, setVisible] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
   const [preferences, setPreferences] = useState<Preferences>({ analytics: false, marketing: false })
 
-  function save(record: ConsentRecord) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(record))
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (raw) {
+        const record: ConsentRecord = JSON.parse(raw)
+        if (record.savedAt && Date.now() - record.savedAt < TWELVE_MONTHS_MS) {
+          updateGtagConsent(record.preferences)
+          return
+        }
+      }
+    } catch {}
+    localStorage.removeItem(STORAGE_KEY)
+    setVisible(true)
+  }, [])
+
+  function save(record: Omit<ConsentRecord, 'savedAt'>) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...record, savedAt: Date.now() }))
+    updateGtagConsent(record.preferences)
     setVisible(false)
   }
 
@@ -70,14 +98,14 @@ export function CookieBanner() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6">
       <div className="mx-auto max-w-2xl bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
-        {/* Main bar */}
+
         <div className="px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <Cookie className="w-5 h-5 text-primary-500 shrink-0 mt-0.5 sm:mt-0" />
           <p className="flex-1 text-sm text-slate-600 leading-relaxed">
             Usamos cookies para mejorar tu experiencia y analizar el tráfico.{' '}
-            <a href="/privacidad" className="text-primary-600 underline underline-offset-2 hover:text-primary-700">
-              Más información
-            </a>
+            <Link href="/cookies" className="text-primary-600 underline underline-offset-2 hover:text-primary-700">
+              Política de cookies
+            </Link>
           </p>
           <button
             onClick={declineAll}
@@ -88,7 +116,6 @@ export function CookieBanner() {
           </button>
         </div>
 
-        {/* Expandable preferences */}
         {showDetails && (
           <div className="border-t border-slate-100 px-5 py-4 space-y-3">
             {CATEGORIES.map(cat => (
@@ -129,7 +156,6 @@ export function CookieBanner() {
           </div>
         )}
 
-        {/* Action buttons */}
         <div className="border-t border-slate-100 px-5 py-3 flex flex-wrap items-center gap-2">
           <button
             onClick={() => setShowDetails(v => !v)}
@@ -161,6 +187,7 @@ export function CookieBanner() {
             Aceptar todo
           </button>
         </div>
+
       </div>
     </div>
   )
