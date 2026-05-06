@@ -106,29 +106,24 @@ export interface HomePageProps {
   googleReviews: GoogleReview[]
   googleRatingSummary: GoogleRatingSummary
   contactInfo: Pick<ContactInfo, 'phone' | 'whatsapp' | 'email'>
-  onBookAppointment?: () => void
   onViewDoctorProfile?: () => void
   onViewAllServices?: () => void
 }
 
 export interface DoctorProfilePageProps {
   doctorProfile: DoctorProfile
-  onBookAppointment?: () => void
 }
 
 export interface ServicesPageProps {
   services: Service[]
   doctorProfile: Pick<DoctorProfile, 'fullName' | 'title'>
-  onBookAppointment?: () => void
 }
 
 export interface LocationPageProps {
   contactInfo: ContactInfo
-  onBookAppointment?: () => void
 }
 
 export interface ContactPageProps {
   contactInfo: ContactInfo
   onSubmitContactForm?: (data: Omit<ContactFormSubmission, 'id' | 'submittedAt' | 'status'>) => void
-  onBookAppointment?: () => void
 }

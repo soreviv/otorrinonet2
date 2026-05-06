@@ -9,9 +9,9 @@ const navItems = [
 ]
 
 const legalItems = [
-  { label: 'Aviso de privacidad', href: '/legal/privacidad' },
-  { label: 'Términos y condiciones', href: '/legal/terminos' },
-  { label: 'Política de cookies', href: '/legal/cookies' },
+  { label: 'Aviso de privacidad', href: '/privacidad' },
+  { label: 'Términos y condiciones', href: '/terminos' },
+  { label: 'Política de cookies', href: '/cookies' },
 ]
 
 export function PatientShellWrapper({ children }: { children: React.ReactNode }) {

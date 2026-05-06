@@ -8,8 +8,10 @@ export const ROUTES = {
   book: '/agendar',
   legal: {
     index: '/legal',
-    privacy: '/legal/privacidad',
-    cookies: '/legal/cookies',
+    privacy: '/privacidad',
+    cookies: '/cookies',
+    terms: '/terminos',
+    descargo: '/descargo',
   },
   staff: {
     root: '/staff',

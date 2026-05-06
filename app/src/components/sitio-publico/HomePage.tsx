@@ -3,10 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { PublicHeader } from './PublicHeader'
 import { PublicFooter } from './PublicFooter'
 import {
   Star, Calendar, ChevronRight,
-  ArrowUpRight, MessageCircle, Menu, X,
+  ArrowUpRight, MessageCircle,
 } from 'lucide-react'
 import type { HomePageProps, GoogleRatingSummary } from '@/lib/sitio-publico-types'
 import { ServiceCard } from './ServiceCard'
@@ -35,14 +36,6 @@ function RatingSummaryBadge({ summary }: { summary: GoogleRatingSummary }) {
   )
 }
 
-const NAV_LINKS = [
-  { label: 'Inicio', href: '/' },
-  { label: 'Perfil', href: '/perfil' },
-  { label: 'Servicios', href: '/servicios' },
-  { label: 'Ubicación', href: '/ubicacion' },
-  { label: 'Contacto', href: '/contacto' },
-]
-
 export function HomePage({
   doctorProfile,
   services,
@@ -50,68 +43,12 @@ export function HomePage({
   googleRatingSummary,
   contactInfo,
 }: HomePageProps) {
-  const [mobileOpen, setMobileOpen] = useState(false)
   const [imgError, setImgError] = useState(false)
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans antialiased dark:bg-slate-950">
 
-      {/* ── NAVIGATION ─────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100 dark:bg-slate-900/95 dark:border-slate-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-
-            <Link href="/" className="flex items-center group">
-              <Image src="/assets/logo-consultorio.png" alt="Logotipo del consultorio del Dr. Alejandro Viveros Domínguez, otorrinolaringólogo" width={48} height={48} sizes="48px" className="h-12 w-auto" priority />
-            </Link>
-
-            <div className="hidden md:flex items-center gap-7">
-              {NAV_LINKS.map(({ label, href }) => (
-                <Link
-                  key={label}
-                  href={href}
-                  className={`text-sm font-medium transition-colors ${
-                    href === '/'
-                      ? 'text-sky-600 dark:text-sky-400'
-                      : 'text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400'
-                  }`}
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 text-slate-500 hover:text-slate-800 transition-colors dark:text-slate-400 dark:hover:text-white"
-            >
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {mobileOpen && (
-          <div className="md:hidden border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pb-4 pt-3 flex flex-col gap-1">
-            {NAV_LINKS.map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                onClick={() => setMobileOpen(false)}
-                className="text-sm text-slate-600 dark:text-slate-300 font-medium py-2.5 border-b border-slate-50 dark:border-slate-800 last:border-0"
-              >
-                {label}
-              </Link>
-            ))}
-            <Link
-              href="/agendar"
-              className="mt-3 flex items-center justify-center gap-2 bg-sky-600 text-white text-sm font-semibold px-4 py-3 rounded-xl"
-            >
-              <Calendar className="w-4 h-4" />
-              Agendar Cita
-            </Link>
-          </div>
-        )}
-      </nav>
+      <PublicHeader />
 
       {/* ── HERO ───────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-white dark:bg-slate-900">

@@ -34,8 +34,8 @@ const defaultNavItems: PatientNavItem[] = [
 ]
 
 const defaultLegalItems: LegalItem[] = [
-  { label: 'Aviso de privacidad', href: '/legal/privacidad' },
-  { label: 'Política de cookies', href: '/legal/cookies' },
+  { label: 'Aviso de privacidad', href: '/privacidad' },
+  { label: 'Política de cookies', href: '/cookies' },
 ]
 
 export function PatientShell({

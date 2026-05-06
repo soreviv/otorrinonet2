@@ -1,6 +1,4 @@
-'use client'
-
-import { useRouter } from 'next/navigation'
+import type { Metadata } from 'next'
 import { HomePage } from '@/components/sitio-publico/HomePage'
 import {
   doctorProfile,
@@ -10,9 +8,13 @@ import {
   contactInfo,
 } from '@/lib/sitio-publico-data'
 
-export default function HomePageRoute() {
-  const router = useRouter()
+export const metadata: Metadata = {
+  title: 'Dr. Alejandro Viveros Domínguez · Otorrinolaringólogo CDMX',
+  description: 'Especialista en otorrinolaringología, cirugía de cabeza y cuello en Lindavista, CDMX. Agenda tu cita en línea.',
+  alternates: { canonical: '/' },
+}
 
+export default function HomePageRoute() {
   return (
     <HomePage
       doctorProfile={doctorProfile}
@@ -20,9 +22,6 @@ export default function HomePageRoute() {
       googleReviews={googleReviews}
       googleRatingSummary={googleRatingSummary}
       contactInfo={{ phone: contactInfo.phone, whatsapp: contactInfo.whatsapp, email: contactInfo.email }}
-      onBookAppointment={() => router.push('/agendar')}
-      onViewDoctorProfile={() => router.push('/perfil')}
-      onViewAllServices={() => router.push('/servicios')}
     />
   )
 }

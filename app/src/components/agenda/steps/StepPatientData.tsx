@@ -226,7 +226,7 @@ export function StepPatientData({
             <label htmlFor="privacy" className="text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
               He leído y acepto el{' '}
               <a
-                href="/legal/privacidad"
+                href="/privacidad"
                 className="text-sky-600 dark:text-sky-400 font-medium underline underline-offset-2 hover:text-sky-700"
                 target="_blank"
                 rel="noopener noreferrer"

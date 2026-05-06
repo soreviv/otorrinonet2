@@ -5,6 +5,15 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
 
+  async redirects() {
+    return [
+      { source: '/legal/privacidad', destination: '/privacidad', permanent: true },
+      { source: '/legal/terminos',   destination: '/terminos',   permanent: true },
+      { source: '/legal/cookies',    destination: '/cookies',    permanent: true },
+      { source: '/legal/descargo',   destination: '/descargo',   permanent: true },
+    ]
+  },
+
   async headers() {
     return [
       {

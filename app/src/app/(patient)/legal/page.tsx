@@ -9,7 +9,7 @@ export default function LegalPage() {
       </p>
       <div className="flex flex-col gap-4">
         <Link
-          href="/legal/privacidad"
+          href="/privacidad"
           className="flex items-center justify-between p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl hover:border-sky-300 dark:hover:border-sky-700 transition-colors group"
         >
           <div>
@@ -23,7 +23,7 @@ export default function LegalPage() {
           <span className="text-slate-400 group-hover:text-sky-600 transition-colors">→</span>
         </Link>
         <Link
-          href="/legal/cookies"
+          href="/cookies"
           className="flex items-center justify-between p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl hover:border-sky-300 dark:hover:border-sky-700 transition-colors group"
         >
           <div>

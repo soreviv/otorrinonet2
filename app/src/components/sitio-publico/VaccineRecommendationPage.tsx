@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+import { PublicHeader } from './PublicHeader'
 import { PublicFooter } from './PublicFooter'
 import {
-  Calendar, Menu, X, Syringe, ShieldCheck, Info,
+  Calendar, Syringe, ShieldCheck, Info,
   RefreshCw, AlertTriangle, MapPin,
 } from 'lucide-react'
 import {
@@ -24,14 +24,6 @@ import {
 type AgeUnit = 'meses' | 'años'
 type Sex = 'male' | 'female'
 
-const NAV_LINKS = [
-  { label: 'Inicio', href: '/' },
-  { label: 'Perfil', href: '/perfil' },
-  { label: 'Servicios', href: '/servicios' },
-  { label: 'Ubicación', href: '/ubicacion' },
-  { label: 'Contacto', href: '/contacto' },
-]
-
 const ORDERED_PRIORITIES: Priority[] = ['routine', 'recommended', 'shared-decision']
 
 function groupByPriority(vaccines: VaccineResult[]): Record<Priority, VaccineResult[]> {
@@ -44,12 +36,7 @@ function groupByPriority(vaccines: VaccineResult[]): Record<Priority, VaccineRes
   return groups
 }
 
-interface Props {
-  onBookAppointment: () => void
-}
-
-export function VaccineRecommendationPage({ onBookAppointment }: Props) {
-  const [mobileOpen,   setMobileOpen]   = useState(false)
+export function VaccineRecommendationPage() {
   const [ageValue,     setAgeValue]     = useState('')
   const [ageUnit,      setAgeUnit]      = useState<AgeUnit>('años')
   const [sex,          setSex]          = useState<Sex | ''>('')
@@ -102,60 +89,7 @@ export function VaccineRecommendationPage({ onBookAppointment }: Props) {
   return (
     <div className="min-h-screen bg-slate-50 font-sans antialiased dark:bg-slate-950">
 
-      {/* ── NAV ── */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100 dark:bg-slate-900/95 dark:border-slate-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center">
-              <Image src="/assets/logo-consultorio.png" alt="Logotipo del consultorio del Dr. Alejandro Viveros Domínguez, otorrinolaringólogo" width={40} height={40} className="h-10 w-auto" priority />
-            </Link>
-            <div className="hidden md:flex items-center gap-6">
-              {NAV_LINKS.map(({ label, href }) => (
-                <a
-                  key={label}
-                  href={href}
-                  className={`text-sm font-medium transition-colors ${
-                    href === '/vacunacion'
-                      ? 'text-sky-600 dark:text-sky-400'
-                      : 'text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400'
-                  }`}
-                >
-                  {label}
-                </a>
-              ))}
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={onBookAppointment}
-                className="hidden sm:flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm shadow-sky-200 dark:shadow-sky-900"
-              >
-                <Calendar className="w-3.5 h-3.5" />
-                Agendar Cita
-              </button>
-              <button
-                onClick={() => setMobileOpen(!mobileOpen)}
-                className="md:hidden p-2 text-slate-500 hover:text-slate-800 transition-colors dark:text-slate-400 dark:hover:text-white"
-              >
-                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-        </div>
-        {mobileOpen && (
-          <div className="md:hidden border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pb-4 pt-3 flex flex-col gap-1">
-            {NAV_LINKS.map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                onClick={() => setMobileOpen(false)}
-                className="text-sm text-slate-600 dark:text-slate-300 font-medium py-2.5 border-b border-slate-50 dark:border-slate-800 last:border-0"
-              >
-                {label}
-              </a>
-            ))}
-          </div>
-        )}
-      </nav>
+      <PublicHeader />
 
       {/* ── HERO ── */}
       <section className="bg-white border-b border-slate-100 dark:bg-slate-900 dark:border-slate-800 py-12">
@@ -468,12 +402,12 @@ export function VaccineRecommendationPage({ onBookAppointment }: Props) {
                     El Dr. Viveros ofrece servicio de vacunación en el consultorio.
                   </p>
                 </div>
-                <button
-                  onClick={onBookAppointment}
+                <Link
+                  href="/agendar"
                   className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap"
                 >
                   Agendar cita
-                </button>
+                </Link>
               </div>
             )}
 

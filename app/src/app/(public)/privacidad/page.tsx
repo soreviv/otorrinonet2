@@ -1,6 +1,18 @@
+import type { Metadata } from 'next'
+import { PublicHeader } from '@/components/sitio-publico/PublicHeader'
+import { PublicFooter } from '@/components/sitio-publico/PublicFooter'
+
+export const metadata: Metadata = {
+  title: 'Aviso de Privacidad · Dr. Alejandro Viveros Domínguez',
+  description: 'Tratamiento de datos personales conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.',
+  alternates: { canonical: '/privacidad' },
+}
+
 export default function AvisoPrivacidadPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
+    <div className="min-h-screen bg-white dark:bg-slate-950 font-sans antialiased flex flex-col">
+      <PublicHeader />
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-16">
       <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
         Aviso de Privacidad
       </h1>
@@ -223,6 +235,8 @@ export default function AvisoPrivacidadPage() {
         </section>
 
       </div>
+      </main>
+      <PublicFooter />
     </div>
   )
 }

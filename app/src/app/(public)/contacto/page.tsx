@@ -1,19 +1,13 @@
-'use client'
-
-import { useRouter } from 'next/navigation'
+import type { Metadata } from 'next'
 import { ContactPage } from '@/components/sitio-publico/ContactPage'
 import { contactInfo } from '@/lib/sitio-publico-data'
 
-export default function ContactoPageRoute() {
-  const router = useRouter()
+export const metadata: Metadata = {
+  title: 'Contacto · Consultorio Dr. Alejandro Viveros Domínguez',
+  description: 'Escríbenos o llama al consultorio del Dr. Viveros Domínguez en Lindavista, CDMX. Respuesta en menos de 24 horas.',
+  alternates: { canonical: '/contacto' },
+}
 
-  return (
-    <ContactPage
-      contactInfo={contactInfo}
-      onSubmitContactForm={(data) => {
-        console.log('Contact form submitted:', data)
-      }}
-      onBookAppointment={() => router.push('/agendar')}
-    />
-  )
+export default function ContactoPageRoute() {
+  return <ContactPage contactInfo={contactInfo} />
 }
