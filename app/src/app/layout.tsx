@@ -132,10 +132,6 @@ export default async function RootLayout({
           strategy="afterInteractive"
           nonce={nonce}
         />
-        <Script
-          src="https://acct.acceptrics.com/d7ba6fe"
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   );
