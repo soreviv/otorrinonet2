@@ -5,7 +5,7 @@ export default function AvisoPrivacidadPage() {
         Aviso de Privacidad
       </h1>
       <p className="text-sm text-slate-500 dark:text-slate-400 mb-10">
-        Última actualización: 24 de abril de 2025
+        Última actualización: 11 de diciembre de 2025
       </p>
 
       <div className="prose prose-slate dark:prose-invert max-w-none text-[15px] leading-relaxed space-y-6">
@@ -186,6 +186,28 @@ export default function AvisoPrivacidadPage() {
             aviso en el consultorio, publicación en el portal de internet{' '}
             <a href="https://www.otorrinonet.com" className="text-sky-600 underline">www.otorrinonet.com</a>{' '}
             y/o a través de un comunicado a su correo electrónico.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mt-8 mb-3">
+            Usted puede revocar su consentimiento para el uso de sus datos personales
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400">
+            Usted puede revocar el consentimiento que, en su caso, nos haya otorgado para el tratamiento
+            de sus datos personales. Sin embargo, es importante que tenga en cuenta que no en todos los
+            casos podremos atender su solicitud o concluir el uso de forma inmediata, ya que es posible
+            que por alguna obligación legal requiramos seguir tratando sus datos personales. Asimismo,
+            usted deberá considerar que para ciertos fines, la revocación de su consentimiento implicará
+            que no le podamos seguir prestando el servicio que nos solicitó o la conclusión de su relación
+            con nosotros.
+          </p>
+          <p className="mt-4 text-slate-600 dark:text-slate-400">
+            Para revocar su consentimiento, usted deberá enviar la solicitud respectiva en escrito libre
+            y anexando copia de su identificación oficial al correo electrónico{' '}
+            <a href="mailto:contacto@otorrinonet.com" className="text-sky-600 underline">
+              contacto@otorrinonet.com
+            </a>.
           </p>
         </section>
 
