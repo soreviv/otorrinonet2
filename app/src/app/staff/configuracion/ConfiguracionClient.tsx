@@ -48,30 +48,13 @@ function Card({ title, icon, children }: { title: string; icon: React.ReactNode;
 
 // ─── Establecimiento tab ──────────────────────────────────────────────────────
 
-function EstablecimientoTab({ initial }: { initial: ClinicConfigData }) {
-  const [form, setForm] = useState({ ...initial })
-  const [saved, setSaved] = useState(false)
-  const [err, setErr] = useState('')
-  const [isPending, startTransition] = useTransition()
-
-  const set = (k: keyof ClinicConfigData, v: string) => {
-    setForm(f => ({ ...f, [k]: v }))
-    setSaved(false)
-    setErr('')
-  }
-
-  function handleSave() {
-    setErr('')
-    startTransition(async () => {
-      try {
-        await saveClinicConfig(form)
-        setSaved(true)
-      } catch (e) {
-        setErr(e instanceof Error ? e.message : 'Error al guardar.')
-      }
-    })
-  }
-
+function EstablecimientoTab({
+  form, set, saved, err, isPending, onSave,
+}: {
+  form: ClinicConfigData
+  set: (k: keyof ClinicConfigData, v: string) => void
+  saved: boolean; err: string; isPending: boolean; onSave: () => void
+}) {
   return (
     <div className="space-y-4" data-testid="establecimiento-tab">
       <Card title="Datos del Establecimiento" icon={<Building2 className="w-4 h-4" strokeWidth={1.75} />}>
@@ -114,37 +97,20 @@ function EstablecimientoTab({ initial }: { initial: ClinicConfigData }) {
         </div>
       </Card>
 
-      <SaveBar saved={saved} err={err} pending={isPending} onSave={handleSave} />
+      <SaveBar saved={saved} err={err} pending={isPending} onSave={onSave} />
     </div>
   )
 }
 
 // ─── Médico tab ───────────────────────────────────────────────────────────────
 
-function MedicoTab({ initial }: { initial: ClinicConfigData }) {
-  const [form, setForm] = useState({ ...initial })
-  const [saved, setSaved] = useState(false)
-  const [err, setErr] = useState('')
-  const [isPending, startTransition] = useTransition()
-
-  const set = (k: keyof ClinicConfigData, v: string) => {
-    setForm(f => ({ ...f, [k]: v }))
-    setSaved(false)
-    setErr('')
-  }
-
-  function handleSave() {
-    setErr('')
-    startTransition(async () => {
-      try {
-        await saveClinicConfig(form)
-        setSaved(true)
-      } catch (e) {
-        setErr(e instanceof Error ? e.message : 'Error al guardar.')
-      }
-    })
-  }
-
+function MedicoTab({
+  form, set, saved, err, isPending, onSave,
+}: {
+  form: ClinicConfigData
+  set: (k: keyof ClinicConfigData, v: string) => void
+  saved: boolean; err: string; isPending: boolean; onSave: () => void
+}) {
   return (
     <div className="space-y-4" data-testid="medico-tab">
       <Card title="Datos del Médico" icon={<Stethoscope className="w-4 h-4" strokeWidth={1.75} />}>
@@ -186,7 +152,7 @@ function MedicoTab({ initial }: { initial: ClinicConfigData }) {
         </div>
       </Card>
 
-      <SaveBar saved={saved} err={err} pending={isPending} onSave={handleSave} />
+      <SaveBar saved={saved} err={err} pending={isPending} onSave={onSave} />
     </div>
   )
 }
@@ -393,6 +359,28 @@ function BitacoraTab({ logs }: { logs: AuditLogRecord[] }) {
 
 export function ConfiguracionClient({ clinicConfig, staffUsers, auditLogs, currentUserId }: Props) {
   const [tab, setTab] = useState<Tab>('establecimiento')
+  const [form, setFormState] = useState<ClinicConfigData>({ ...clinicConfig })
+  const [saved, setSaved] = useState(false)
+  const [err, setErr] = useState('')
+  const [isPending, startTransition] = useTransition()
+
+  const set = (k: keyof ClinicConfigData, v: string) => {
+    setFormState(f => ({ ...f, [k]: v }))
+    setSaved(false)
+    setErr('')
+  }
+
+  function handleSave() {
+    setErr('')
+    startTransition(async () => {
+      try {
+        await saveClinicConfig(form)
+        setSaved(true)
+      } catch (e) {
+        setErr(e instanceof Error ? e.message : 'Error al guardar.')
+      }
+    })
+  }
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'establecimiento', label: 'Establecimiento', icon: <Building2 className="w-4 h-4" strokeWidth={1.75} /> },
@@ -419,10 +407,10 @@ export function ConfiguracionClient({ clinicConfig, staffUsers, auditLogs, curre
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
         {tab === 'establecimiento' && (
-          <EstablecimientoTab initial={clinicConfig} />
+          <EstablecimientoTab form={form} set={set} saved={saved} err={err} isPending={isPending} onSave={handleSave} />
         )}
         {tab === 'medico' && (
-          <MedicoTab initial={clinicConfig} />
+          <MedicoTab form={form} set={set} saved={saved} err={err} isPending={isPending} onSave={handleSave} />
         )}
         {tab === 'usuarios' && (
           <UsuariosTab initial={staffUsers} currentUserId={currentUserId} />

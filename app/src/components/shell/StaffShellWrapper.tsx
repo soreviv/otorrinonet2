@@ -6,6 +6,7 @@ import {
   ClipboardList,
   ScrollText,
   Shield,
+  Settings,
 } from 'lucide-react'
 import { StaffShell, type StaffRole } from './StaffShell'
 import { logoutAction } from '@/app/actions/auth'
@@ -36,6 +37,13 @@ const staffNavItems = [
     label: 'Administración',
     href: '/staff/admin',
     icon: Shield,
+    roles: ['medico'] as StaffRole[],
+  },
+  {
+    id: 'configuracion',
+    label: 'Configuración',
+    href: '/staff/configuracion',
+    icon: Settings,
     roles: ['medico'] as StaffRole[],
   },
 ]

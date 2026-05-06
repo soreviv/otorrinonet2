@@ -5,7 +5,7 @@ import {
   Clock, Activity, TrendingUp, ChevronRight,
 } from 'lucide-react'
 import { getDashboardMetrics, getCitasHoy, getPacientesRecientes } from '@/app/actions/dashboard'
-import { CitasPorDiaChart, CitasPorEstadoChart } from '@/components/dashboard/DashboardChartsClient'
+import { CitasPorDiaChart, CitasPorEstadoChart } from '@/components/dashboard/DashboardChartsWrapper'
 
 const STATUS_LABELS: Record<string, string> = {
   pendiente: 'Pendiente', confirmada: 'Confirmada', completada: 'Completada', cancelada: 'Cancelada',
