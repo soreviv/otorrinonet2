@@ -1,7 +1,5 @@
 import type { Metadata } from 'next'
-import { PublicHeader } from '@/components/sitio-publico/PublicHeader'
-import { PublicFooter } from '@/components/sitio-publico/PublicFooter'
-import { Breadcrumbs } from '@/components/sitio-publico/Breadcrumbs'
+import { LegalPageShell } from '@/components/sitio-publico/LegalPageShell'
 
 export const metadata: Metadata = {
   title: 'Política de Cookies · Dr. Alejandro Viveros Domínguez',
@@ -11,229 +9,94 @@ export const metadata: Metadata = {
 
 export default function CookiesPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 font-sans antialiased flex flex-col">
-      <PublicHeader />
-      <Breadcrumbs items={[{ label: 'Política de Cookies', href: '/cookies' }]} />
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-16">
-      <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-        Política de Cookies
-      </h1>
-      <p className="text-sm text-slate-500 dark:text-slate-400 mb-10">
-        Actualizado el 5 de febrero de 2022
-      </p>
+    <LegalPageShell
+      title="Política de Cookies"
+      updatedAt="Última actualización: 7 de mayo de 2026"
+      breadcrumb={{ label: 'Política de Cookies', href: '/cookies' }}
+    >
+      <section>
+        <h2>¿Qué es una cookie?</h2>
+        <p>
+          Una cookie es un pequeño archivo de texto que se almacena en su computadora u otro dispositivo
+          conectado a Internet para identificar su navegador, proporcionar análisis y recordar información
+          sobre usted, como su preferencia de idioma. Son completamente seguras y no se pueden utilizar
+          para ejecutar programas o enviar virus a su dispositivo.
+        </p>
+      </section>
 
-      <div className="prose prose-slate dark:prose-invert max-w-none text-[15px] leading-relaxed space-y-6">
+      <section>
+        <h2>¿Por qué utilizamos cookies?</h2>
+        <p>Usamos cookies propias y de terceros en nuestra plataforma para varios propósitos:</p>
+        <ul>
+          <li>Para facilitar el funcionamiento y la funcionalidad básica del sitio.</li>
+          <li>Para mejorar su experiencia de navegación y hacerla más rápida.</li>
+          <li>Para entender cómo se utiliza el sitio y cuál es la mejor forma de mejorarlo.</li>
+          <li>Para analizar la efectividad de nuestras comunicaciones.</li>
+        </ul>
+      </section>
 
-        <section>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mt-8 mb-3">
-            Definiciones y términos clave
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400">
-            Para ayudar a explicar las cosas de la manera más clara posible en esta Política de cookies,
-            cada vez que se hace referencia a cualquiera de estos términos, se definen estrictamente como:
-          </p>
-          <ul className="list-disc list-inside mt-3 space-y-2 text-slate-600 dark:text-slate-400">
-            <li>
-              <strong className="text-slate-700 dark:text-slate-300">Cookie:</strong> pequeña cantidad de
-              datos generados por un sitio web y guardados por su navegador web. Se utiliza para identificar
-              su navegador, proporcionar análisis, recordar información sobre usted, como su preferencia de
-              idioma o información de inicio de sesión.
-            </li>
-            <li>
-              <strong className="text-slate-700 dark:text-slate-300">Compañía:</strong> cuando esta política
-              menciona &ldquo;Compañía&rdquo;, &ldquo;nosotros&rdquo;, &ldquo;nos&rdquo; o &ldquo;nuestro&rdquo;, se refiere a Dr. Viveros Otorrino, que es
-              responsable de su información en virtud de esta Política de Cookies.
-            </li>
-            <li>
-              <strong className="text-slate-700 dark:text-slate-300">Plataforma:</strong> sitio web de
-              Internet, aplicación web o aplicación digital de cara al público de Dr. Viveros Otorrino.
-            </li>
-            <li>
-              <strong className="text-slate-700 dark:text-slate-300">Dispositivo:</strong> cualquier
-              dispositivo conectado a Internet, como un teléfono, tablet, computadora o cualquier otro
-              dispositivo que se pueda usar para visitar Dr. Viveros Otorrino y usar los servicios.
-            </li>
-            <li>
-              <strong className="text-slate-700 dark:text-slate-300">Datos personales:</strong> cualquier
-              información que directa, indirectamente o en conexión con otra información, incluido un número
-              de identificación personal, permita la identificación de una persona física.
-            </li>
-            <li>
-              <strong className="text-slate-700 dark:text-slate-300">Servicio:</strong> se refiere al
-              servicio brindado por Dr. Viveros Otorrino como se describe en los términos relativos (si
-              están disponibles) y en esta plataforma.
-            </li>
-            <li>
-              <strong className="text-slate-700 dark:text-slate-300">Terceros:</strong> se refiere a
-              anunciantes, patrocinadores de concursos, socios promocionales y de marketing, y otros que
-              brindan nuestro contenido o cuyos productos o servicios que creemos que pueden interesarle.
-            </li>
-            <li>
-              <strong className="text-slate-700 dark:text-slate-300">Sitio web:</strong> el sitio de
-              Dr. Viveros Otorrino, al que se puede acceder a través de esta URL:{' '}
-              <a href="https://www.otorrinonet.com" className="text-sky-600 underline">
-                https://www.otorrinonet.com
-              </a>
-            </li>
-            <li>
-              <strong className="text-slate-700 dark:text-slate-300">Usted:</strong> una persona o entidad
-              que está registrada con Dr. Viveros Otorrino para utilizar los Servicios.
-            </li>
-          </ul>
-        </section>
+      <section>
+        <h2>Tipos de cookies que utilizamos</h2>
 
-        <section>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mt-8 mb-3">
-            Introducción
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400">
-            Esta Política de cookies explica cómo Dr. Viveros Otorrino y sus afiliados (colectivamente
-            &ldquo;Dr. Viveros Otorrino&rdquo;, &ldquo;nosotros&rdquo;, &ldquo;nos&rdquo; y &ldquo;nuestro&rdquo;), utilizan cookies y tecnologías
-            similares para reconocerlo cuando visita nuestra plataforma. Explica qué son estas tecnologías
-            y por qué las usamos, así como las opciones de cómo controlarlas.
-          </p>
-        </section>
+        <h3>Cookies esenciales</h3>
+        <p>
+          Estrictamente necesarias para habilitar funciones básicas como la seguridad y la gestión
+          de preferencias. Sin ellas, no podría utilizar los servicios básicos del sitio.
+        </p>
 
-        <section>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mt-8 mb-3">
-            ¿Qué es una Cookie?
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400">
-            Una cookie es un pequeño archivo de texto que se almacena en su computadora u otro dispositivo
-            conectado a Internet para identificar su navegador, proporcionar análisis, recordar información
-            sobre usted, como su preferencia de idioma o información de inicio de sesión. Son completamente
-            seguros y no se pueden utilizar para ejecutar programas o enviar virus a su dispositivo.
-          </p>
-        </section>
+        <h3>Cookies analíticas</h3>
+        <p>
+          Nos permiten entender cómo los visitantes interactúan con el sitio. Usamos Google Analytics
+          (GA4) para recopilar datos de uso de forma agregada y anónima. Estas cookies solo se activan
+          si usted otorga su consentimiento.
+        </p>
 
-        <section>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mt-8 mb-3">
-            ¿Por qué utilizamos Cookies?
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400">
-            Usamos cookies propias y/o de terceros en nuestra plataforma para varios propósitos, tales como:
-          </p>
-          <ul className="list-disc list-inside mt-3 space-y-1 text-slate-600 dark:text-slate-400">
-            <li>Para facilitar el funcionamiento y la funcionalidad de nuestra plataforma.</li>
-            <li>Para mejorar su experiencia con nuestra plataforma y hacer que navegar alrededor de ellos sea más rápido y fácil.</li>
-            <li>Para permitirnos crear una experiencia de usuario personalizada para usted y para que entendamos qué es útil o de su interés.</li>
-            <li>Para analizar cómo se utiliza nuestra plataforma y cuál es la mejor forma de personalizarla.</li>
-            <li>Para identificar prospectos futuros y personalizar las interacciones de marketing y ventas con él.</li>
-            <li>Para facilitar la adaptación de la publicidad online a sus intereses.</li>
-          </ul>
-        </section>
+        <h3>Cookies de marketing</h3>
+        <p>
+          Se utilizan para adaptar la publicidad en línea a sus intereses y medir la efectividad de
+          campañas. Solo se activan si usted otorga su consentimiento explícito.
+        </p>
+      </section>
 
-        <section>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mt-8 mb-3">
-            Tipos de Cookies que utilizamos
-          </h2>
+      <section>
+        <h2>Google Consent Mode v2</h2>
+        <p>
+          Este sitio implementa Google Consent Mode v2. Esto significa que Google Analytics carga
+          desde el primer momento, pero <strong>sin guardar cookies de identificación</strong> hasta
+          que usted acepte. Si rechaza, GA4 sigue midiendo visitas de forma agregada sin rastrear
+          su identidad ni su comportamiento individual.
+        </p>
+      </section>
 
-          <div className="space-y-5 mt-4">
-            <div>
-              <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">Cookies Esenciales</h3>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Usamos cookies esenciales para que nuestra plataforma funcione. Estas cookies son
-                estrictamente necesarias para habilitar funciones básicas como la seguridad, la gestión de
-                la red, sus preferencias de cookies y accesibilidad. Sin ellas, no podría utilizar los
-                servicios básicos.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">Cookies de Rendimiento y Funcionalidad</h3>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Estas cookies se utilizan para mejorar el rendimiento y la funcionalidad de nuestra
-                plataforma, pero no son esenciales para su uso. Sin embargo, sin estas cookies, es posible
-                que ciertas funciones, como los videos, no estén disponibles.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">Cookies de Marketing</h3>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Estas cookies de marketing basadas en cuentas nos permiten identificar prospectos futuros
-                y personalizar las interacciones de ventas y marketing con ellos.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">Cookies de Análisis y Personalización</h3>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Estas cookies recopilan información que se utiliza para ayudarnos a comprender cómo se
-                utiliza nuestra plataforma o qué tan efectivas son nuestras campañas de marketing.
-                Usamos cookies proporcionadas por Google Analytics para recopilar datos limitados
-                directamente de los navegadores del usuario final.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">Cookies de Redes Sociales</h3>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Estas cookies se utilizan cuando comparte información utilizando un botón para compartir
-                en las redes sociales o un botón &ldquo;Me gusta&rdquo; en nuestro Sitio o cuando vincula su cuenta
-                o interactúa con nuestro contenido a través de un sitio web de redes sociales.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">Cookies de Terceros</h3>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Algunas cookies que se han configurado en nuestra plataforma no se configuran de forma
-                propia por Dr. Viveros Otorrino. Los sitios web pueden integrarse con contenido de
-                terceros para ofrecer publicidad. No controlamos el uso de estas cookies de terceros.
-              </p>
-            </div>
-          </div>
-        </section>
+      <section>
+        <h2>¿Cómo administrar sus preferencias de cookies?</h2>
+        <p>
+          Al visitar este sitio por primera vez verá un banner de cookies donde puede elegir aceptar
+          todas las cookies, rechazarlas o personalizar su elección por categoría. Su preferencia se
+          guarda durante 12 meses.
+        </p>
+        <p>
+          También puede controlar las cookies directamente desde la configuración de su navegador.
+          Tenga en cuenta que deshabilitar ciertas cookies puede afectar la funcionalidad del sitio.
+        </p>
+      </section>
 
-        <section>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mt-8 mb-3">
-            ¿Cómo se pueden Administrar las Cookies?
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400">
-            La mayoría de los navegadores le permiten controlar las cookies a través de sus preferencias
-            de &ldquo;configuración&rdquo;. Sin embargo, si limita la capacidad de los sitios web para establecer
-            cookies, puede empeorar su experiencia de usuario en general.
-          </p>
-        </section>
+      <section>
+        <h2>Cambios en esta política</h2>
+        <p>
+          Podemos actualizar esta Política de Cookies para reflejar cambios en nuestro servicio o en
+          la normativa aplicable. Si continúa utilizando el sitio tras la publicación de cambios,
+          se considerará que acepta la política actualizada.
+        </p>
+      </section>
 
-        <section>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mt-8 mb-3">
-            Cambios en nuestra Política de Cookies
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400">
-            Podemos cambiar nuestro Servicio y nuestras políticas, y es posible que debamos realizar
-            cambios en esta Política de cookies para que reflejen con precisión nuestro Servicio y
-            nuestras políticas. Si continúa utilizando el Servicio, estará sujeto a la Política de
-            cookies actualizada.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mt-8 mb-3">
-            Su consentimiento
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400">
-            Al utilizar nuestra plataforma, registrar una cuenta o realizar una compra, por la presente
-            acepta nuestra Política de cookies y acepta sus términos.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mt-8 mb-3">
-            Contáctenos
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400">
-            No dude en contactarnos si tiene alguna pregunta sobre nuestra Política de Cookies.
-          </p>
-          <ul className="list-disc list-inside mt-2 text-slate-600 dark:text-slate-400">
-            <li>
-              A través de correo electrónico:{' '}
-              <a href="mailto:contacto@otorrinonet.com" className="text-sky-600 underline">
-                contacto@otorrinonet.com
-              </a>
-            </li>
-          </ul>
-        </section>
-
-      </div>
-      </main>
-      <PublicFooter />
-    </div>
+      <section>
+        <h2>Contáctenos</h2>
+        <p>
+          Si tiene alguna pregunta sobre nuestra Política de Cookies, puede contactarnos en{' '}
+          <a href="mailto:contacto@otorrinonet.com">contacto@otorrinonet.com</a>.
+        </p>
+      </section>
+    </LegalPageShell>
   )
 }
