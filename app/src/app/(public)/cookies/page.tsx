@@ -97,6 +97,22 @@ export default function CookiesPage() {
           <a href="mailto:contacto@otorrinonet.com">contacto@otorrinonet.com</a>.
         </p>
       </section>
+
+      <section>
+        <h2>Más información sobre las cookies</h2>
+        <p>
+          Si desea ampliar su conocimiento sobre qué son las cookies, cómo funcionan y cómo
+          gestionarlas,{' '}
+          <a
+            href="http://mzl.la/1BAQyo7"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            puede hacer clic aquí para acceder a una guía detallada
+          </a>
+          .
+        </p>
+      </section>
     </LegalPageShell>
   )
 }
