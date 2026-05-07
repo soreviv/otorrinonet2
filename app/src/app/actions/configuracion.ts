@@ -5,6 +5,13 @@ import { verifySession } from '@/lib/dal'
 import { logAction } from '@/lib/audit'
 import bcrypt from 'bcryptjs'
 
+export interface FechaBloqueo {
+  id: string
+  date: string      // 'YYYY-MM-DD'
+  tipo: 'feriado' | 'vacaciones' | 'congreso'
+  etiqueta: string
+}
+
 export interface ClinicConfigData {
   clinicName: string
   clinicAddress: string
@@ -90,6 +97,39 @@ export async function saveClinicConfig(data: ClinicConfigData): Promise<void> {
     where: { id: 'singleton' },
     create: { id: 'singleton', ...data },
     update: data,
+  })
+  void logAction({ action: 'modificacion', resource: 'clinic_config', userId: session.userId })
+}
+
+// ─── Fechas bloqueadas ────────────────────────────────────────────────────────
+
+export async function getDiasFeriados(): Promise<FechaBloqueo[]> {
+  await verifySession()
+  const cfg = await prisma.clinicConfig.findUnique({
+    where: { id: 'singleton' },
+    select: { diasFeriados: true },
+  })
+  if (!cfg?.diasFeriados || !Array.isArray(cfg.diasFeriados)) return []
+  return cfg.diasFeriados as unknown as FechaBloqueo[]
+}
+
+export async function getPublicBlockedDates(): Promise<string[]> {
+  const cfg = await prisma.clinicConfig.findUnique({
+    where: { id: 'singleton' },
+    select: { diasFeriados: true },
+  })
+  if (!cfg?.diasFeriados || !Array.isArray(cfg.diasFeriados)) return []
+  return (cfg.diasFeriados as unknown as FechaBloqueo[]).map(f => f.date)
+}
+
+export async function saveDiasFeriados(fechas: FechaBloqueo[]): Promise<void> {
+  const session = await verifySession()
+  if (session.role !== 'medico') throw new Error('Sin autorización')
+
+  await prisma.clinicConfig.upsert({
+    where: { id: 'singleton' },
+    create: { id: 'singleton', diasFeriados: fechas as unknown as never },
+    update: { diasFeriados: fechas as unknown as never },
   })
   void logAction({ action: 'modificacion', resource: 'clinic_config', userId: session.userId })
 }

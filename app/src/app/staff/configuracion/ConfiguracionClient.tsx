@@ -4,10 +4,11 @@ import { useState, useTransition } from 'react'
 import {
   Building2, Stethoscope, Users, Shield, Plus, UserCheck, UserX,
   Save, RefreshCw, Search, Mail, Phone, MapPin, FileText, GraduationCap,
+  CalendarX2, Trash2, Calendar,
 } from 'lucide-react'
 import {
-  saveClinicConfig, createStaffUser, toggleStaffUserStatus,
-  type ClinicConfigData, type StaffUserData, type AuditLogRecord,
+  saveClinicConfig, createStaffUser, toggleStaffUserStatus, saveDiasFeriados,
+  type ClinicConfigData, type StaffUserData, type AuditLogRecord, type FechaBloqueo,
 } from '@/app/actions/configuracion'
 import { LogoUploader } from '@/components/configuracion/LogoUploader'
 
@@ -16,9 +17,10 @@ interface Props {
   staffUsers: StaffUserData[]
   auditLogs: AuditLogRecord[]
   currentUserId: string
+  diasFeriados: FechaBloqueo[]
 }
 
-type Tab = 'establecimiento' | 'medico' | 'usuarios' | 'bitacora'
+type Tab = 'establecimiento' | 'medico' | 'usuarios' | 'bitacora' | 'calendario'
 
 const INPUT = 'w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500'
 const LABEL = 'block text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5'
@@ -355,9 +357,213 @@ function BitacoraTab({ logs }: { logs: AuditLogRecord[] }) {
   )
 }
 
+// ─── Calendario tab ───────────────────────────────────────────────────────────
+
+const TIPO_LABELS: Record<FechaBloqueo['tipo'], string> = {
+  feriado: 'Feriado oficial',
+  vacaciones: 'Vacaciones',
+  congreso: 'Congreso / Evento',
+}
+
+const TIPO_COLORS: Record<FechaBloqueo['tipo'], string> = {
+  feriado: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300',
+  vacaciones: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300',
+  congreso: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300',
+}
+
+function nthMonday(year: number, month: number, n: number): string {
+  const date = new Date(year, month, 1)
+  const dow = date.getDay()
+  const daysToFirst = dow === 1 ? 0 : dow === 0 ? 1 : 8 - dow
+  const day = 1 + daysToFirst + (n - 1) * 7
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+function getMexicanHolidays(year: number): Omit<FechaBloqueo, 'id'>[] {
+  return [
+    { date: `${year}-01-01`, tipo: 'feriado', etiqueta: 'Año Nuevo' },
+    { date: nthMonday(year, 1, 1), tipo: 'feriado', etiqueta: 'Día de la Constitución' },
+    { date: nthMonday(year, 2, 3), tipo: 'feriado', etiqueta: 'Natalicio de Benito Juárez' },
+    { date: `${year}-05-01`, tipo: 'feriado', etiqueta: 'Día del Trabajo' },
+    { date: `${year}-09-16`, tipo: 'feriado', etiqueta: 'Día de la Independencia' },
+    { date: nthMonday(year, 10, 3), tipo: 'feriado', etiqueta: 'Revolución Mexicana' },
+    { date: `${year}-12-25`, tipo: 'feriado', etiqueta: 'Navidad' },
+  ]
+}
+
+function CalendarioTab({ initial }: { initial: FechaBloqueo[] }) {
+  const [dates, setDates] = useState<FechaBloqueo[]>(
+    [...initial].sort((a, b) => a.date.localeCompare(b.date))
+  )
+  const [newDate, setNewDate] = useState('')
+  const [newTipo, setNewTipo] = useState<FechaBloqueo['tipo']>('vacaciones')
+  const [newEtiqueta, setNewEtiqueta] = useState('')
+  const [holidayYear, setHolidayYear] = useState(new Date().getFullYear())
+  const [saved, setSaved] = useState(false)
+  const [err, setErr] = useState('')
+  const [isPending, startTransition] = useTransition()
+
+  function addDate() {
+    if (!newDate || !newEtiqueta.trim()) return
+    if (dates.some(d => d.date === newDate)) return
+    const entry: FechaBloqueo = {
+      id: `${newDate}-${Date.now()}`,
+      date: newDate,
+      tipo: newTipo,
+      etiqueta: newEtiqueta.trim(),
+    }
+    setDates(prev => [...prev, entry].sort((a, b) => a.date.localeCompare(b.date)))
+    setNewDate('')
+    setNewEtiqueta('')
+    setSaved(false)
+  }
+
+  function removeDate(id: string) {
+    setDates(prev => prev.filter(d => d.id !== id))
+    setSaved(false)
+  }
+
+  function addHolidays() {
+    const holidays = getMexicanHolidays(holidayYear)
+    setDates(prev => {
+      const existing = new Set(prev.map(d => d.date))
+      const toAdd = holidays
+        .filter(h => !existing.has(h.date))
+        .map(h => ({ ...h, id: `${h.date}-official` }))
+      return [...prev, ...toAdd].sort((a, b) => a.date.localeCompare(b.date))
+    })
+    setSaved(false)
+  }
+
+  function handleSave() {
+    setErr('')
+    startTransition(async () => {
+      try {
+        await saveDiasFeriados(dates)
+        setSaved(true)
+      } catch (e) {
+        setErr(e instanceof Error ? e.message : 'Error al guardar.')
+      }
+    })
+  }
+
+  function formatDate(iso: string) {
+    return new Date(iso + 'T12:00:00').toLocaleDateString('es-MX', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    })
+  }
+
+  const thisYear = new Date().getFullYear()
+
+  return (
+    <div className="space-y-4">
+      <Card title="Bloqueo de fechas" icon={<CalendarX2 className="w-4 h-4" strokeWidth={1.75} />}>
+        {/* Agregar fecha individual */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Field label="Fecha">
+            <input
+              type="date"
+              className={INPUT}
+              value={newDate}
+              onChange={e => { setNewDate(e.target.value); setSaved(false) }}
+            />
+          </Field>
+          <Field label="Tipo">
+            <select className={INPUT} value={newTipo} onChange={e => setNewTipo(e.target.value as FechaBloqueo['tipo'])}>
+              <option value="vacaciones">Vacaciones</option>
+              <option value="congreso">Congreso / Evento</option>
+              <option value="feriado">Feriado oficial</option>
+            </select>
+          </Field>
+          <Field label="Descripción">
+            <input
+              className={INPUT}
+              placeholder="Ej. Congreso AMCORL 2026"
+              value={newEtiqueta}
+              onChange={e => setNewEtiqueta(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') addDate() }}
+            />
+          </Field>
+        </div>
+        <div className="mt-3">
+          <button
+            className={BTN_PRIMARY}
+            onClick={addDate}
+            disabled={!newDate || !newEtiqueta.trim()}
+          >
+            <Plus className="w-4 h-4" strokeWidth={2} />
+            Agregar fecha
+          </button>
+        </div>
+
+        {/* Feriados oficiales */}
+        <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+          <p className={LABEL}>Feriados oficiales de México</p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <select
+              className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              value={holidayYear}
+              onChange={e => setHolidayYear(Number(e.target.value))}
+            >
+              {[thisYear, thisYear + 1, thisYear + 2].map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+            <button className={BTN_OUTLINE} onClick={addHolidays}>
+              <Calendar className="w-4 h-4" strokeWidth={1.75} />
+              Agregar feriados {holidayYear}
+            </button>
+          </div>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+            Año Nuevo · Constitución · Juárez · Día del Trabajo · Independencia · Revolución · Navidad
+          </p>
+        </div>
+
+        {/* Lista de fechas bloqueadas */}
+        <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+          <p className={LABEL}>Fechas bloqueadas ({dates.length})</p>
+          {dates.length === 0 ? (
+            <p className="text-sm text-slate-400 dark:text-slate-600 italic py-4 text-center">
+              No hay fechas bloqueadas. Los pacientes podrán agendar cualquier día hábil.
+            </p>
+          ) : (
+            <div className="space-y-2 mt-2">
+              {dates.map(d => (
+                <div
+                  key={d.id}
+                  className="flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-semibold ${TIPO_COLORS[d.tipo]}`}>
+                      {TIPO_LABELS[d.tipo]}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{d.etiqueta}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 capitalize">{formatDate(d.date)}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => removeDate(d.id)}
+                    className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                    aria-label={`Eliminar ${d.etiqueta}`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Card>
+
+      <SaveBar saved={saved} err={err} pending={isPending} onSave={handleSave} />
+    </div>
+  )
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function ConfiguracionClient({ clinicConfig, staffUsers, auditLogs, currentUserId }: Props) {
+export function ConfiguracionClient({ clinicConfig, staffUsers, auditLogs, currentUserId, diasFeriados }: Props) {
   const [tab, setTab] = useState<Tab>('establecimiento')
   const [form, setFormState] = useState<ClinicConfigData>({ ...clinicConfig })
   const [saved, setSaved] = useState(false)
@@ -386,6 +592,7 @@ export function ConfiguracionClient({ clinicConfig, staffUsers, auditLogs, curre
     { id: 'establecimiento', label: 'Establecimiento', icon: <Building2 className="w-4 h-4" strokeWidth={1.75} /> },
     { id: 'medico', label: 'Médico', icon: <Stethoscope className="w-4 h-4" strokeWidth={1.75} /> },
     { id: 'usuarios', label: 'Usuarios', icon: <Users className="w-4 h-4" strokeWidth={1.75} /> },
+    { id: 'calendario', label: 'Calendario', icon: <CalendarX2 className="w-4 h-4" strokeWidth={1.75} /> },
     { id: 'bitacora', label: 'Bitácora', icon: <Shield className="w-4 h-4" strokeWidth={1.75} /> },
   ]
 
@@ -414,6 +621,9 @@ export function ConfiguracionClient({ clinicConfig, staffUsers, auditLogs, curre
         )}
         {tab === 'usuarios' && (
           <UsuariosTab initial={staffUsers} currentUserId={currentUserId} />
+        )}
+        {tab === 'calendario' && (
+          <CalendarioTab initial={diasFeriados} />
         )}
         {tab === 'bitacora' && (
           <BitacoraTab logs={auditLogs} />

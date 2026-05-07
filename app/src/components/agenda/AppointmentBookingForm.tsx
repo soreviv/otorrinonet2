@@ -10,6 +10,7 @@ import { StepConfirmation } from './steps/StepConfirmation'
 import { PatientFormSchema, type PatientFormData } from '@/lib/schemas/appointment'
 import type { AppointmentBookingProps, BookingFormData } from '@/lib/agenda-types'
 import { submitAppointmentRequest } from '@/app/actions/appointments'
+import { getPublicBlockedDates } from '@/app/actions/configuracion'
 
 const STEPS = ['Fecha y hora', 'Tus datos', 'Confirmación'] as const
 const DRAFT_KEY = 'appointment-draft'
@@ -47,7 +48,12 @@ export function AppointmentBookingForm({ onSubmit }: AppointmentBookingProps) {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [blockedDates, setBlockedDates] = useState<string[]>([])
   const turnstileRef = useRef<TurnstileInstance>(null)
+
+  useEffect(() => {
+    getPublicBlockedDates().then(setBlockedDates).catch(() => {})
+  }, [])
 
   // Persist draft (explicit fields to avoid destructuring an unused variable)
   const draftSnapshot = useMemo<DraftData>(
@@ -179,6 +185,7 @@ export function AppointmentBookingForm({ onSubmit }: AppointmentBookingProps) {
               selectedTime={selectedTime}
               onDateChange={handleDateChange}
               onTimeChange={handleTimeChange}
+              blockedDates={blockedDates}
             />
           )}
 

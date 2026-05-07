@@ -26,6 +26,7 @@ interface StepDateTimeSelectionProps {
   selectedTime: string
   onDateChange: (d: string) => void
   onTimeChange: (t: string) => void
+  blockedDates?: string[]
 }
 
 export function StepDateTimeSelection({
@@ -33,6 +34,7 @@ export function StepDateTimeSelection({
   selectedTime,
   onDateChange,
   onTimeChange,
+  blockedDates = [],
 }: StepDateTimeSelectionProps) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -72,9 +74,16 @@ export function StepDateTimeSelection({
     return `${viewYear}-${mm}-${dd}`
   }
 
+  const blockedSet = useMemo(() => new Set(blockedDates), [blockedDates])
+
   function isDisabled(day: number) {
     const date = new Date(viewYear, viewMonth, day)
-    return date < today || !CONSULTATION_DAYS.has(date.getDay())
+    const iso = toISO(day)
+    return date < today || !CONSULTATION_DAYS.has(date.getDay()) || blockedSet.has(iso)
+  }
+
+  function getBlockedReason(day: number): string | undefined {
+    return blockedSet.has(toISO(day)) ? 'Fecha no disponible' : undefined
   }
 
   const todayISO = today.toISOString().split('T')[0]
@@ -126,15 +135,17 @@ export function StepDateTimeSelection({
               const disabled = isDisabled(day)
               const isSelected = iso === selectedDate
               const isToday = iso === todayISO
+              const blockedReason = getBlockedReason(day)
               return (
                 <button
                   key={iso}
                   role="gridcell"
                   disabled={disabled}
                   onClick={() => onDateChange(iso)}
-                  aria-label={`${day} de ${MONTH_NAMES[viewMonth]}`}
+                  aria-label={`${day} de ${MONTH_NAMES[viewMonth]}${blockedReason ? ` — ${blockedReason}` : ''}`}
                   aria-selected={isSelected}
                   aria-disabled={disabled}
+                  title={blockedReason}
                   className={`h-9 w-full rounded-lg text-sm transition-all font-medium ${
                     isSelected
                       ? 'bg-sky-600 text-white shadow-sm'

@@ -18,7 +18,7 @@ export default function TerminosPage() {
         Bienvenido a{' '}
         <a href="https://www.otorrinonet.com">www.otorrinonet.com</a>,
         sitio web del Dr. Alejandro Viveros Domínguez, médico especialista en
-        Otorrinolaringología. Al acceder y utilizar este sitio web, usted acepta quedar
+        Otorrinolaringología y Cirugía de Cabeza y Cuello. Al acceder y utilizar este sitio web, usted acepta quedar
         vinculado por los presentes Términos y Condiciones. Si no está de acuerdo con
         alguno de ellos, le pedimos que se abstenga de utilizar este sitio.
       </p>
@@ -28,7 +28,9 @@ export default function TerminosPage() {
         <p>El titular y responsable del presente sitio web es:</p>
         <ul className="not-prose list-none space-y-1.5 text-slate-700 dark:text-slate-300 text-base mt-3">
           <li><strong>Nombre:</strong> Dr. Alejandro Viveros Domínguez</li>
-          <li><strong>Especialidad:</strong> Otorrinolaringología</li>
+          <li><strong>Especialidad:</strong> Otorrinolaringología y Cirugía de Cabeza y Cuello</li>
+          <li><strong>Cédula profesional:</strong> 6277305</li>
+          <li><strong>Cédula de especialidad:</strong> 10148701</li>
           <li><strong>Domicilio:</strong> Chosica 730, Colonia Lindavista, C.P. 07300, Alcaldía Gustavo A. Madero, Ciudad de México</li>
           <li><strong>Correo electrónico:</strong>{' '}
             <a href="mailto:contacto@otorrinonet.com" className="text-sky-600 underline">contacto@otorrinonet.com</a>
