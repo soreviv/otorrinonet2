@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import dynamic from 'next/dynamic'
+import AgendarClient from './AgendarClient'
 
 export const metadata: Metadata = {
   title: 'Agendar Cita · Dr. Alejandro Viveros, Otorrinolaringólogo CDMX',
@@ -7,11 +7,6 @@ export const metadata: Metadata = {
   alternates: { canonical: '/agendar' },
 }
 
-const AppointmentBooking = dynamic(
-  () => import('@/components/agenda').then((m) => ({ default: m.AppointmentBooking })),
-  { ssr: false },
-)
-
 export default function AgendarPage() {
-  return <AppointmentBooking />
+  return <AgendarClient />
 }
