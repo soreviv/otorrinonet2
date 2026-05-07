@@ -10,6 +10,13 @@
 - nodemailer para emails (citas, contacto, reset password)
 - Idioma: es-MX, zona horaria America/Mexico_City
 
+## Design System (fuente de verdad: `app/src/app/globals.css`)
+- **Primary:** `sky` — botones, links, acentos, estados activos de nav
+- **Secondary:** `blue` — tags, highlights, badges secundarios
+- **Neutral:** `slate` — fondos, texto, bordes, tarjetas (sin alias, clases directas)
+- **Fuentes:** DM Sans (headings), Inter (body/sans), IBM Plex Mono (timestamps, IDs, CURP, códigos)
+- Nota: `product-plan/design-system/` documenta teal/sky/slate — está desactualizado, ignorar
+
 ## Personas
 1. Médico (rol `medico`): consulta + EHR + recetas + firma + admin
 2. Recepcionista: agenda, lectura básica
@@ -21,6 +28,8 @@
 - `/(public)/agendar` — formulario de cita en 3 pasos con Turnstile
 - `/login` + `/login/setup-2fa` + `/login/verify-2fa`
 - `/staff/agenda` `/staff/ehr` `/staff/notas` `/staff/configuracion` `/staff/admin`
+
+## Última actualización: 2026-05-07
 
 ## Implementado en esta iteración (2026-01-05)
 
@@ -68,6 +77,17 @@
 - ✓ `tsc --noEmit` pasa sin errores
 - ✓ Lint sin errores nuevos (solo warnings y 1 error preexistentes en archivos
   no tocados por esta iteración)
+
+## Decisiones de arquitectura y artefactos
+
+### product-plan/ — carpeta de documentación de diseño
+- **No es código funcional**: ningún archivo de `product-plan/` es importado por la app
+- **Contenido**: 76 archivos / 2.5 MB — specs de secciones, componentes React de referencia,
+  tokens de diseño (documentación), data shapes TypeScript, instrucciones de implementación,
+  capturas de pantalla de referencia (15 PNGs)
+- **Puede moverse fuera del repo** sin afectar el funcionamiento del proyecto
+- Recomendación: moverlo a un repo privado separado (ej. `otorrinonet2-design`) o
+  a un branch `design-docs` si se prefiere mantener historial conjunto
 
 ## Backlog priorizado (P0)
 - [ ] Cifrado en producción debe lanzar error si faltan `ENCRYPTION_KEY` /
