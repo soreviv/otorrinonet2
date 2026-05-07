@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { PublicHeader } from './PublicHeader'
 import { PublicFooter } from './PublicFooter'
+import { Breadcrumbs } from './Breadcrumbs'
 import {
   Calendar, Syringe, ShieldCheck, Info,
   RefreshCw, AlertTriangle, MapPin,
@@ -90,6 +91,7 @@ export function VaccineRecommendationPage() {
     <div className="min-h-screen bg-slate-50 font-sans antialiased dark:bg-slate-950">
 
       <PublicHeader />
+      <Breadcrumbs items={[{ label: 'Vacunación en Adultos', href: '/vacunacion' }]} />
 
       {/* ── HERO ── */}
       <section className="bg-white border-b border-slate-100 dark:bg-slate-900 dark:border-slate-800 py-12">

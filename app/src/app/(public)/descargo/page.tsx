@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { PublicHeader } from '@/components/sitio-publico/PublicHeader'
 import { PublicFooter } from '@/components/sitio-publico/PublicFooter'
+import { Breadcrumbs } from '@/components/sitio-publico/Breadcrumbs'
 
 export const metadata: Metadata = {
   title: 'Descargo de Responsabilidad · Dr. Alejandro Viveros Domínguez',
@@ -12,6 +13,7 @@ export default function DescargoDePage() {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 font-sans antialiased flex flex-col">
       <PublicHeader />
+      <Breadcrumbs items={[{ label: 'Descargo de Responsabilidad', href: '/descargo' }]} />
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-16">
       <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
         Descargo de Responsabilidad

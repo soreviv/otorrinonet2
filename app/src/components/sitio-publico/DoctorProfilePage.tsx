@@ -6,10 +6,11 @@ import { PublicHeader } from './PublicHeader'
 import { PublicFooter } from './PublicFooter'
 import {
   Stethoscope, Calendar, GraduationCap,
-  Award, Building2, ChevronRight, ArrowLeft,
+  Award, Building2,
   BadgeCheck, Clock,
 } from 'lucide-react'
 import type { DoctorProfilePageProps } from '@/lib/sitio-publico-types'
+import { Breadcrumbs } from './Breadcrumbs'
 
 export function DoctorProfilePage({
   doctorProfile,
@@ -21,19 +22,7 @@ export function DoctorProfilePage({
 
       <PublicHeader />
 
-      {/* ── BREADCRUMB ───────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center gap-1.5 text-xs text-slate-400">
-            <Link href="/" className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors flex items-center gap-1">
-              <ArrowLeft className="w-3 h-3" />
-              Inicio
-            </Link>
-            <ChevronRight className="w-3 h-3" />
-            <span className="text-slate-600 dark:text-slate-300 font-medium">Perfil del Doctor</span>
-          </div>
-        </div>
-      </div>
+      <Breadcrumbs items={[{ label: 'Perfil del Doctor', href: '/perfil' }]} />
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
