@@ -2,17 +2,19 @@ import { redirect } from 'next/navigation'
 import { verifySession } from '@/lib/dal'
 import { getSystemUsers, getAuditLogs, getArcoRequests, getFhirExports } from '@/app/actions/admin'
 import { SAMPLE_COMPLIANCE_BADGES, SAMPLE_METRICS, SAMPLE_PRIVACY_NOTICE } from '@/lib/admin-data'
+import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import { AdminClient } from './AdminClient'
 
 export default async function AdminPage() {
   const session = await verifySession()
   if (session.role !== 'medico') redirect('/staff/agenda')
 
-  const [users, auditLogs, arcoRequests, fhirExports] = await Promise.all([
+  const [users, auditLogs, arcoRequests, fhirExports, clinicCfg] = await Promise.all([
     getSystemUsers(),
     getAuditLogs(),
     getArcoRequests(),
     getFhirExports(),
+    getClinicConfigFromDB(),
   ])
 
   const now = new Date()
@@ -42,6 +44,13 @@ export default async function AdminPage() {
       arcoRequests={arcoRequests}
       fhirExports={fhirExports}
       privacyNotice={SAMPLE_PRIVACY_NOTICE}
+      clinicInfo={{
+        clinicName: clinicCfg.clinicName,
+        clinicAddress: clinicCfg.clinicAddress,
+        clinicPhone: clinicCfg.clinicPhone,
+        clinicEmail: clinicCfg.clinicEmail,
+        clinicCofepris: clinicCfg.clinicCofepris,
+      }}
     />
   )
 }

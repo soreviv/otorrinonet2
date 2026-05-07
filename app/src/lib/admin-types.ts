@@ -81,6 +81,14 @@ export interface PrivacyNotice {
   downloadUrl: string
 }
 
+export interface ClinicInfo {
+  clinicName: string
+  clinicAddress: string
+  clinicPhone: string
+  clinicEmail: string
+  clinicCofepris?: string
+}
+
 export interface AdminDashboardProps {
   metrics: DashboardMetrics
   complianceBadges: ComplianceBadge[]
@@ -89,6 +97,7 @@ export interface AdminDashboardProps {
   arcoRequests: ArcoRequest[]
   fhirExports: FhirExport[]
   privacyNotice: PrivacyNotice
+  clinicInfo: ClinicInfo
 
   onEditUser?: (userId: string, updates: { role?: UserRole; status?: UserStatus }) => void
   onDeactivateUser?: (userId: string) => void

@@ -12,6 +12,7 @@ import type {
   FhirExport,
   UserRole,
   UserStatus,
+  ClinicInfo,
 } from '@/lib/admin-types'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -195,7 +196,7 @@ function UserEditModal({
 
 // ─── Tab Panels ───────────────────────────────────────────────────────────────
 
-function DashboardTab({ metrics, complianceBadges }: Pick<AdminDashboardProps, 'metrics' | 'complianceBadges'>) {
+function DashboardTab({ metrics, complianceBadges, clinicInfo }: Pick<AdminDashboardProps, 'metrics' | 'complianceBadges' | 'clinicInfo'>) {
   const metricCards = [
     {
       label: 'Usuarios activos',
@@ -281,6 +282,50 @@ function DashboardTab({ metrics, complianceBadges }: Pick<AdminDashboardProps, '
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-7 h-7 rounded-lg bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Establecimiento</h3>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Nombre</span>
+            <span className="text-slate-700 dark:text-slate-300 font-medium">{clinicInfo.clinicName || <span className="italic text-slate-400">Sin configurar</span>}</span>
+          </div>
+          {clinicInfo.clinicCofepris && (
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Autorización COFEPRIS</span>
+              <span className="text-slate-700 dark:text-slate-300 font-mono">{clinicInfo.clinicCofepris}</span>
+            </div>
+          )}
+          {clinicInfo.clinicAddress && (
+            <div className="flex flex-col gap-0.5 sm:col-span-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Domicilio</span>
+              <span className="text-slate-600 dark:text-slate-400">{clinicInfo.clinicAddress}</span>
+            </div>
+          )}
+          {clinicInfo.clinicPhone && (
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Teléfono</span>
+              <a href={`tel:${clinicInfo.clinicPhone}`} className="text-slate-600 dark:text-slate-400 font-mono hover:text-sky-600 transition-colors">{clinicInfo.clinicPhone}</a>
+            </div>
+          )}
+          {clinicInfo.clinicEmail && (
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Correo</span>
+              <a href={`mailto:${clinicInfo.clinicEmail}`} className="text-slate-600 dark:text-slate-400 hover:text-sky-600 transition-colors">{clinicInfo.clinicEmail}</a>
+            </div>
+          )}
+        </div>
+        {!clinicInfo.clinicAddress && !clinicInfo.clinicPhone && !clinicInfo.clinicEmail && !clinicInfo.clinicCofepris && (
+          <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 italic">
+            Completa los datos en <span className="font-medium not-italic">Configuración → Establecimiento</span>.
+          </p>
+        )}
       </div>
 
       <div className="bg-white dark:bg-slate-800 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 p-5 shadow-sm">
@@ -760,6 +805,7 @@ export function AdminDashboard({
   arcoRequests,
   fhirExports,
   privacyNotice,
+  clinicInfo,
   onEditUser,
   onDeactivateUser,
   onActivateUser,
@@ -806,7 +852,7 @@ export function AdminDashboard({
 
       <div className="max-w-5xl mx-auto px-4 py-5 pb-10">
         {activeTab === 'dashboard' && (
-          <DashboardTab metrics={metrics} complianceBadges={complianceBadges} />
+          <DashboardTab metrics={metrics} complianceBadges={complianceBadges} clinicInfo={clinicInfo} />
         )}
         {activeTab === 'usuarios' && (
           <UsuariosTab
