@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifySession, requireMedico } from '@/lib/dal'
 import { encrypt, decrypt } from '@/lib/crypto'
 import { logAction } from '@/lib/audit'
 import type {
@@ -117,7 +117,7 @@ export interface PatientSearchFilters {
 
 export async function getPatients(): Promise<Patient[]> {
   const session = await verifySession()
-  const rows = await prisma.patient.findMany({ orderBy: { createdAt: 'desc' } })
+  const rows = await prisma.patient.findMany({ where: { status: 'activo' }, orderBy: { createdAt: 'desc' } })
   void logAction({ action: 'acceso', resource: 'patients', userId: session.userId })
   return rows.map(mapToFrontend)
 }
@@ -136,6 +136,7 @@ export async function searchPatientsAdvanced(filters: PatientSearchFilters): Pro
   const rows = await prisma.patient.findMany({
     where: {
       AND: [
+        { status: 'activo' },
         filters.query?.trim() ? {
           OR: [
             { nombre: { contains: filters.query.trim(), mode: 'insensitive' } },
@@ -159,7 +160,7 @@ export async function savePatient(
   data: Omit<Patient, 'id' | 'expedienteNumber' | 'createdAt' | 'updatedAt'>,
   id?: string,
 ): Promise<Patient> {
-  const session = await verifySession()
+  const session = await requireMedico()
 
   const nombre = data.generalData.nombre.trim()
   const apellidoPaterno = data.generalData.apellidoPaterno.trim()
@@ -206,7 +207,8 @@ export async function savePatient(
 }
 
 export async function deletePatient(id: string): Promise<void> {
-  const session = await verifySession()
-  await prisma.patient.delete({ where: { id } })
+  const session = await requireMedico()
+  // Borrado lógico — NOM-004 exige retención mínima de 5 años
+  await prisma.patient.update({ where: { id }, data: { status: 'inactivo' } })
   void logAction({ action: 'eliminacion', resource: 'patient', resourceId: id, userId: session.userId })
 }

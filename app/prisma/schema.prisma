@@ -23,6 +23,7 @@ model StaffUser {
   logoUniversidadUrl String?
   totpSecret         String?
   totpEnabled        Boolean   @default(false)
+  mustChangePassword Boolean   @default(false)
   lastAccess         DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt

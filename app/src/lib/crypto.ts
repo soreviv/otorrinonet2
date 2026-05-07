@@ -8,10 +8,11 @@ function getKey(): Buffer {
 
   if (!password || !kdfSalt) {
     if (process.env.NODE_ENV === 'production') {
-      // In production without keys: data is stored plaintext (log warning, don't crash)
-      console.warn('[crypto] ENCRYPTION_KEY / ENCRYPTION_KDF_SALT not set — data will NOT be encrypted at rest.')
+      throw new Error(
+        '[crypto] ENCRYPTION_KEY y ENCRYPTION_KDF_SALT son obligatorias en producción. ' +
+        'Genera valores con: openssl rand -hex 32',
+      )
     }
-    // Deterministic dev key derived from fixed strings
     return scryptSync('otorrinonet-dev-key-not-for-production', 'otorrinonet-kdf-salt-dev', 32)
   }
 

@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(npm list *)",
-      "Bash(npx browserslist *)"
+      "Bash(npx browserslist *)",
+      "Bash(sed -n '1,30p' /workspaces/otorrinonet2/app/prisma/schema.prisma)",
+      "Bash(sed -n '55,85p' /workspaces/otorrinonet2/app/prisma/schema.prisma)",
+      "Bash(git -C /workspaces/otorrinonet2 status)",
+      "Bash(git -C /workspaces/otorrinonet2 diff --stat)",
+      "Bash(git -C /workspaces/otorrinonet2 log --oneline -5)",
+      "Bash(git -C /workspaces/otorrinonet2 pull --ff-only)",
+      "Bash(git -C /workspaces/otorrinonet2 add app/prisma/schema.prisma app/prisma/seed.ts app/prisma/migrations/20260507_add_must_change_password/ app/src/app/actions/appointments.ts app/src/app/actions/ehr.ts app/src/app/actions/notas.ts 'app/src/app/api/appointment/[action]/route.ts' app/src/lib/crypto.ts app/src/lib/mailer.ts 'app/src/app/\\(public\\)/cita/' app/.env.example memory/PRD.md)"
     ]
   }
 }

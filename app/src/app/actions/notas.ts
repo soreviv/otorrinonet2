@@ -2,7 +2,7 @@
 
 import { randomUUID } from 'node:crypto'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifySession, requireMedico } from '@/lib/dal'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import { logAction } from '@/lib/audit'
 import { computeNoteSignatureHash } from '@/lib/crypto'
@@ -385,7 +385,7 @@ export async function createPrescription(
   medications: PrescriptionMedication[],
   diagnosis?: string,
 ): Promise<Prescription> {
-  const session = await verifySession()
+  const session = await requireMedico()
   const recetaId = randomUUID()
 
   const [patient, , clinicCfg, latestVitals] = await Promise.all([

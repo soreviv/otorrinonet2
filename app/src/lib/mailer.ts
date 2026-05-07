@@ -128,8 +128,8 @@ export async function sendAppointmentConfirmationToPatient(
 ): Promise<void> {
   if (process.env.NODE_ENV === 'test') return
 
-  const confirmUrl = `${appUrl()}/api/appointment/confirmar?token=${data.actionToken}`
-  const cancelUrl  = `${appUrl()}/api/appointment/cancelar?token=${data.actionToken}`
+  const confirmUrl = `${appUrl()}/cita/confirmar?token=${data.actionToken}`
+  const cancelUrl  = `${appUrl()}/cita/cancelar?token=${data.actionToken}`
   const typeLabel  = APPOINTMENT_TYPE_LABEL[data.appointmentType] ?? data.appointmentType
   const dateStr    = formatDate(data.fecha)
 
@@ -234,8 +234,8 @@ export async function sendAppointmentReschedule(
 ): Promise<void> {
   if (process.env.NODE_ENV === 'test') return
 
-  const confirmUrl = `${appUrl()}/api/appointment/confirmar?token=${data.actionToken}`
-  const cancelUrl  = `${appUrl()}/api/appointment/cancelar?token=${data.actionToken}`
+  const confirmUrl = `${appUrl()}/cita/confirmar?token=${data.actionToken}`
+  const cancelUrl  = `${appUrl()}/cita/cancelar?token=${data.actionToken}`
   const typeLabel  = APPOINTMENT_TYPE_LABEL[data.appointmentType] ?? data.appointmentType
   const dateStr    = formatDate(data.fecha)
 

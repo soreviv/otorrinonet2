@@ -89,18 +89,23 @@
 - Recomendación: moverlo a un repo privado separado (ej. `otorrinonet2-design`) o
   a un branch `design-docs` si se prefiere mantener historial conjunto
 
-## Backlog priorizado (P0)
-- [ ] Cifrado en producción debe lanzar error si faltan `ENCRYPTION_KEY` /
-      `ENCRYPTION_KDF_SALT` (actualmente cae a clave determinística pública)
-- [ ] Validación servidor del payload de citas (Zod + verificación de slot
-      libre + horarios reales + no en pasado + feriados)
-- [ ] Confirm/cancel cita por email: cambiar GET por POST con confirmación
-      visual (los pre-fetchers de Outlook/Defender disparan la acción hoy)
-- [ ] Captura `Patient.nombre/apellidoPaterno/apellidoMaterno` por separado
-      (split actual por espacios rompe nombres compuestos mexicanos)
-- [ ] `requireMedico()` en `savePatient`, `deletePatient`, `createPrescription`
-- [ ] Borrado lógico de paciente (NOM-004, retención 5 años)
-- [ ] Seed: passwords desde env + flag `mustChangePassword`
+## Backlog priorizado (P0) — resuelto 2026-05-07
+- [x] Cifrado en producción lanza `Error` si faltan `ENCRYPTION_KEY`/`ENCRYPTION_KDF_SALT`
+      (`lib/crypto.ts`)
+- [x] Validación servidor de citas: Zod + fecha no en pasado (CDMX -06:00) + feriados +
+      slot no tomado (`actions/appointments.ts`)
+- [x] Confirm/cancel cita: GET reemplazado por páginas de confirmación visual con form POST
+      (`(public)/cita/confirmar` y `(public)/cita/cancelar`); mailer actualizado;
+      API route `/api/appointment/[action]` eliminado
+- [x] Captura `nombre/apellidoPaterno/apellidoMaterno` separados — ya estaba implementado,
+      verificado en `PatientForm.tsx`
+- [x] `requireMedico()` en `savePatient`, `deletePatient` (`actions/ehr.ts`) y
+      `createPrescription` (`actions/notas.ts`)
+- [x] Borrado lógico: `deletePatient` actualiza `status='inactivo'` en lugar de borrar;
+      listados filtran `status='activo'` (`actions/ehr.ts`)
+- [x] Seed lee passwords de `SEED_PASSWORD_MEDICO/RECEPCIONISTA/ENFERMERA`; sin env →
+      contraseña temporal + `mustChangePassword=true`; migración
+      `20260507_add_must_change_password` agrega columna a `staff_users`
 
 ## Backlog P1
 - [ ] Rate-limit + lockout en login y password reset
