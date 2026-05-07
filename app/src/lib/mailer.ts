@@ -128,10 +128,11 @@ export async function sendAppointmentConfirmationToPatient(
 ): Promise<void> {
   if (process.env.NODE_ENV === 'test') return
 
-  const confirmUrl = `${appUrl()}/cita/confirmar?token=${data.actionToken}`
-  const cancelUrl  = `${appUrl()}/cita/cancelar?token=${data.actionToken}`
-  const typeLabel  = APPOINTMENT_TYPE_LABEL[data.appointmentType] ?? data.appointmentType
-  const dateStr    = formatDate(data.fecha)
+  const confirmUrl  = `${appUrl()}/cita/confirmar?token=${data.actionToken}`
+  const cancelUrl   = `${appUrl()}/cita/cancelar?token=${data.actionToken}`
+  const modifyUrl   = `${appUrl()}/cita/modificar?token=${data.actionToken}`
+  const typeLabel   = APPOINTMENT_TYPE_LABEL[data.appointmentType] ?? data.appointmentType
+  const dateStr     = formatDate(data.fecha)
 
   const content = `
     <p>Estimado/a <strong>${data.patientName}</strong>,</p>
@@ -143,10 +144,11 @@ export async function sendAppointmentConfirmationToPatient(
       ${cfg.clinicAddress ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Lugar</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${cfg.clinicAddress}</td></tr>` : ''}
       ${data.motivo ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Motivo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.motivo}</td></tr>` : ''}
     </table>
-    <p>Por favor confirme su asistencia:</p>
+    <p>Por favor confirme su asistencia o modifique la fecha si lo necesita:</p>
     <p>
-      <a href="${confirmUrl}" style="display:inline-block;padding:10px 20px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:12px">Confirmar cita</a>
-      <a href="${cancelUrl}"  style="display:inline-block;padding:10px 20px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Cancelar cita</a>
+      <a href="${confirmUrl}" style="display:inline-block;padding:10px 20px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Confirmar cita</a>
+      <a href="${modifyUrl}"  style="display:inline-block;padding:10px 20px;background:#0369a1;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Modificar fecha</a>
+      <a href="${cancelUrl}"  style="display:inline-block;padding:10px 20px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-bottom:8px">Cancelar cita</a>
     </p>
     ${cfg.clinicPhone ? `<p style="color:#6b7280;font-size:0.875em">Si tiene dudas llámenos al ${cfg.clinicPhone}.</p>` : ''}
   `
@@ -156,7 +158,7 @@ export async function sendAppointmentConfirmationToPatient(
     to: `"${data.patientName}" <${data.patientEmail}>`,
     subject: `Cita agendada — ${dateStr} a las ${data.hora}`,
     html: emailLayout(content, cfg),
-    text: `Cita agendada: ${typeLabel} el ${dateStr} a las ${data.hora}.\nConfirmar: ${confirmUrl}\nCancelar: ${cancelUrl}`,
+    text: `Cita agendada: ${typeLabel} el ${dateStr} a las ${data.hora}.\nConfirmar: ${confirmUrl}\nModificar: ${modifyUrl}\nCancelar: ${cancelUrl}`,
   })
 }
 
@@ -236,6 +238,7 @@ export async function sendAppointmentReschedule(
 
   const confirmUrl = `${appUrl()}/cita/confirmar?token=${data.actionToken}`
   const cancelUrl  = `${appUrl()}/cita/cancelar?token=${data.actionToken}`
+  const modifyUrl  = `${appUrl()}/cita/modificar?token=${data.actionToken}`
   const typeLabel  = APPOINTMENT_TYPE_LABEL[data.appointmentType] ?? data.appointmentType
   const dateStr    = formatDate(data.fecha)
 
@@ -249,8 +252,9 @@ export async function sendAppointmentReschedule(
       ${cfg.clinicAddress ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Lugar</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${cfg.clinicAddress}</td></tr>` : ''}
     </table>
     <p>
-      <a href="${confirmUrl}" style="display:inline-block;padding:10px 20px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:12px">Confirmar nueva cita</a>
-      <a href="${cancelUrl}"  style="display:inline-block;padding:10px 20px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Cancelar</a>
+      <a href="${confirmUrl}" style="display:inline-block;padding:10px 20px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Confirmar nueva cita</a>
+      <a href="${modifyUrl}"  style="display:inline-block;padding:10px 20px;background:#0369a1;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Modificar fecha</a>
+      <a href="${cancelUrl}"  style="display:inline-block;padding:10px 20px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-bottom:8px">Cancelar</a>
     </p>
   `
 

@@ -8,6 +8,7 @@ import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import {
   sendAppointmentConfirmationToPatient,
   sendAppointmentNotificationToDoctor,
+  sendAppointmentReschedule,
   type AppointmentEmailData,
 } from '@/lib/mailer'
 
@@ -130,5 +131,64 @@ export async function cancelAppointmentByToken(
     where: { id: appointment.id },
     data: { status: 'cancelada' },
   })
+  return { ok: true }
+}
+
+export async function rescheduleAppointmentByToken(
+  token: string,
+  newDate: string,
+  newTime: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!token) return { ok: false, error: 'Token inválido.' }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(newDate)) return { ok: false, error: 'Fecha inválida.' }
+  if (!/^\d{2}:\d{2}$/.test(newTime)) return { ok: false, error: 'Hora inválida.' }
+
+  const appointment = await prisma.appointment.findUnique({ where: { actionToken: token } })
+  if (!appointment) return { ok: false, error: 'Enlace inválido o expirado.' }
+  if (appointment.status === 'cancelada') return { ok: false, error: 'Esta cita ya fue cancelada.' }
+
+  const newScheduledAt = new Date(`${newDate}T${newTime}:00-06:00`)
+  if (newScheduledAt.getTime() < Date.now() - 30 * 60 * 1000) {
+    return { ok: false, error: 'No es posible agendar citas en el pasado.' }
+  }
+
+  const clinicRow = await prisma.clinicConfig.findUnique({ where: { id: 'singleton' } })
+  const feriados: string[] = Array.isArray(clinicRow?.diasFeriados) ? clinicRow.diasFeriados as string[] : []
+  if (feriados.includes(newDate)) {
+    return { ok: false, error: 'El consultorio no tiene disponibilidad ese día.' }
+  }
+
+  const slotTaken = await prisma.appointment.findFirst({
+    where: {
+      scheduledAt: newScheduledAt,
+      status: { in: ['pendiente', 'confirmada'] },
+      id: { not: appointment.id },
+    },
+  })
+  if (slotTaken) {
+    return { ok: false, error: 'Ese horario ya no está disponible. Por favor elige otro.' }
+  }
+
+  const cfg = await getClinicConfigFromDB()
+
+  await prisma.appointment.update({
+    where: { id: appointment.id },
+    data: { scheduledAt: newScheduledAt, status: 'pendiente', patientConfirmed: false },
+  })
+
+  if (appointment.patientEmail && appointment.patientName) {
+    const emailData: AppointmentEmailData = {
+      patientName: appointment.patientName,
+      patientEmail: appointment.patientEmail,
+      fecha: newDate,
+      hora: newTime,
+      appointmentType: appointment.appointmentType ?? 'primera_vez',
+      actionToken: token,
+    }
+    sendAppointmentReschedule(emailData, cfg).catch(err =>
+      console.error('[mailer] Error enviando email de reagendamiento:', err),
+    )
+  }
+
   return { ok: true }
 }
