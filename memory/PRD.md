@@ -144,17 +144,17 @@
       `20260507_add_must_change_password` agrega columna a `staff_users`
 
 ## Backlog P1
-- [ ] Rate-limit + lockout en login y password reset
-- [ ] Sesiones server-side revocables
-- [ ] Catálogo CIE-10 con seed
-- [ ] Disponibilidad real de slots respetando `appointmentDurationMin`
-- [ ] Time-zone fix CDMX (`date-fns-tz`)
-- [ ] Conectar `onNewOrder`, `onViewDocuments`, exports FHIR
-- [ ] Email HTML escape de inputs
+- [x] Rate-limit + lockout en login y password reset — `src/lib/rate-limit.ts`, 5 intentos / 15 min → bloqueo 30 min
+- [x] Sesiones server-side revocables — `sessionVersion` en StaffUser + JWT; `verifySession()` valida contra BD; incrementa en reset de contraseña
+- [x] Catálogo CIE-10 con seed (modelo `Cie10`, `searchCie10`, `Cie10Search.tsx`, `import-cie10.mjs`)
+- [x] Disponibilidad real de slots respetando `appointmentDurationMin` — ventana de solapamiento en `appointments.ts`
+- [x] Time-zone fix CDMX (`date-fns-tz`) — `fromZonedTime` en `appointments.ts`; `formatInTimeZone` en cron reminder
+- [x] Email HTML escape de inputs — función `esc()` en `mailer.ts`, aplicada a todos los interpolados en HTML
 
 ## Backlog P2 (oportunidades)
 - [x] Recordatorio por email 24 h antes de la cita — cron `POST /api/cron/reminder` (ventana 20–28 h, marca `reminderSent=true`); `sendReminderEmail` en `mailer.ts`
 - [ ] Pago anticipado (Stripe / MercadoPago)
+- [ ] Conectar `onNewOrder` / `onViewDocuments` / exports FHIR — requiere definir sistema receptor (laboratorio, HIS, IMSS, etc.)
 - [ ] Telemedicina (Daily.co) — sin fecha, largo plazo
 - [ ] Portal del paciente (login propio) — sin fecha, largo plazo
 - [x] Reseñas y NPS automatizado (Google Places + cron email — 2026-05-09)
