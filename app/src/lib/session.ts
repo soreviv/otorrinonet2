@@ -18,6 +18,7 @@ export type SessionPayload = {
   email: string
   name: string
   role: 'medico' | 'enfermera' | 'recepcionista'
+  sessionVersion: number
 }
 
 export type PendingPayload = {

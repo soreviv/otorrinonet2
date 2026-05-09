@@ -24,6 +24,7 @@ model StaffUser {
   totpSecret         String?
   totpEnabled        Boolean   @default(false)
   mustChangePassword Boolean   @default(false)
+  sessionVersion     Int       @default(0)
   lastAccess         DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt

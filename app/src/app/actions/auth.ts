@@ -89,14 +89,15 @@ export async function confirmSetup2faAction(_prev: ActionResult | null, formData
   const valid = verifySync({ token: code, secret: user.totpSecret })
   if (!valid) return { error: 'Código incorrecto. Intenta de nuevo.' }
 
-  await prisma.staffUser.update({
+  const updated = await prisma.staffUser.update({
     where: { id: user.id },
     data: { totpEnabled: true, lastAccess: new Date() },
+    select: { sessionVersion: true },
   })
 
   await deletePendingSession()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await createSession({ userId: user.id, email: user.email, name: user.name, role: user.role as any })
+  await createSession({ userId: user.id, email: user.email, name: user.name, role: user.role as any, sessionVersion: updated.sessionVersion })
   await logAction({ action: 'login_ok', resource: 'auth', userId: user.id, details: { method: '2fa_setup' } })
 
   return { ok: true }
@@ -118,11 +119,15 @@ export async function verify2faAction(_prev: ActionResult | null, formData: Form
     return { error: 'Código incorrecto. Intenta de nuevo.' }
   }
 
-  await prisma.staffUser.update({ where: { id: user.id }, data: { lastAccess: new Date() } })
+  const updated = await prisma.staffUser.update({
+    where: { id: user.id },
+    data: { lastAccess: new Date() },
+    select: { sessionVersion: true },
+  })
 
   await deletePendingSession()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await createSession({ userId: user.id, email: user.email, name: user.name, role: user.role as any })
+  await createSession({ userId: user.id, email: user.email, name: user.name, role: user.role as any, sessionVersion: updated.sessionVersion })
   await logAction({ action: 'login_ok', resource: 'auth', userId: user.id, details: { method: 'totp' } })
 
   return { ok: true }
@@ -176,7 +181,10 @@ export async function resetPasswordAction(_prev: ActionResult | null, formData: 
 
   const passwordHash = await bcrypt.hash(password, 12)
   await prisma.$transaction([
-    prisma.staffUser.update({ where: { id: resetToken.userId }, data: { passwordHash } }),
+    prisma.staffUser.update({
+      where: { id: resetToken.userId },
+      data: { passwordHash, sessionVersion: { increment: 1 } },
+    }),
     prisma.passwordResetToken.update({ where: { id: resetToken.id }, data: { usedAt: new Date() } }),
   ])
   return { ok: true }
