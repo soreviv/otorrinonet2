@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import {
   Building2, Stethoscope, Users, Shield, Plus, UserCheck, UserX,
   Save, RefreshCw, Search, Mail, Phone, MapPin, FileText, GraduationCap,
-  CalendarX2, Trash2, Calendar,
+  CalendarX2, Trash2, Calendar, Star,
 } from 'lucide-react'
 import {
   saveClinicConfig, createStaffUser, toggleStaffUserStatus, saveDiasFeriados,
@@ -49,6 +49,47 @@ function Card({ title, icon, children }: { title: string; icon: React.ReactNode;
 }
 
 // ─── Establecimiento tab ──────────────────────────────────────────────────────
+
+function GoogleReviewsCard() {
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'err'>('idle')
+  const [msg, setMsg] = useState('')
+
+  async function handleRefresh() {
+    setStatus('loading')
+    setMsg('')
+    try {
+      const res = await fetch('/api/reviews/refresh', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Error desconocido')
+      setMsg(`${data.count} reseñas importadas · Calificación: ${data.rating} (${data.total} en total)`)
+      setStatus('ok')
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Error al conectar con Google')
+      setStatus('err')
+    }
+  }
+
+  return (
+    <Card title="Reseñas de Google" icon={<Star className="w-4 h-4" strokeWidth={1.75} />}>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+        Importa las reseñas más recientes desde Google Places y actualiza el sitio público. Requiere que <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 rounded">GOOGLE_PLACES_API_KEY</code> esté configurada.
+      </p>
+      <button
+        onClick={handleRefresh}
+        disabled={status === 'loading'}
+        className={BTN_PRIMARY}
+      >
+        <RefreshCw className={`w-4 h-4 ${status === 'loading' ? 'animate-spin' : ''}`} strokeWidth={1.75} />
+        {status === 'loading' ? 'Importando…' : 'Refrescar reseñas de Google'}
+      </button>
+      {msg && (
+        <p className={`mt-3 text-sm font-medium ${status === 'ok' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+          {msg}
+        </p>
+      )}
+    </Card>
+  )
+}
 
 function EstablecimientoTab({
   form, set, saved, err, isPending, onSave,
@@ -98,6 +139,8 @@ function EstablecimientoTab({
           />
         </div>
       </Card>
+
+      <GoogleReviewsCard />
 
       <SaveBar saved={saved} err={err} pending={isPending} onSave={onSave} />
     </div>

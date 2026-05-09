@@ -267,6 +267,59 @@ export async function sendAppointmentReschedule(
   })
 }
 
+// ─── Email NPS post-consulta ─────────────────────────────────────────────────
+
+const PLACE_ID = 'ChIJ0R5OAqT5BIYR1jEuvyIO4M4'
+const REVIEW_URL = `https://search.google.com/local/writereview?placeid=${PLACE_ID}`
+
+export interface NpsEmailData {
+  patientName: string
+  patientEmail: string
+  whatsapp?: string
+}
+
+export async function sendNpsEmail(data: NpsEmailData, cfg: ClinicConfig): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return
+
+  const waText = encodeURIComponent(`Hola Dr. Viveros, quería compartirle mi experiencia de la consulta.`)
+  const waLink = data.whatsapp ? `https://wa.me/${data.whatsapp.replace(/\D/g, '')}?text=${waText}` : null
+
+  const content = `
+    <p>Estimado/a <strong>${data.patientName}</strong>,</p>
+    <p>Esperamos que su consulta haya sido de su agrado. Su opinión nos ayuda a mejorar y orienta a otros pacientes que buscan atención especializada.</p>
+    <p>¿Nos regalaría un minuto para dejar su reseña?</p>
+    <p style="margin:24px 0">
+      <a href="${REVIEW_URL}" style="display:inline-block;padding:12px 24px;background:#f59e0b;color:#fff;text-decoration:none;border-radius:6px;font-weight:700;font-size:1em">
+        ★ Dejar reseña en Google
+      </a>
+    </p>
+    ${waLink ? `
+    <p>También puede compartir su experiencia directamente por WhatsApp:</p>
+    <p>
+      <a href="${waLink}" style="display:inline-block;padding:10px 20px;background:#25d366;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">
+        Enviar comentario por WhatsApp
+      </a>
+    </p>
+    ` : ''}
+    <p style="color:#9ca3af;font-size:0.8em;margin-top:24px">Si ya dejó su reseña, muchas gracias. Puede ignorar este correo.</p>
+  `
+
+  await getTransport().sendMail({
+    from: sender(cfg),
+    to: `"${data.patientName}" <${data.patientEmail}>`,
+    subject: `¿Cómo fue su consulta? — ${cfg.clinicName}`,
+    html: emailLayout(content, cfg),
+    text: [
+      `Estimado/a ${data.patientName},`,
+      '',
+      'Esperamos que su consulta haya sido de su agrado.',
+      '',
+      `Deje su reseña en Google: ${REVIEW_URL}`,
+      waLink ? `Comentario por WhatsApp: ${waLink}` : '',
+    ].filter(Boolean).join('\n'),
+  })
+}
+
 // ─── Formulario de contacto ───────────────────────────────────────────────────
 
 export interface ContactEmailData {

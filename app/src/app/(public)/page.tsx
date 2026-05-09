@@ -1,12 +1,7 @@
 import type { Metadata } from 'next'
 import { HomePage } from '@/components/sitio-publico/HomePage'
-import {
-  doctorProfile,
-  services,
-  googleReviews,
-  googleRatingSummary,
-  contactInfo,
-} from '@/lib/sitio-publico-data'
+import { doctorProfile, services, contactInfo } from '@/lib/sitio-publico-data'
+import { getCachedGoogleReviews } from '@/lib/google-places'
 
 export const metadata: Metadata = {
   title: 'Dr. Alejandro Viveros Domínguez · Otorrinolaringólogo CDMX',
@@ -14,13 +9,15 @@ export const metadata: Metadata = {
   alternates: { canonical: '/' },
 }
 
-export default function HomePageRoute() {
+export default async function HomePageRoute() {
+  const { reviews, summary } = await getCachedGoogleReviews()
+
   return (
     <HomePage
       doctorProfile={doctorProfile}
       services={services}
-      googleReviews={googleReviews}
-      googleRatingSummary={googleRatingSummary}
+      googleReviews={reviews}
+      googleRatingSummary={summary}
       contactInfo={{ phone: contactInfo.phone, whatsapp: contactInfo.whatsapp, email: contactInfo.email }}
     />
   )

@@ -127,6 +127,7 @@ model Appointment {
   actionToken      String?   @unique
   patientConfirmed Boolean   @default(false)
   reminderSent     Boolean   @default(false)
+  npsSentAt        DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -373,6 +374,8 @@ model ClinicConfig {
   horarios               Json?
   diasFeriados           Json?
   notificationEmail      String?
+  googleReviewsJson      Json?
+  googleReviewsCachedAt  DateTime?
   updatedAt              DateTime @updatedAt
 
   @@map("clinic_config")
