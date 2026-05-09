@@ -23,6 +23,16 @@ function getTransport(): Transporter {
   return _transport
 }
 
+function esc(s: string | null | undefined): string {
+  if (!s) return ''
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 // ─── Helpers de branding ─────────────────────────────────────────────────────
 
 function sender(cfg: ClinicConfig): string {
@@ -44,14 +54,14 @@ function emailLayout(content: string, cfg: ClinicConfig): string {
   return `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1a1a1a">
       <div style="background:#0369a1;padding:20px 24px;border-radius:8px 8px 0 0">
-        <p style="color:#fff;font-weight:700;font-size:1.25em;margin:0">${cfg.clinicName}</p>
+        <p style="color:#fff;font-weight:700;font-size:1.25em;margin:0">${esc(cfg.clinicName)}</p>
       </div>
       <div style="border:1px solid #e5e7eb;border-top:none;padding:24px;border-radius:0 0 8px 8px">
         ${content}
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
         <p style="color:#9ca3af;font-size:0.75em;margin:0">
-          ${cfg.clinicName}${cfg.clinicAddress ? ' — ' + cfg.clinicAddress : ''}
-          ${cfg.clinicPhone ? ' · ' + cfg.clinicPhone : ''}
+          ${esc(cfg.clinicName)}${cfg.clinicAddress ? ' — ' + esc(cfg.clinicAddress) : ''}
+          ${cfg.clinicPhone ? ' · ' + esc(cfg.clinicPhone) : ''}
         </p>
       </div>
     </div>
@@ -84,7 +94,7 @@ export async function sendPasswordResetEmail(
       'Si usted no realizó esta solicitud, ignore este correo.',
     ].join('\n'),
     html: emailLayout(`
-      <p>Estimado/a <strong>${toNombre}</strong>,</p>
+      <p>Estimado/a <strong>${esc(toNombre)}</strong>,</p>
       <p>Recibimos una solicitud para restablecer su contraseña.</p>
       <p>
         <a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#0369a1;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">
@@ -92,7 +102,7 @@ export async function sendPasswordResetEmail(
         </a>
       </p>
       <p style="color:#666;font-size:0.875em">Este enlace expira en <strong>1 hora</strong>.</p>
-      <p style="color:#666;font-size:0.875em">Si el botón no funciona: <code>${resetUrl}</code></p>
+      <p style="color:#666;font-size:0.875em">Si el botón no funciona: <code>${esc(resetUrl)}</code></p>
       <p style="color:#999;font-size:0.75em">Si usted no realizó esta solicitud, ignore este correo.</p>
     `, cfg),
   })
@@ -135,14 +145,14 @@ export async function sendAppointmentConfirmationToPatient(
   const dateStr     = formatDate(data.fecha)
 
   const content = `
-    <p>Estimado/a <strong>${data.patientName}</strong>,</p>
+    <p>Estimado/a <strong>${esc(data.patientName)}</strong>,</p>
     <p>Su solicitud de cita ha sido recibida. Los detalles son:</p>
     <table style="border-collapse:collapse;width:100%;margin:16px 0">
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:40%">Tipo de consulta</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${typeLabel}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Fecha</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${dateStr}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.hora}</td></tr>
-      ${cfg.clinicAddress ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Lugar</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${cfg.clinicAddress}</td></tr>` : ''}
-      ${data.motivo ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Motivo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.motivo}</td></tr>` : ''}
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:40%">Tipo de consulta</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(typeLabel)}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Fecha</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(dateStr)}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.hora)}</td></tr>
+      ${cfg.clinicAddress ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Lugar</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(cfg.clinicAddress)}</td></tr>` : ''}
+      ${data.motivo ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Motivo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.motivo)}</td></tr>` : ''}
     </table>
     <p>Por favor confirme su asistencia o modifique la fecha si lo necesita:</p>
     <p>
@@ -150,7 +160,7 @@ export async function sendAppointmentConfirmationToPatient(
       <a href="${modifyUrl}"  style="display:inline-block;padding:10px 20px;background:#0369a1;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Modificar fecha</a>
       <a href="${cancelUrl}"  style="display:inline-block;padding:10px 20px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-bottom:8px">Cancelar cita</a>
     </p>
-    ${cfg.clinicPhone ? `<p style="color:#6b7280;font-size:0.875em">Si tiene dudas llámenos al ${cfg.clinicPhone}.</p>` : ''}
+    ${cfg.clinicPhone ? `<p style="color:#6b7280;font-size:0.875em">Si tiene dudas llámenos al ${esc(cfg.clinicPhone)}.</p>` : ''}
   `
 
   await getTransport().sendMail({
@@ -177,12 +187,12 @@ export async function sendAppointmentNotificationToDoctor(
   const content = `
     <p>Se ha recibido una nueva solicitud de cita a través del portal.</p>
     <table style="border-collapse:collapse;width:100%;margin:16px 0">
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:40%">Paciente</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.patientName}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Tipo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${typeLabel}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Fecha</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${dateStr}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.hora}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Email</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.patientEmail}</td></tr>
-      ${data.motivo ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Motivo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.motivo}</td></tr>` : ''}
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:40%">Paciente</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.patientName)}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Tipo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(typeLabel)}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Fecha</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(dateStr)}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.hora)}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Email</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.patientEmail)}</td></tr>
+      ${data.motivo ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Motivo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.motivo)}</td></tr>` : ''}
     </table>
     <p style="color:#6b7280;font-size:0.875em">Revise su agenda en el sistema EHR para confirmar o reagendar.</p>
   `
@@ -209,16 +219,16 @@ export async function sendAppointmentCancellation(
     : 'Su cita ha sido cancelada correctamente.'
 
   const content = `
-    <p>Estimado/a <strong>${data.patientName}</strong>,</p>
+    <p>Estimado/a <strong>${esc(data.patientName)}</strong>,</p>
     <p>${reason}</p>
     <table style="border-collapse:collapse;width:100%;margin:16px 0">
-      <tr><td style="padding:8px 12px;background:#fef2f2;border:1px solid #e5e7eb;font-weight:600;width:40%">Fecha cancelada</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${dateStr}</td></tr>
-      <tr><td style="padding:8px 12px;background:#fef2f2;border:1px solid #e5e7eb;font-weight:600">Hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.hora}</td></tr>
+      <tr><td style="padding:8px 12px;background:#fef2f2;border:1px solid #e5e7eb;font-weight:600;width:40%">Fecha cancelada</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(dateStr)}</td></tr>
+      <tr><td style="padding:8px 12px;background:#fef2f2;border:1px solid #e5e7eb;font-weight:600">Hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.hora)}</td></tr>
     </table>
     <p>
       <a href="${appUrl()}/agendar" style="display:inline-block;padding:10px 20px;background:#0369a1;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Agendar nueva cita</a>
     </p>
-    ${cfg.clinicPhone ? `<p style="color:#6b7280;font-size:0.875em">Si tiene preguntas contáctenos al ${cfg.clinicPhone}.</p>` : ''}
+    ${cfg.clinicPhone ? `<p style="color:#6b7280;font-size:0.875em">Si tiene preguntas contáctenos al ${esc(cfg.clinicPhone)}.</p>` : ''}
   `
 
   await getTransport().sendMail({
@@ -243,13 +253,13 @@ export async function sendAppointmentReschedule(
   const dateStr    = formatDate(data.fecha)
 
   const content = `
-    <p>Estimado/a <strong>${data.patientName}</strong>,</p>
+    <p>Estimado/a <strong>${esc(data.patientName)}</strong>,</p>
     <p>Su cita ha sido <strong>reagendada</strong>. Los nuevos detalles son:</p>
     <table style="border-collapse:collapse;width:100%;margin:16px 0">
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:40%">Tipo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${typeLabel}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Nueva fecha</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${dateStr}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Nueva hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.hora}</td></tr>
-      ${cfg.clinicAddress ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Lugar</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${cfg.clinicAddress}</td></tr>` : ''}
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:40%">Tipo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(typeLabel)}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Nueva fecha</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(dateStr)}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Nueva hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.hora)}</td></tr>
+      ${cfg.clinicAddress ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Lugar</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(cfg.clinicAddress)}</td></tr>` : ''}
     </table>
     <p>
       <a href="${confirmUrl}" style="display:inline-block;padding:10px 20px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Confirmar nueva cita</a>
@@ -285,7 +295,7 @@ export async function sendNpsEmail(data: NpsEmailData, cfg: ClinicConfig): Promi
   const waLink = data.whatsapp ? `https://wa.me/${data.whatsapp.replace(/\D/g, '')}?text=${waText}` : null
 
   const content = `
-    <p>Estimado/a <strong>${data.patientName}</strong>,</p>
+    <p>Estimado/a <strong>${esc(data.patientName)}</strong>,</p>
     <p>Esperamos que su consulta haya sido de su agrado. Su opinión nos ayuda a mejorar y orienta a otros pacientes que buscan atención especializada.</p>
     <p>¿Nos regalaría un minuto para dejar su reseña?</p>
     <p style="margin:24px 0">
@@ -341,20 +351,20 @@ export async function sendReminderEmail(data: ReminderEmailData, cfg: ClinicConf
   const dateStr    = formatDate(data.fecha)
 
   const content = `
-    <p>Estimado/a <strong>${data.patientName}</strong>,</p>
-    <p>Le recordamos que mañana tiene una cita programada en ${cfg.clinicName}.</p>
+    <p>Estimado/a <strong>${esc(data.patientName)}</strong>,</p>
+    <p>Le recordamos que mañana tiene una cita programada en ${esc(cfg.clinicName)}.</p>
     <table style="border-collapse:collapse;width:100%;margin:16px 0">
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:40%">Tipo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${typeLabel}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Fecha</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${dateStr}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.hora}</td></tr>
-      ${cfg.clinicAddress ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Lugar</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${cfg.clinicAddress}</td></tr>` : ''}
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:40%">Tipo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(typeLabel)}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Fecha</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(dateStr)}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.hora)}</td></tr>
+      ${cfg.clinicAddress ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Lugar</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(cfg.clinicAddress)}</td></tr>` : ''}
     </table>
     <p>
       <a href="${confirmUrl}" style="display:inline-block;padding:10px 20px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Confirmar asistencia</a>
       <a href="${modifyUrl}"  style="display:inline-block;padding:10px 20px;background:#0369a1;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Cambiar fecha</a>
       <a href="${cancelUrl}"  style="display:inline-block;padding:10px 20px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-bottom:8px">Cancelar cita</a>
     </p>
-    ${cfg.clinicPhone ? `<p style="color:#6b7280;font-size:0.875em">Si tiene dudas llámenos al ${cfg.clinicPhone}.</p>` : ''}
+    ${cfg.clinicPhone ? `<p style="color:#6b7280;font-size:0.875em">Si tiene dudas llámenos al ${esc(cfg.clinicPhone)}.</p>` : ''}
   `
 
   await getTransport().sendMail({
@@ -388,13 +398,13 @@ export async function sendContactNotification(
   const content = `
     <p>Ha recibido un nuevo mensaje de contacto a través del portal.</p>
     <table style="border-collapse:collapse;width:100%;margin:16px 0">
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:30%">Nombre</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.name}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Correo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.email}</td></tr>
-      ${data.phone ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Teléfono</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.phone}</td></tr>` : ''}
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Asunto</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.subject}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:30%">Nombre</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.name)}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Correo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.email)}</td></tr>
+      ${data.phone ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Teléfono</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.phone)}</td></tr>` : ''}
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Asunto</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.subject)}</td></tr>
     </table>
-    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:16px;margin:16px 0;white-space:pre-wrap">${data.message}</div>
-    <p style="color:#6b7280;font-size:0.875em">Responda directamente a ${data.email}.</p>
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:16px;margin:16px 0;white-space:pre-wrap">${esc(data.message)}</div>
+    <p style="color:#6b7280;font-size:0.875em">Responda directamente a ${esc(data.email)}.</p>
   `
 
   await getTransport().sendMail({
