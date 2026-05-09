@@ -7,6 +7,8 @@ import { StepProgressBar } from './steps/StepProgressBar'
 import { StepDateTimeSelection } from './steps/StepDateTimeSelection'
 import { StepPatientData } from './steps/StepPatientData'
 import { StepConfirmation } from './steps/StepConfirmation'
+import { PublicHeader } from '@/components/sitio-publico/PublicHeader'
+import { PublicFooter } from '@/components/sitio-publico/PublicFooter'
 import { PatientFormSchema, type PatientFormData } from '@/lib/schemas/appointment'
 import type { AppointmentBookingProps, BookingFormData } from '@/lib/agenda-types'
 import { submitAppointmentRequest } from '@/app/actions/appointments'
@@ -160,7 +162,9 @@ export function AppointmentBookingForm({ onSubmit }: AppointmentBookingProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex items-start justify-center py-10 px-4">
+    <>
+    <PublicHeader />
+    <div className="bg-white dark:bg-slate-950 flex items-start justify-center py-10 px-4">
       <div className="w-full max-w-2xl">
         {/* Page header */}
         <div className="text-center mb-8">
@@ -280,5 +284,7 @@ export function AppointmentBookingForm({ onSubmit }: AppointmentBookingProps) {
         </p>
       </div>
     </div>
+    <PublicFooter />
+    </>
   )
 }
