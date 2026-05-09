@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { verifyTurnstileToken } from '@/lib/turnstile'
 import { prisma } from '@/lib/prisma'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
+import { encrypt } from '@/lib/crypto'
 import {
   sendAppointmentConfirmationToPatient,
   sendAppointmentNotificationToDoctor,
@@ -66,7 +67,10 @@ export async function submitAppointmentRequest(
     return { ok: false, error: 'Ese horario ya no está disponible. Por favor elige otro.' }
   }
 
-  // 6. Crear cita
+  // 6. Crear o reutilizar expediente del paciente
+  const patientId = await findOrCreatePortalPatient(data.patientName, data.email, data.phone)
+
+  // 7. Crear cita
   const actionToken = randomUUID()
   await prisma.appointment.create({
     data: {
@@ -79,6 +83,7 @@ export async function submitAppointmentRequest(
       patientPhone: data.phone,
       appointmentType: data.appointmentType ?? 'primera_vez',
       actionToken,
+      patientId,
     },
   })
 
@@ -191,4 +196,46 @@ export async function rescheduleAppointmentByToken(
   }
 
   return { ok: true }
+}
+
+// ─── Helpers internos ─────────────────────────────────────────────────────────
+
+function parseName(fullName: string): { nombre: string; apellidoPaterno: string; apellidoMaterno: string | null } {
+  const parts = fullName.trim().split(/\s+/)
+  if (parts.length === 1) return { nombre: parts[0], apellidoPaterno: parts[0], apellidoMaterno: null }
+  if (parts.length === 2) return { nombre: parts[0], apellidoPaterno: parts[1], apellidoMaterno: null }
+  // 3+ palabras: primer token = nombre, segundo = apellido paterno, resto = apellido materno
+  return {
+    nombre: parts[0],
+    apellidoPaterno: parts[1],
+    apellidoMaterno: parts.slice(2).join(' '),
+  }
+}
+
+async function findOrCreatePortalPatient(fullName: string, email: string, phone: string): Promise<string | null> {
+  try {
+    const { nombre, apellidoPaterno, apellidoMaterno } = parseName(fullName)
+    const year = new Date().getFullYear()
+    const count = await prisma.patient.count()
+    const expedienteNumber = `VIV-${year}-${String(count + 1).padStart(4, '0')}`
+
+    const patient = await prisma.patient.create({
+      data: {
+        expedienteNumber,
+        nombre,
+        apellidoPaterno,
+        apellidoMaterno: apellidoMaterno ?? null,
+        fechaNacimiento: new Date('2000-01-01'),
+        sexo: 'otro',
+        telefono: phone ? encrypt(phone) : null,
+        email: email ? encrypt(email) : null,
+        status: 'activo',
+      },
+    })
+    return patient.id
+  } catch (err) {
+    // No bloquear la cita si la creación del expediente falla
+    console.error('[appointments] Error creando expediente desde portal:', err)
+    return null
+  }
 }
