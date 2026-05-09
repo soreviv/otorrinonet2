@@ -59,10 +59,13 @@ export async function submitAppointmentRequest(
 
   const cfg = await getClinicConfigFromDB()
 
-  // 5. Slot no tomado (estado activo = pendiente | confirmada)
+  // 5. Sin solapamiento — una cita ocupa appointmentDurationMin minutos
+  const durationMs = (clinicRow?.appointmentDurationMin ?? 30) * 60 * 1000
+  const windowStart = new Date(scheduledAt.getTime() - durationMs + 1)
+  const windowEnd   = new Date(scheduledAt.getTime() + durationMs - 1)
   const slotTaken = await prisma.appointment.findFirst({
     where: {
-      scheduledAt,
+      scheduledAt: { gte: windowStart, lte: windowEnd },
       status: { in: ['pendiente', 'confirmada'] },
     },
   })
@@ -166,9 +169,12 @@ export async function rescheduleAppointmentByToken(
     return { ok: false, error: 'El consultorio no tiene disponibilidad ese día.' }
   }
 
+  const durationMs   = (clinicRow?.appointmentDurationMin ?? 30) * 60 * 1000
+  const windowStart  = new Date(newScheduledAt.getTime() - durationMs + 1)
+  const windowEnd    = new Date(newScheduledAt.getTime() + durationMs - 1)
   const slotTaken = await prisma.appointment.findFirst({
     where: {
-      scheduledAt: newScheduledAt,
+      scheduledAt: { gte: windowStart, lte: windowEnd },
       status: { in: ['pendiente', 'confirmada'] },
       id: { not: appointment.id },
     },
