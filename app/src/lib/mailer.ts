@@ -320,6 +320,52 @@ export async function sendNpsEmail(data: NpsEmailData, cfg: ClinicConfig): Promi
   })
 }
 
+// ─── Recordatorio 24 h antes ────────────────────────────────────────────────
+
+export interface ReminderEmailData {
+  patientName: string
+  patientEmail: string
+  fecha: string
+  hora: string
+  appointmentType: string
+  actionToken: string
+}
+
+export async function sendReminderEmail(data: ReminderEmailData, cfg: ClinicConfig): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return
+
+  const confirmUrl = `${appUrl()}/cita/confirmar?token=${data.actionToken}`
+  const cancelUrl  = `${appUrl()}/cita/cancelar?token=${data.actionToken}`
+  const modifyUrl  = `${appUrl()}/cita/modificar?token=${data.actionToken}`
+  const typeLabel  = APPOINTMENT_TYPE_LABEL[data.appointmentType] ?? data.appointmentType
+  const dateStr    = formatDate(data.fecha)
+
+  const content = `
+    <p>Estimado/a <strong>${data.patientName}</strong>,</p>
+    <p>Le recordamos que mañana tiene una cita programada en ${cfg.clinicName}.</p>
+    <table style="border-collapse:collapse;width:100%;margin:16px 0">
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:40%">Tipo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${typeLabel}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Fecha</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${dateStr}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${data.hora}</td></tr>
+      ${cfg.clinicAddress ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Lugar</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${cfg.clinicAddress}</td></tr>` : ''}
+    </table>
+    <p>
+      <a href="${confirmUrl}" style="display:inline-block;padding:10px 20px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Confirmar asistencia</a>
+      <a href="${modifyUrl}"  style="display:inline-block;padding:10px 20px;background:#0369a1;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Cambiar fecha</a>
+      <a href="${cancelUrl}"  style="display:inline-block;padding:10px 20px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-bottom:8px">Cancelar cita</a>
+    </p>
+    ${cfg.clinicPhone ? `<p style="color:#6b7280;font-size:0.875em">Si tiene dudas llámenos al ${cfg.clinicPhone}.</p>` : ''}
+  `
+
+  await getTransport().sendMail({
+    from: sender(cfg),
+    to: `"${data.patientName}" <${data.patientEmail}>`,
+    subject: `Recordatorio de cita mañana — ${data.hora} — ${cfg.clinicName}`,
+    html: emailLayout(content, cfg),
+    text: `Recordatorio: ${typeLabel} mañana ${dateStr} a las ${data.hora}.\nConfirmar: ${confirmUrl}\nCambiar: ${modifyUrl}\nCancelar: ${cancelUrl}`,
+  })
+}
+
 // ─── Formulario de contacto ───────────────────────────────────────────────────
 
 export interface ContactEmailData {

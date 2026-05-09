@@ -29,7 +29,7 @@
 - `/login` + `/login/setup-2fa` + `/login/verify-2fa`
 - `/staff/agenda` `/staff/ehr` `/staff/notas` `/staff/configuracion` `/staff/admin`
 
-## Última actualización: 2026-05-07
+## Última actualización: 2026-05-09
 
 ## Implementado en esta iteración (2026-01-05)
 
@@ -89,6 +89,42 @@
 - Recomendación: moverlo a un repo privado separado (ej. `otorrinonet2-design`) o
   a un branch `design-docs` si se prefiere mantener historial conjunto
 
+## Implementado (2026-05-07 → 2026-05-09)
+
+### Fixes sitio público (sprint completo)
+- [x] **FIX-03** `PublicHeader.tsx` compartido en `src/components/sitio-publico/` — nav extraído de todas las páginas, `usePathname` + `aria-current`, aria hamburguesa, "Agendar Cita" como `<Link>`
+- [x] **FIX-01** `src/app/not-found.tsx` con PublicHeader + PublicFooter + CTAs a `/`, `/servicios`, `/agendar`
+- [x] **FIX-02** Redirects 301 en `next.config.ts`: `/legal/*` → canónicas; referencias internas limpias
+- [x] **FIX-05/06/07/13** Incluidos en FIX-03 (Link, aria-label/expanded/controls, aria-current)
+- [x] **FIX-08** PublicHeader + PublicFooter añadido a `/privacidad`, `/terminos`, `/cookies`, `/descargo`
+- [x] **FIX-11** Metadata (title, description, canonical) en todas las `page.tsx` de `(public)/`
+- [x] **FIX-12** `Breadcrumbs.tsx` con JSON-LD `BreadcrumbList` en `/perfil`, `/servicios`, `/vacunacion` y páginas legales
+- [x] **FIX-14** Script acceptrics eliminado de `src/app/layout.tsx`
+- [x] **FIX-10** Footer: columna "Navegación" (lg:grid-cols-4) + iconos redes sociales (@drviverosorl)
+- [x] **FIX-15** CookieBanner robusto: `useState→useEffect` (sin hydration mismatch), expiración 12 meses
+- [x] GA4 Consent Mode v2 activado; `CookieBanner` integrado en root layout
+- [x] `LegalPageShell` + `prose-lg` en páginas legales para mejor legibilidad
+- [x] Polyfills innecesarios eliminados (Array.prototype.at, Object.hasOwn, flatMap, etc. — ~14 KiB Lighthouse)
+- [x] xlsx eliminado; vulnerabilidad hono corregida
+- **Pendiente FIX-09**: botón flotante WhatsApp — bloqueado, el Dr. Viveros no tiene número celular definitivo aún
+
+### Panel admin — establecimiento y configuración
+- [x] Dashboard admin muestra datos reales del establecimiento (`AdminDashboard.tsx` — commit f61cd2d)
+- [x] **Bloqueo de fechas**: tab en `ConfiguracionClient` para marcar días no disponibles en el calendario de citas; acción `blockedDates` en `actions/configuracion.ts`
+- [x] **Datos legales del médico**: campos adicionales en tab Médico (cedula especialidad, universidad, escudo)
+
+### Flujo de citas — mejoras al portal
+- [x] **Expediente automático**: al agendar cita desde el portal, se crea automáticamente un registro `Patient` si el correo no existe (`actions/appointments.ts` — commit f56a31f)
+- [x] **Modificación de cita por el paciente**: enlace de "modificar cita" en el correo de confirmación → `/cita/modificar?token=…` → formulario `ModificarCitaForm.tsx` → página de éxito `/cita-modificada`; acción `rescheduleCita` en `actions/appointments.ts` (commit 7763d82)
+
+### Reseñas y NPS (P2 completado)
+- [x] **Google Places reviews**: `src/lib/google-places.ts` — fetch y caché de reseñas; campos `googleReviewsJson`, `googleReviewsCachedAt` en `clinic_config`; endpoint `/api/reviews/refresh`; reseñas mostradas en página principal
+- [x] **Email NPS post-consulta**: cron `/api/cron/nps` — envía encuesta NPS por email después de la cita; campo `npsSentAt` en schema; configuración de Google Places ID en tab Configuración
+- [x] `.env.example` actualizado con `GOOGLE_PLACES_API_KEY`, `GOOGLE_PLACE_ID`, `CRON_SECRET`
+
+### Seguridad
+- [x] `fast-uri` actualizado para corregir CVEs de path traversal y host confusion (commit eb201e4)
+
 ## Backlog priorizado (P0) — resuelto 2026-05-07
 - [x] Cifrado en producción lanza `Error` si faltan `ENCRYPTION_KEY`/`ENCRYPTION_KDF_SALT`
       (`lib/crypto.ts`)
@@ -117,13 +153,13 @@
 - [ ] Email HTML escape de inputs
 
 ## Backlog P2 (oportunidades)
-- [ ] Recordatorios WhatsApp/Email/SMS (cron `reminderSent` ya en schema)
+- [x] Recordatorio por email 24 h antes de la cita — cron `POST /api/cron/reminder` (ventana 20–28 h, marca `reminderSent=true`); `sendReminderEmail` en `mailer.ts`
 - [ ] Pago anticipado (Stripe / MercadoPago)
-- [ ] Telemedicina (Daily.co)
-- [ ] Portal del paciente (login propio)
-- [ ] Reseñas y NPS automatizado
-- [ ] Triaje IA en motivo de consulta
-- [ ] Dictado por voz + estructura SOAP (Whisper + LLM)
+- [ ] Telemedicina (Daily.co) — sin fecha, largo plazo
+- [ ] Portal del paciente (login propio) — sin fecha, largo plazo
+- [x] Reseñas y NPS automatizado (Google Places + cron email — 2026-05-09)
+- [ ] ~~Triaje IA en motivo de consulta~~ — descartado
+- [ ] ~~Dictado por voz + estructura SOAP (Whisper + LLM)~~ — descartado
 - [ ] Dashboard métricas clínicas/financieras
 - [ ] Facturación CFDI (Facturama)
 - [ ] FHIR export individual y bulk
