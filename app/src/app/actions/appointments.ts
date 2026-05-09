@@ -2,6 +2,7 @@
 
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
+import { fromZonedTime } from 'date-fns-tz'
 import { verifyTurnstileToken } from '@/lib/turnstile'
 import { prisma } from '@/lib/prisma'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
@@ -12,6 +13,8 @@ import {
   sendAppointmentReschedule,
   type AppointmentEmailData,
 } from '@/lib/mailer'
+
+const CDMX = 'America/Mexico_City'
 
 const AppointmentPayloadSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida'),
@@ -41,7 +44,7 @@ export async function submitAppointmentRequest(
   if (!valid) return { ok: false, error: 'Verificación de seguridad fallida. Intenta de nuevo.' }
 
   // 3. Fecha no en el pasado (zona horaria CDMX, margen de 30 min)
-  const scheduledAt = new Date(`${data.date}T${data.time}:00-06:00`)
+  const scheduledAt = fromZonedTime(`${data.date}T${data.time}`, CDMX)
   const now = new Date()
   if (scheduledAt.getTime() < now.getTime() - 30 * 60 * 1000) {
     return { ok: false, error: 'No es posible agendar citas en el pasado.' }
@@ -152,7 +155,7 @@ export async function rescheduleAppointmentByToken(
   if (!appointment) return { ok: false, error: 'Enlace inválido o expirado.' }
   if (appointment.status === 'cancelada') return { ok: false, error: 'Esta cita ya fue cancelada.' }
 
-  const newScheduledAt = new Date(`${newDate}T${newTime}:00-06:00`)
+  const newScheduledAt = fromZonedTime(`${newDate}T${newTime}`, CDMX)
   if (newScheduledAt.getTime() < Date.now() - 30 * 60 * 1000) {
     return { ok: false, error: 'No es posible agendar citas en el pasado.' }
   }

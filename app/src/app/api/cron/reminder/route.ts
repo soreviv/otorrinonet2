@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { formatInTimeZone } from 'date-fns-tz'
 import { prisma } from '@/lib/prisma'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import { sendReminderEmail } from '@/lib/mailer'
+
+const CDMX = 'America/Mexico_City'
 
 // Ejecutar diariamente ~10 AM CDMX.
 // Busca citas entre 20h y 28h a partir de ahora para tolerar drift del cron.
@@ -44,10 +47,8 @@ export async function POST(req: NextRequest) {
 
   for (const appt of appointments) {
     try {
-      const fecha = appt.scheduledAt.toISOString().slice(0, 10)
-      const hora  = appt.scheduledAt.toLocaleTimeString('es-MX', {
-        hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City',
-      })
+      const fecha = formatInTimeZone(appt.scheduledAt, CDMX, 'yyyy-MM-dd')
+      const hora  = formatInTimeZone(appt.scheduledAt, CDMX, 'HH:mm')
 
       await sendReminderEmail(
         {
