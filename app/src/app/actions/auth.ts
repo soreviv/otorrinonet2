@@ -15,6 +15,7 @@ import {
 import { logAction } from '@/lib/audit'
 import { sendPasswordResetEmail } from '@/lib/mailer'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
+import { checkRateLimit, recordFailure, clearRateLimit } from '@/lib/rate-limit'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -28,19 +29,27 @@ export async function loginAction(_prev: ActionResult | null, formData: FormData
 
   if (!email || !password) return { error: 'Completa todos los campos.' }
 
+  const rlKey = `login:${email}`
+  if (checkRateLimit(rlKey).blocked) {
+    return { error: 'Demasiados intentos fallidos. Espere 30 minutos e intente de nuevo.' }
+  }
+
   const user = await prisma.staffUser.findUnique({ where: { email } })
 
   if (!user || user.activo === false) {
+    recordFailure(rlKey)
     await logAction({ action: 'login_fallido', resource: 'auth', details: { email, reason: 'user_not_found' } })
     return { error: 'Credenciales incorrectas.' }
   }
 
   const valid = await bcrypt.compare(password, user.passwordHash)
   if (!valid) {
+    recordFailure(rlKey)
     await logAction({ action: 'login_fallido', resource: 'auth', userId: user.id, details: { reason: 'invalid_password' } })
     return { error: 'Credenciales incorrectas.' }
   }
 
+  clearRateLimit(rlKey)
   await createPendingSession(user.id)
 
   redirect(user.totpEnabled ? '/login/verify-2fa' : '/login/setup-2fa')
@@ -129,7 +138,15 @@ export async function logoutAction() {
 // ─── Recuperación de contraseña ───────────────────────────────────────────────
 
 export async function requestPasswordResetAction(email: string): Promise<ActionResult> {
-  const user = await prisma.staffUser.findUnique({ where: { email: email.toLowerCase().trim() } })
+  const normalizedEmail = email.toLowerCase().trim()
+  const rlKey = `reset:${normalizedEmail}`
+
+  if (checkRateLimit(rlKey).blocked) {
+    return { ok: true }
+  }
+  recordFailure(rlKey)
+
+  const user = await prisma.staffUser.findUnique({ where: { email: normalizedEmail } })
   if (user && user.activo) {
     await prisma.passwordResetToken.deleteMany({ where: { userId: user.id } })
     const plain = randomBytes(32).toString('hex')
