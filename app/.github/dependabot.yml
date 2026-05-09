@@ -1,0 +1,63 @@
+version: 2
+
+updates:
+  # Dependencias npm (Next.js, Prisma, librerías UI, etc.)
+  - package-ecosystem: "npm"
+    directory: "/app"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/Mexico_City"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "npm"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      # Actualizar todo el ecosistema de Next.js junto
+      nextjs:
+        patterns:
+          - "next"
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      # Actualizar Prisma junto (cliente + CLI deben ir sincronizados)
+      prisma:
+        patterns:
+          - "prisma"
+          - "@prisma/client"
+      # Utilidades de desarrollo que no afectan runtime
+      dev-tooling:
+        patterns:
+          - "eslint*"
+          - "@eslint*"
+          - "typescript"
+          - "@types/*"
+          - "postcss"
+          - "tailwindcss"
+    ignore:
+      # Evitar saltos de major automáticos en dependencias críticas
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "prisma"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@prisma/client"
+        update-types: ["version-update:semver-major"]
+
+  # Acciones de GitHub (si se añaden workflows en el futuro)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/Mexico_City"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore"
