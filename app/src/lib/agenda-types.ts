@@ -1,5 +1,15 @@
 export type AppointmentStatus = 'pendiente' | 'confirmada' | 'cancelada' | 'reprogramada' | 'completada'
 
+export interface CobroResumen {
+  id: string
+  tipoConsulta: string
+  montoTotal: number
+  metodoPago: string
+  notasExtra: string | null
+  facturado: boolean
+  cobradoAt: string
+}
+
 export interface Service {
   id: string
   name: string
@@ -22,6 +32,7 @@ export interface Appointment {
   bookingSource: string        // "staff" | "portal"
   patientConfirmed: boolean
   createdAt: string
+  cobro?: CobroResumen | null
 }
 
 export interface TimeSlot {

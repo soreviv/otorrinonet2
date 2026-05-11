@@ -6,7 +6,7 @@ import type { Appointment, Service } from '@/lib/agenda-types'
 
 export async function getAppointments(): Promise<Appointment[]> {
   const apts = await prisma.appointment.findMany({
-    include: { patient: true, service: true },
+    include: { patient: true, service: true, cobro: true },
     orderBy: { scheduledAt: 'asc' },
   })
 
@@ -42,6 +42,15 @@ export async function getAppointments(): Promise<Appointment[]> {
       bookingSource: apt.bookingSource,
       patientConfirmed: apt.patientConfirmed,
       createdAt: apt.createdAt.toISOString(),
+      cobro: apt.cobro ? {
+        id: apt.cobro.id,
+        tipoConsulta: apt.cobro.tipoConsulta,
+        montoTotal: apt.cobro.montoTotal,
+        metodoPago: apt.cobro.metodoPago,
+        notasExtra: apt.cobro.notasExtra,
+        facturado: apt.cobro.facturado,
+        cobradoAt: apt.cobro.cobradoAt.toISOString(),
+      } : null,
     }
   })
 }

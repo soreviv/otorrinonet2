@@ -153,13 +153,15 @@
 
 ## Backlog P2 (oportunidades)
 - [x] Recordatorio por email 24 h antes de la cita — cron `POST /api/cron/reminder` (ventana 20–28 h, marca `reminderSent=true`); `sendReminderEmail` en `mailer.ts`
-- [ ] Pago anticipado (Stripe / MercadoPago)
 - [ ] Conectar `onNewOrder` / `onViewDocuments` / exports FHIR — requiere definir sistema receptor (laboratorio, HIS, IMSS, etc.)
 - [ ] Telemedicina (Daily.co) — sin fecha, largo plazo
 - [ ] Portal del paciente (login propio) — sin fecha, largo plazo
 - [x] Reseñas y NPS automatizado (Google Places + cron email — 2026-05-09)
 - [ ] ~~Triaje IA en motivo de consulta~~ — descartado
 - [ ] ~~Dictado por voz + estructura SOAP (Whisper + LLM)~~ — descartado
-- [ ] Dashboard métricas clínicas/financieras
-- [ ] Facturación CFDI (Facturama)
 - [ ] FHIR export individual y bulk
+
+## Backlog largo plazo (baja prioridad / sin fecha)
+- [ ] **Módulo de cobros** — modelo `Cobro` en BD (tipoConsulta, montoTotal, metodoPago, notasExtra); formulario en panel de cita; dashboard financiero (ingresos del día/mes). Decisiones tomadas: sin Stripe, registro manual por el staff. Precios: primera vez $1,100 / subsecuente $1,000 / lavado de oídos $600. Nota aclaratoria: honorarios son por consulta; insumos extra (férulas, tapones, etc.) se cobran en consultorio y se anotan en campo libre. Descartado: pago anticipado online (baja adopción en el perfil de pacientes del consultorio).
+- [ ] Facturación CFDI (Facturama)
+- [ ] ~~Pago anticipado Stripe/MercadoPago~~ — descartado por baja adopción en el perfil de pacientes

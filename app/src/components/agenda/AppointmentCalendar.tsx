@@ -22,6 +22,8 @@ import {
   RefreshCw,
   User,
 } from 'lucide-react'
+import { CobroPanel } from './CobroPanel'
+import type { CobroResumen } from '@/lib/agenda-types'
 
 // ─── Status config ────────────────────────────────────────────────────────────
 
@@ -167,6 +169,7 @@ interface DetailPanelProps {
   onReject: () => void
   onCancel: () => void
   onReschedule: () => void
+  onCobrado: (cobro: CobroResumen) => void
 }
 
 function DetailPanel({
@@ -175,6 +178,7 @@ function DetailPanel({
   onReject,
   onCancel,
   onReschedule,
+  onCobrado,
 }: DetailPanelProps) {
   const apt = appointment
 
@@ -293,6 +297,14 @@ function DetailPanel({
           )}
         </div>
 
+        {apt.status !== 'cancelada' && (
+          <CobroPanel
+            appointmentId={apt.id}
+            cobro={apt.cobro}
+            onCobrado={onCobrado}
+          />
+        )}
+
         <p className="text-xs text-slate-400 dark:text-slate-600 text-center pt-2">
           Solicitud recibida: {formatCreatedAt(apt.createdAt)}
         </p>
@@ -341,7 +353,7 @@ function InfoRow({ icon, iconBg, label, value }: InfoRowProps) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function AppointmentCalendar({
-  appointments,
+  appointments: initialAppointments,
   onConfirm,
   onReject,
   onCancel,
@@ -350,10 +362,15 @@ export function AppointmentCalendar({
   onCreate,
   onSearch,
 }: AppointmentCalendarProps) {
+  const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments)
   const [selectedId, setSelectedId] = useState<string | null>(
-    appointments[0]?.id ?? null
+    initialAppointments[0]?.id ?? null
   )
   const [searchQuery, setSearchQuery] = useState('')
+
+  function handleCobrado(appointmentId: string, cobro: CobroResumen) {
+    setAppointments(prev => prev.map(a => a.id === appointmentId ? { ...a, cobro } : a))
+  }
 
   const filtered = useMemo(() => {
     if (!searchQuery.trim()) return appointments
@@ -555,6 +572,7 @@ export function AppointmentCalendar({
             onReject={() => onReject?.(selected.id)}
             onCancel={() => onCancel?.(selected.id)}
             onReschedule={() => onReschedule?.(selected.id)}
+            onCobrado={cobro => handleCobrado(selected.id, cobro)}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center text-slate-300 dark:text-slate-700">
