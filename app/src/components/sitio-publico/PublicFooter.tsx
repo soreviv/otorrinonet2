@@ -53,7 +53,8 @@ const NAV_LINKS = [
   { label: 'Servicios',    href: '/servicios' },
   { label: 'Ubicación',    href: '/ubicacion' },
   { label: 'Contacto',     href: '/contacto' },
-  { label: 'Agendar Cita', href: '/agendar' },
+  { label: 'Agendar Cita',     href: '/agendar' },
+  { label: 'Autofacturación', href: '/autofactura' },
 ]
 
 const LEGAL_LINKS = [
