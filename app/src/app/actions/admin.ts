@@ -1,9 +1,12 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { requireMedico } from '@/lib/dal'
+import { logAction } from '@/lib/audit'
 import type { SystemUser, AuditLog, ArcoRequest, FhirExport, UserRole, UserStatus, ArcoStatus } from '@/lib/admin-types'
 
 export async function getSystemUsers(): Promise<SystemUser[]> {
+  await requireMedico()
   const users = await prisma.staffUser.findMany({ orderBy: { createdAt: 'asc' } })
   return users.map(u => ({
     id: u.id,
@@ -17,6 +20,7 @@ export async function getSystemUsers(): Promise<SystemUser[]> {
 }
 
 export async function getAuditLogs(): Promise<AuditLog[]> {
+  await requireMedico()
   const logs = await prisma.auditLog.findMany({
     include: { user: true },
     orderBy: { fecha: 'desc' },
@@ -34,6 +38,7 @@ export async function getAuditLogs(): Promise<AuditLog[]> {
 }
 
 export async function getArcoRequests(): Promise<ArcoRequest[]> {
+  await requireMedico()
   const requests = await prisma.arcoRequest.findMany({
     include: { patient: true },
     orderBy: { submittedAt: 'desc' },
@@ -56,6 +61,7 @@ export async function getArcoRequests(): Promise<ArcoRequest[]> {
 }
 
 export async function getFhirExports(): Promise<FhirExport[]> {
+  await requireMedico()
   const exports = await prisma.fhirExport.findMany({
     include: { patient: true, requestedBy: true },
     orderBy: { requestedAt: 'desc' },
@@ -80,11 +86,27 @@ export async function getFhirExports(): Promise<FhirExport[]> {
 }
 
 export async function updateUserRole(userId: string, role: UserRole): Promise<void> {
+  const session = await requireMedico()
   await prisma.staffUser.update({ where: { id: userId }, data: { role } })
+  await logAction({
+    action: 'modificacion',
+    resource: 'staff_user',
+    resourceId: userId,
+    userId: session.userId,
+    details: { field: 'role', value: role },
+  })
 }
 
 export async function updateUserStatus(userId: string, status: UserStatus): Promise<void> {
+  const session = await requireMedico()
   await prisma.staffUser.update({ where: { id: userId }, data: { activo: status === 'activo' } })
+  await logAction({
+    action: 'modificacion',
+    resource: 'staff_user',
+    resourceId: userId,
+    userId: session.userId,
+    details: { field: 'activo', value: status },
+  })
 }
 
 export async function updateArcoRequestStatus(
@@ -92,6 +114,7 @@ export async function updateArcoRequestStatus(
   status: ArcoStatus,
   notes?: string,
 ): Promise<void> {
+  const session = await requireMedico()
   const dbStatus = status.replace('-', '_')
   await prisma.arcoRequest.update({
     where: { id: requestId },
@@ -100,5 +123,12 @@ export async function updateArcoRequestStatus(
       notes: notes ?? undefined,
       resolvedAt: status === 'resuelta' || status === 'rechazada' ? new Date() : undefined,
     },
+  })
+  await logAction({
+    action: 'modificacion',
+    resource: 'arco_request',
+    resourceId: requestId,
+    userId: session.userId,
+    details: { status: dbStatus },
   })
 }
