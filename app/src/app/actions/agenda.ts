@@ -75,7 +75,7 @@ export async function updateAppointmentStatus(
 ): Promise<void> {
   const session = await verifySession()
   await prisma.appointment.update({ where: { id }, data: { status } })
-  void logAction({
+  await logAction({
     action: 'modificacion',
     resource: 'appointment',
     resourceId: id,
