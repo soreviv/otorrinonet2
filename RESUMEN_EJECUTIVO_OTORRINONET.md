@@ -1,5 +1,5 @@
 # Resumen Ejecutivo: Proyecto OtorrinoNet
-**Fecha:** 12 de mayo de 2024
+**Fecha:** 12 de mayo de 2026
 **Asunto:** Informe de Auditoría Técnica y Cumplimiento Normativo para Certificación SSA
 
 ---
