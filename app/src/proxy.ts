@@ -8,14 +8,14 @@ function buildCsp(nonce: string) {
     `default-src 'self'`,
     // strict-dynamic confía en scripts inyectados por scripts con nonce (cubre Turnstile).
     // unsafe-eval solo en dev: React lo usa para reconstruir stack traces del servidor.
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ''}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://js.stripe.com${isDev ? " 'unsafe-eval'" : ''}`,
     // unsafe-inline en style-src: necesario para inline styles de React y next/font en runtime.
     `style-src 'self' 'unsafe-inline'`,
-    // img-src: restringido a dominios conocidos (Google Maps, reseñas Google).
-    `img-src 'self' data: blob: https://maps.gstatic.com https://*.googleusercontent.com https://lh3.googleusercontent.com`,
+    // img-src: restringido a dominios conocidos (Google Maps, reseñas Google, Stripe).
+    `img-src 'self' data: blob: https://maps.gstatic.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://*.stripe.com`,
     `font-src 'self'`,
-    `connect-src 'self' https://challenges.cloudflare.com`,
-    `frame-src https://maps.google.com https://www.google.com https://challenges.cloudflare.com`,
+    `connect-src 'self' https://challenges.cloudflare.com https://api.stripe.com`,
+    `frame-src https://maps.google.com https://www.google.com https://challenges.cloudflare.com https://js.stripe.com`,
     `frame-ancestors 'none'`,
     `object-src 'none'`,
     `base-uri 'self'`,
