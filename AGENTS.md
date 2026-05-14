@@ -83,9 +83,18 @@ Todas las páginas públicas siguen este patrón:
 - Siempre incluir variantes `dark:` en clases de Tailwind.
 - No agregar comentarios salvo que el WHY sea no obvio.
 
-### Commits
+### Commits y ramas
+
+> **OBLIGATORIO antes de crear cualquier rama o PR:**
+> ```bash
+> git fetch origin
+> git rebase origin/master
+> ```
+> Saltarse este paso ha causado regresiones graves en producción (archivos borrados, paquetes eliminados).
+
 - Mensajes en **español**, en imperativo, con prefijo: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`.
 - Abrir PR hacia `master` — nunca push directo a `master`.
+- Si el PR toca `package.json`, incluir también `package-lock.json` actualizado.
 
 ### Rutas legales
 - Las rutas canónicas son `/privacidad`, `/terminos`, `/cookies`, `/descargo`.
@@ -129,18 +138,40 @@ Este repositorio usa **dos agentes en paralelo**:
 - Decisiones de arquitectura y seguridad.
 - Fixes de compilación post-merge.
 
-### Regla de coordinación
-- Jules **no toca**: `src/proxy.ts`, `src/lib/stripe.ts`, `src/lib/stripe-client.ts`, `package.json`, `next.config.ts`.
-- Antes de hacer merge de un PR de Jules, Claude Code verifica TypeScript y aplica `prisma db push` / `prisma generate` si el schema cambió.
+### Regla de coordinación — ARCHIVOS PROTEGIDOS
+
+Los siguientes archivos son propiedad exclusiva de Claude Code. **Jules no debe modificarlos, eliminarlos ni revertirlos bajo ninguna circunstancia:**
+
+| Archivo | Por qué está protegido |
+|---|---|
+| `app/src/proxy.ts` | CSP con nonce + dominios de Stripe; un cambio incorrecto rompe la seguridad de toda la app |
+| `app/src/lib/stripe.ts` | Singleton Stripe server-side con lazy init; si se borra el checkout deja de funcionar |
+| `app/src/lib/stripe-client.ts` | `stripePromise` para Stripe Elements; si se borra el formulario de pago falla en cliente |
+| `app/next.config.ts` | Configuración de caché, imágenes y redirects; no agregar ni quitar sin coordinar |
+| `app/package.json` | Los paquetes `stripe`, `@stripe/stripe-js` y `@stripe/react-stripe-js` deben permanecer |
+| `app/package-lock.json` | Debe mantenerse en sync con `package.json` |
+
+**Cómo detectar si tu rama está desactualizada:**
+```bash
+git fetch origin
+git log --oneline origin/master ^HEAD   # si lista commits → tu rama está atrasada
+git rebase origin/master                # sincronizar ANTES de abrir el PR
+```
+
+Si al hacer rebase aparece un conflicto en alguno de los archivos protegidos, **resolver siempre a favor de la versión de `origin/master`** (es decir, `git checkout origin/master -- <archivo>` y luego `git add`).
+
+Antes de hacer merge de un PR de Jules, Claude Code verifica TypeScript y aplica `prisma db push` / `prisma generate` si el schema cambió.
 
 ---
 
 ## Módulos en desarrollo activo
 
-### Tienda en línea (Fase 1 — en progreso)
+### Tienda en línea (Fase 1 — ✅ completada)
 - **Admin staff**: ✅ completado (`/staff/tienda/`)
-- **Infraestructura Stripe**: ✅ completado (stripe.ts, CSP, useCarrito, schemas Zod)
-- **Pendiente**: páginas públicas de tienda, checkout con Stripe Elements, webhook, email de ticket
+- **Infraestructura Stripe**: ✅ completado (`stripe.ts`, `stripe-client.ts`, CSP, `useCarrito`, schemas Zod)
+- **Páginas públicas**: ✅ catálogo, detalle, carrito, checkout con Stripe Elements, confirmación, cancelado
+- **Webhook**: ✅ `/api/stripe/webhook` — firma HMAC, idempotencia, transacción stock + estado, email ticket
+- **Pendiente operativo**: llenar `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` en `.env` del servidor
 
 ### Autofacturación CFDI 4.0
 - ✅ Completado (`/autofactura/`)
