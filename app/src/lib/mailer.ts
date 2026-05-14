@@ -416,3 +416,102 @@ export async function sendContactNotification(
     text: `Nuevo mensaje de ${data.name} (${data.email}):\n\nAsunto: ${data.subject}\n\n${data.message}`,
   })
 }
+
+// ─── Email de confirmación de compra ──────────────────────────────────────────
+
+export async function sendOrderTicket(params: {
+  order: {
+    id: string
+    compradorNombre: string
+    compradorEmail: string
+    shippingChoice: 'pickup' | 'domicilio'
+    subtotal: number      // centavos
+    costoEnvio: number    // centavos
+    total: number         // centavos
+    direccionCalle?: string | null
+    direccionNumero?: string | null
+    direccionColonia?: string | null
+    direccionMunicipio?: string | null
+    direccionEstado?: string | null
+    direccionCP?: string | null
+  }
+  items: {
+    nombreSnapshot: string
+    cantidad: number
+    precioUnitario: number  // centavos
+    subtotal: number        // centavos
+  }[]
+  pdfBuffer?: Buffer        // para Fase 3 CFDI; ignorar por ahora
+  cfg: ClinicConfig
+}): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount / 100)
+  }
+
+  const itemsHtml = params.items.map(item => `
+    <tr>
+      <td style="padding:8px;border-bottom:1px solid #e5e7eb">${esc(item.nombreSnapshot)}</td>
+      <td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${item.cantidad}</td>
+      <td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${formatCurrency(item.precioUnitario)}</td>
+      <td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${formatCurrency(item.subtotal)}</td>
+    </tr>
+  `).join('')
+
+  const shippingInfo = params.order.shippingChoice === 'pickup'
+    ? `<p><strong>Método de entrega:</strong> Recoger en consultorio</p>
+       <p>Puedes recoger tu pedido en el consultorio del Dr. Viveros en su próxima visita o llamando al consultorio.</p>`
+    : `<p><strong>Método de entrega:</strong> Envío a domicilio</p>
+       <p><strong>Dirección:</strong> ${esc(params.order.direccionCalle)} ${esc(params.order.direccionNumero)}, ${esc(params.order.direccionColonia)}, ${esc(params.order.direccionMunicipio)}, ${esc(params.order.direccionEstado)}, CP ${esc(params.order.direccionCP)}</p>
+       <p>Nos pondremos en contacto contigo para coordinar la entrega.</p>`
+
+  const content = `
+    <p>Hola <strong>${esc(params.order.compradorNombre)}</strong>,</p>
+    <p>Gracias por tu compra. Hemos recibido tu pedido con éxito.</p>
+
+    <h3 style="margin-top:24px">Detalles del pedido #${params.order.id.slice(-8).toUpperCase()}</h3>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:0.875em">
+      <thead>
+        <tr style="background:#f9fafb">
+          <th style="padding:8px;text-align:left;border-bottom:2px solid #e5e7eb">Producto</th>
+          <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">Cant.</th>
+          <th style="padding:8px;text-align:right;border-bottom:2px solid #e5e7eb">Precio</th>
+          <th style="padding:8px;text-align:right;border-bottom:2px solid #e5e7eb">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsHtml}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3" style="padding:8px;text-align:right;font-weight:600">Subtotal</td>
+          <td style="padding:8px;text-align:right">${formatCurrency(params.order.subtotal)}</td>
+        </tr>
+        ${params.order.costoEnvio > 0 ? `
+        <tr>
+          <td colspan="3" style="padding:8px;text-align:right;font-weight:600">Envío</td>
+          <td style="padding:8px;text-align:right">${formatCurrency(params.order.costoEnvio)}</td>
+        </tr>` : ''}
+        <tr>
+          <td colspan="3" style="padding:8px;text-align:right;font-weight:700;font-size:1.1em">Total</td>
+          <td style="padding:8px;text-align:right;font-weight:700;font-size:1.1em;color:#0369a1">${formatCurrency(params.order.total)}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div style="background:#f0f9ff;padding:16px;border-radius:8px;margin-top:24px">
+      ${shippingInfo}
+    </div>
+
+    <p style="margin-top:24px;font-size:0.875em;color:#6b7280">Si tienes alguna duda sobre tu pedido, por favor contáctanos.</p>
+  `
+
+  await getTransport().sendMail({
+    from: sender(params.cfg),
+    to: `"${params.order.compradorNombre}" <${params.order.compradorEmail}>`,
+    subject: `Confirmación de pedido #${params.order.id.slice(-8).toUpperCase()} — ${params.cfg.clinicName}`,
+    html: emailLayout(content, params.cfg),
+    text: `Hola ${params.order.compradorNombre}, gracias por tu compra. Pedido #${params.order.id.slice(-8).toUpperCase()}, Total: ${formatCurrency(params.order.total)}`,
+  })
+}

@@ -72,3 +72,21 @@ export async function validarStockCarrito(
 
   return resultados
 }
+
+export async function getOrdenByPaymentIntent(paymentIntentId: string) {
+  return await prisma.order.findUnique({
+    where: { stripePaymentIntentId: paymentIntentId },
+    include: {
+      items: {
+        include: {
+          product: {
+            select: {
+              nombre: true,
+              imagenes: true
+            }
+          }
+        }
+      }
+    }
+  })
+}
