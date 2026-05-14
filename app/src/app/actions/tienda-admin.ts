@@ -23,7 +23,7 @@ export async function crearProducto(data: unknown) {
 
   const validated = productSchema.safeParse(data)
   if (!validated.success) {
-    return { ok: false, error: validated.error.errors[0].message }
+    return { ok: false, error: validated.error.issues[0].message }
   }
 
   const { categoria } = validated.data
@@ -55,7 +55,7 @@ export async function actualizarProducto(id: string, data: unknown) {
 
   const validated = updateProductSchema.safeParse(data)
   if (!validated.success) {
-    return { ok: false, error: validated.error.errors[0].message }
+    return { ok: false, error: validated.error.issues[0].message }
   }
 
   try {

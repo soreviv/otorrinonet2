@@ -85,7 +85,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
     }
 
     const res = isEditing
-      ? await actualizarProducto(initialData.id, payload)
+      ? await actualizarProducto(initialData!.id, payload)
       : await crearProducto(payload)
 
     setLoading(false)
