@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useCarrito } from '@/hooks/useCarrito'
 import { CheckCircle2, Package, MapPin, Truck, Loader2, AlertTriangle, ShoppingBag, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
@@ -18,6 +19,7 @@ interface ConfirmacionClientProps {
 
 export function ConfirmacionClient({ order }: ConfirmacionClientProps) {
   const { vaciar } = useCarrito()
+  const router = useRouter()
 
   // Vaciar carrito al confirmar orden pagada
   useEffect(() => {
@@ -25,6 +27,14 @@ export function ConfirmacionClient({ order }: ConfirmacionClientProps) {
       vaciar()
     }
   }, [order?.status, vaciar])
+
+  // El webhook puede tardar 1-5 s; si la orden sigue pendiente_pago, refrescar
+  useEffect(() => {
+    if (order?.status === 'pendiente_pago') {
+      const t = setTimeout(() => router.refresh(), 3000)
+      return () => clearTimeout(t)
+    }
+  }, [order?.status, router])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount / 100)
