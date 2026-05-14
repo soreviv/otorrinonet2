@@ -8,6 +8,7 @@ import {
   ScrollText,
   Shield,
   Settings,
+  ShoppingBag,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -66,6 +67,13 @@ const defaultNavItems: StaffNavItem[] = [
     href: '/staff/admin',
     icon: Shield,
     roles: ['medico'],
+  },
+  {
+    id: 'tienda',
+    label: 'Tienda',
+    href: '/staff/tienda',
+    icon: ShoppingBag,
+    roles: ['medico', 'recepcionista'],
   },
   {
     id: 'configuracion',

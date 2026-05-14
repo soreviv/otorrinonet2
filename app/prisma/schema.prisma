@@ -461,3 +461,107 @@ model Cobro {
 
   @@map("cobros")
 }
+
+enum ProductCategory {
+  dispositivo_medico
+  suplemento_otc
+  paquete_consulta
+  vacuna
+  otro
+}
+
+enum DeliveryMode {
+  pickup_only
+  shipping_only
+  both
+}
+
+model Product {
+  id             String          @id @default(cuid())
+  nombre         String
+  descripcion    String?         @db.Text
+  slug           String          @unique
+  categoria      ProductCategory
+  modoEntrega    DeliveryMode    @default(both)
+  precioUnitario Int
+  stock          Int             @default(0)
+  stockIlimitado Boolean         @default(false)
+  activo         Boolean         @default(true)
+  imagenes       String[]
+  metaTitle      String?
+  metaDesc       String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  orderItems     OrderItem[]
+  @@index([categoria])
+  @@index([activo])
+  @@map("products")
+}
+
+enum OrderStatus {
+  pendiente_pago
+  pagado
+  en_preparacion
+  enviado
+  entregado
+  cancelado
+  reembolsado
+}
+
+enum ShippingChoice {
+  pickup
+  domicilio
+}
+
+model Order {
+  id                    String         @id @default(cuid())
+  compradorNombre       String
+  compradorEmail        String
+  compradorTelefono     String?
+  direccionCalle        String?
+  direccionNumero       String?
+  direccionColonia      String?
+  direccionMunicipio    String?
+  direccionEstado       String?
+  direccionCP           String?
+  shippingChoice        ShippingChoice
+  costoEnvio            Int            @default(0)
+  subtotal              Int
+  total                 Int
+  status                OrderStatus    @default(pendiente_pago)
+  stripePaymentIntentId String?        @unique
+  stripeChargeId        String?
+  guiaMensajeria        String?
+  urlRastreo            String?
+  notasInternas         String?        @db.Text
+  stripeEventId         String?        @unique
+  ticketEnviadoAt       DateTime?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  items                 OrderItem[]
+  @@index([status])
+  @@index([compradorEmail])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id             String   @id @default(cuid())
+  orderId        String
+  productId      String
+  cantidad       Int
+  precioUnitario Int
+  nombreSnapshot String
+  subtotal       Int
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product  @relation(fields: [productId], references: [id])
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model StripeWebhookEvent {
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now())
+  @@map("stripe_webhook_events")
+}
