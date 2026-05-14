@@ -2,9 +2,12 @@
 
 import { prisma } from '@/lib/prisma'
 import { decrypt } from '@/lib/crypto'
+import { verifySession } from '@/lib/dal'
+import { logAction } from '@/lib/audit'
 import type { Appointment, Service } from '@/lib/agenda-types'
 
 export async function getAppointments(): Promise<Appointment[]> {
+  await verifySession()
   const apts = await prisma.appointment.findMany({
     include: { patient: true, service: true, cobro: true },
     orderBy: { scheduledAt: 'asc' },
@@ -56,6 +59,7 @@ export async function getAppointments(): Promise<Appointment[]> {
 }
 
 export async function getServices(): Promise<Service[]> {
+  await verifySession()
   const services = await prisma.service.findMany({ where: { active: true }, orderBy: { name: 'asc' } })
   return services.map(s => ({
     id: s.id,
@@ -69,5 +73,13 @@ export async function updateAppointmentStatus(
   id: string,
   status: 'confirmada' | 'cancelada' | 'completada',
 ): Promise<void> {
+  const session = await verifySession()
   await prisma.appointment.update({ where: { id }, data: { status } })
+  await logAction({
+    action: 'modificacion',
+    resource: 'appointment',
+    resourceId: id,
+    userId: session.userId,
+    details: { status },
+  })
 }

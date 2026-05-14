@@ -1,0 +1,4 @@
+## 2025-05-21 - Missing Authorization in Administrative Server Actions
+**Vulnerability:** Several server actions in `app/src/app/actions/admin.ts`, `agenda.ts`, and `cie10.ts` lacked session verification (`verifySession`) or role-based access control (`requireMedico`). This allowed potential unauthorized access to sensitive system logs, user management, and clinical data via direct server action calls.
+**Learning:** Even with a robust Data Access Layer (DAL) in place, individual server actions must explicitly invoke guards. The App Router's server actions are public entry points unless protected.
+**Prevention:** Always start server actions with a call to `verifySession()` or a role-specific guard (`requireMedico()`) before any database operations. Use audit logging (`logAction`) for all state-changing operations.

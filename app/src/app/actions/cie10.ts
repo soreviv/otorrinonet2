@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { verifySession } from '@/lib/dal'
 
 export interface Cie10Result {
   codigo: string
@@ -9,6 +10,7 @@ export interface Cie10Result {
 }
 
 export async function searchCie10(query: string): Promise<Cie10Result[]> {
+  await verifySession()
   if (!query || query.trim().length < 2) return []
 
   const q = query.trim()
