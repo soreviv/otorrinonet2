@@ -1,79 +1,78 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
+import { DeliveryMode } from '@/generated/prisma'
 
-const STORAGE_KEY = 'orl-carrito'
-
-export interface ItemCarrito {
-  productId:     string
-  nombre:        string
-  precioUnitario: number  // centavos
-  imagen:        string | null
-  cantidad:      number
-  modoEntrega:   'pickup_only' | 'shipping_only' | 'both'
-}
-
-function leerStorage(): ItemCarrito[] {
-  if (typeof window === 'undefined') return []
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
-  } catch {
-    return []
-  }
-}
-
-function escribirStorage(items: ItemCarrito[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+export interface CarritoItem {
+  productId: string
+  nombre: string
+  precioUnitario: number
+  cantidad: number
+  imagen?: string
+  modoEntrega: DeliveryMode
 }
 
 export function useCarrito() {
-  const [items, setItems] = useState<ItemCarrito[]>([])
+  const [items, setItems] = useState<CarritoItem[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setItems(leerStorage())
+    const saved = localStorage.getItem('otorrinonet_carrito')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        // Solo actualizar si es diferente para evitar cascading renders innecesarios
+        // Aunque useEffect corre después del render, setItems directo a veces molesta al linter
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setItems(parsed)
+      } catch (e) {
+        console.error('Error loading cart', e)
+      }
+    }
+    setLoading(false)
   }, [])
 
-  const agregar = useCallback((producto: Omit<ItemCarrito, 'cantidad'>, cantidad = 1) => {
-    setItems(prev => {
-      const existe = prev.find(i => i.productId === producto.productId)
-      const next = existe
-        ? prev.map(i => i.productId === producto.productId
-            ? { ...i, cantidad: i.cantidad + cantidad }
-            : i)
-        : [...prev, { ...producto, cantidad }]
-      escribirStorage(next)
-      return next
-    })
-  }, [])
+  const save = (newItems: CarritoItem[]) => {
+    setItems(newItems)
+    localStorage.setItem('otorrinonet_carrito', JSON.stringify(newItems))
+  }
 
-  const actualizar = useCallback((productId: string, cantidad: number) => {
-    setItems(prev => {
-      const next = cantidad <= 0
-        ? prev.filter(i => i.productId !== productId)
-        : prev.map(i => i.productId === productId ? { ...i, cantidad } : i)
-      escribirStorage(next)
-      return next
-    })
-  }, [])
+  const agregar = (item: CarritoItem) => {
+    const existing = items.find(i => i.productId === item.productId)
+    if (existing) {
+      save(items.map(i => i.productId === item.productId ? { ...i, cantidad: i.cantidad + item.cantidad } : i))
+    } else {
+      save([...items, item])
+    }
+  }
 
-  const eliminar = useCallback((productId: string) => {
-    setItems(prev => {
-      const next = prev.filter(i => i.productId !== productId)
-      escribirStorage(next)
-      return next
-    })
-  }, [])
+  const actualizarCantidad = (productId: string, cantidad: number) => {
+    if (cantidad <= 0) {
+      eliminar(productId)
+    } else {
+      save(items.map(i => i.productId === productId ? { ...i, cantidad } : i))
+    }
+  }
 
-  const vaciar = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY)
-    setItems([])
-  }, [])
+  const eliminar = (productId: string) => {
+    save(items.filter(i => i.productId !== productId))
+  }
 
-  const subtotal = items.reduce((acc, i) => acc + i.precioUnitario * i.cantidad, 0)
-  const totalItems = items.reduce((acc, i) => acc + i.cantidad, 0)
+  const vaciar = () => {
+    save([])
+  }
 
-  // true si todos los items del carrito permiten envío a domicilio
-  const permiteEnvio = items.every(i => i.modoEntrega !== 'pickup_only')
+  const subtotal = items.reduce((acc, i) => acc + (i.precioUnitario * i.cantidad), 0)
+  const permiteEnvio = !items.some(i => i.modoEntrega === DeliveryMode.pickup_only)
 
-  return { items, subtotal, totalItems, permiteEnvio, agregar, actualizar, eliminar, vaciar }
+  return {
+    items,
+    loading,
+    agregar,
+    actualizarCantidad,
+    eliminar,
+    vaciar,
+    subtotal,
+    permiteEnvio
+  }
 }

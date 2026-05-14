@@ -11,6 +11,8 @@ export interface DashboardMetrics {
   prescripcionesActivas: number
   citasPorDia: { fecha: string; total: number }[]
   citasPorEstado: { estado: string; total: number }[]
+  tiendaHoy: { pedidos: number; ingresos: number }
+  tiendaMes: { pedidos: number; ingresos: number }
 }
 
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
@@ -19,6 +21,8 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
   const today = new Date()
   const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
   const endOfDay   = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
 
   const sevenDaysAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6)
 
@@ -30,6 +34,8 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
     prescripcionesActivas,
     citasUltimos7Dias,
     citasPorEstadoRaw,
+    tiendaHoyRaw,
+    tiendaMesRaw,
   ] = await Promise.all([
     prisma.patient.count(),
     prisma.appointment.count({ where: { scheduledAt: { gte: startOfDay, lt: endOfDay } } }),
@@ -44,6 +50,20 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
       by: ['status'],
       _count: { id: true },
     }),
+    prisma.order.findMany({
+      where: {
+        createdAt: { gte: startOfDay, lt: endOfDay },
+        status: { notIn: ['cancelado', 'reembolsado'] }
+      },
+      select: { total: true, status: true }
+    }),
+    prisma.order.findMany({
+      where: {
+        createdAt: { gte: startOfMonth, lt: endOfDay },
+        status: { notIn: ['cancelado', 'reembolsado'] }
+      },
+      select: { total: true, status: true }
+    }),
   ])
 
   // Agrupar citas por día
@@ -57,6 +77,16 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
     if (dayMap.has(key)) dayMap.set(key, (dayMap.get(key) ?? 0) + 1)
   }
 
+  const tiendaHoy = {
+    pedidos: tiendaHoyRaw.length,
+    ingresos: tiendaHoyRaw.filter(o => o.status !== 'pendiente_pago').reduce((acc, o) => acc + o.total, 0)
+  }
+
+  const tiendaMes = {
+    pedidos: tiendaMesRaw.length,
+    ingresos: tiendaMesRaw.filter(o => o.status !== 'pendiente_pago').reduce((acc, o) => acc + o.total, 0)
+  }
+
   return {
     totalPacientes,
     citasHoy,
@@ -65,6 +95,8 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
     prescripcionesActivas,
     citasPorDia: Array.from(dayMap.entries()).map(([fecha, total]) => ({ fecha, total })),
     citasPorEstado: citasPorEstadoRaw.map(r => ({ estado: r.status, total: r._count.id })),
+    tiendaHoy,
+    tiendaMes
   }
 }
 

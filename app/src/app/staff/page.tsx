@@ -56,14 +56,47 @@ export default async function StaffDashboard() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {stats.map(s => (
-          <div key={s.label} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+          <div key={s.label} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-4">
             <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center mb-3`}>
               <s.icon className={`h-5 w-5 ${s.color}`} />
             </div>
-            <p className="text-2xl font-bold text-slate-900">{s.value}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{s.label}</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{s.value}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{s.label}</p>
           </div>
         ))}
+      </div>
+
+      {/* Métricas de Tienda */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-sky-900/30 flex items-center justify-center text-sky-600 dark:text-sky-400">
+            <TrendingUp className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Ventas Hoy</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-black text-slate-900 dark:text-slate-100">
+                {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(metrics.tiendaHoy.ingresos / 100)}
+              </span>
+              <span className="text-sm font-medium text-slate-500">{metrics.tiendaHoy.pedidos} pedidos</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+            <Activity className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Ventas Mes</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-black text-slate-900 dark:text-slate-100">
+                {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(metrics.tiendaMes.ingresos / 100)}
+              </span>
+              <span className="text-sm font-medium text-slate-500">{metrics.tiendaMes.pedidos} pedidos</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Gráficas */}

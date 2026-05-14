@@ -62,6 +62,6 @@ export const CheckoutSchema = z.object({
   datosComprador: DatosCompradorSchema,
 })
 
-export type DatosComprador = z.infer<typeof DatosCompradorSchema>
-export type CarritoItem    = z.infer<typeof CarritoItemSchema>
-export type CheckoutInput  = z.infer<typeof CheckoutSchema>
+export type DatosComprador    = z.infer<typeof DatosCompradorSchema>
+export type CarritoItemInput  = z.infer<typeof CarritoItemSchema>
+export type CheckoutInput     = z.infer<typeof CheckoutSchema>
