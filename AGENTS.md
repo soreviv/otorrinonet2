@@ -1,0 +1,156 @@
+# AGENTS.md
+
+Guía para agentes de IA que trabajen en este repositorio.
+
+## Proyecto
+
+Sistema clínico para el consultorio del **Dr. Alejandro Viveros Domínguez**, otorrinolaringólogo en CDMX.
+
+- **Sitio público** (`app/src/app/(public)/`) — marketing, agendado de citas, consentimientos, tienda en línea, autofacturación CFDI 4.0.
+- **Panel interno staff** (`app/src/app/staff/`) — agenda, expediente clínico (EHR), notas, recetas, cobros, tienda admin. Requiere sesión autenticada.
+
+La aplicación vive en `app/`. Todo el trabajo de código va dentro de esa carpeta.
+
+---
+
+## Stack
+
+- **Next.js 16** App Router · **React 19** · **TypeScript 5**
+- **Prisma 7** + **PostgreSQL** — usar `prisma db push` (sin `migrate`)
+- **Tailwind CSS 4**
+- **Stripe** — pagos de la tienda en línea
+- **JWT** en cookie `session` (8 h) — `verifySession()` en `app/src/lib/dal.ts`
+- **Nodemailer** — emails transaccionales
+- **Cloudflare Turnstile** — protección del formulario de agendado
+- **Zod** — validación de inputs en server actions
+- **Recharts** — gráficas en el dashboard
+
+---
+
+## Convenciones críticas
+
+### Autenticación
+- Todas las server actions del panel staff deben llamar `await verifySession()` como primera línea.
+- `verifySession()` redirige automáticamente a `/login` si no hay sesión válida.
+- Las rutas `/staff/*` están protegidas por el middleware en `app/src/proxy.ts`.
+
+### Server Actions
+- Siempre `'use server'` en la primera línea del archivo.
+- Retornar `{ ok: boolean; error?: string }` para mutaciones, o los datos directamente para queries.
+- Usar Zod con `safeParse` para validar inputs externos. En Zod v4 usar `.issues[0].message` (no `.errors`).
+- Capturar error Prisma `P2002` (unique constraint) y retornar mensaje legible.
+
+### Schema Prisma
+- Después de modificar `prisma/schema.prisma` ejecutar:
+  ```bash
+  npx prisma db push
+  npx prisma generate
+  ```
+- El cliente Prisma se genera en `app/src/generated/prisma`.
+- Importar tipos desde `@/generated/prisma` (enums, modelos).
+- Importar el cliente desde `@/lib/prisma`.
+- Montos siempre en **centavos enteros MXN** (ej. $1,100 = `110000`).
+
+### Estilo visual — Sitio público
+Todas las páginas públicas siguen este patrón:
+```tsx
+<div className="min-h-screen bg-slate-50 font-sans antialiased dark:bg-slate-950">
+  <PublicHeader />
+  <Breadcrumbs items={[{ label: 'Página', href: '/ruta' }]} />
+  {/* Barra blanca con título */}
+  <div className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
+      <p className="text-[11px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-2">Eyebrow</p>
+      <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white leading-tight">Título</h1>
+    </div>
+  </div>
+  {/* Contenido */}
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+    {/* ... */}
+  </div>
+  <PublicFooter />
+</div>
+```
+
+### Estilo visual — Panel staff
+- Heredar el `StaffShell` del layout padre — no reimplementar navegación.
+- Colores: slate para fondos/texto, sky para acciones primarias.
+- Cards: `bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl`.
+- Referencia: `app/src/app/staff/agenda/page.tsx`.
+
+### Componentes
+- `'use client'` solo cuando el componente usa hooks, estado o eventos del browser.
+- Siempre incluir variantes `dark:` en clases de Tailwind.
+- No agregar comentarios salvo que el WHY sea no obvio.
+
+### Commits
+- Mensajes en **español**, en imperativo, con prefijo: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`.
+- Abrir PR hacia `master` — nunca push directo a `master`.
+
+### Rutas legales
+- Las rutas canónicas son `/privacidad`, `/terminos`, `/cookies`, `/descargo`.
+- No crear ni referenciar `/legal/*` (son redirects 301).
+
+---
+
+## Archivos clave
+
+| Archivo | Propósito |
+|---|---|
+| `app/src/lib/dal.ts` | `verifySession()` — autenticación |
+| `app/src/lib/clinic-config.ts` | Datos del doctor/clínica (desde env vars) |
+| `app/src/lib/mailer.ts` | Emails transaccionales (Nodemailer) |
+| `app/src/lib/stripe.ts` | Singleton Stripe server-side (`'server-only'`) |
+| `app/src/lib/stripe-client.ts` | `stripePromise` para Stripe Elements |
+| `app/src/lib/schemas/tienda.ts` | Schemas Zod de la tienda (admin + checkout) |
+| `app/src/hooks/useCarrito.ts` | Hook de carrito en localStorage |
+| `app/src/proxy.ts` | Middleware: auth guard + CSP con nonce |
+| `app/prisma/schema.prisma` | Schema de BD |
+| `app/src/generated/prisma` | Cliente Prisma generado (no editar manualmente) |
+| `app/src/components/sitio-publico/PublicHeader.tsx` | Header compartido del sitio público |
+| `app/src/components/sitio-publico/PublicFooter.tsx` | Footer compartido del sitio público |
+| `app/src/components/sitio-publico/Breadcrumbs.tsx` | Breadcrumbs con JSON-LD |
+| `app/src/components/shell/StaffShell.tsx` | Shell del panel interno (nav lateral) |
+
+---
+
+## División de trabajo entre agentes
+
+Este repositorio usa **dos agentes en paralelo**:
+
+### Jules (este agente)
+- Tareas bien delimitadas, sin dependencias de Stripe ni de seguridad crítica.
+- Páginas públicas de la tienda, CRUD de productos/pedidos, emails, métricas de dashboard.
+- Siempre trabaja en una rama nueva y abre PR — nunca push directo a `master`.
+
+### Claude Code (agente interactivo en el servidor)
+- Integración de Stripe (Payment Intent, Stripe Elements, webhook).
+- Cambios al CSP en `proxy.ts`.
+- Decisiones de arquitectura y seguridad.
+- Fixes de compilación post-merge.
+
+### Regla de coordinación
+- Jules **no toca**: `src/proxy.ts`, `src/lib/stripe.ts`, `src/lib/stripe-client.ts`, `package.json`, `next.config.ts`.
+- Antes de hacer merge de un PR de Jules, Claude Code verifica TypeScript y aplica `prisma db push` / `prisma generate` si el schema cambió.
+
+---
+
+## Módulos en desarrollo activo
+
+### Tienda en línea (Fase 1 — en progreso)
+- **Admin staff**: ✅ completado (`/staff/tienda/`)
+- **Infraestructura Stripe**: ✅ completado (stripe.ts, CSP, useCarrito, schemas Zod)
+- **Pendiente**: páginas públicas de tienda, checkout con Stripe Elements, webhook, email de ticket
+
+### Autofacturación CFDI 4.0
+- ✅ Completado (`/autofactura/`)
+- Integrada con factura.com via `app/src/lib/factura-com.ts`
+
+---
+
+## Pendientes conocidos
+
+- **FIX-09**: botón flotante de WhatsApp y enlace `tel:` en el header — bloqueado hasta confirmar número celular del Dr. Viveros.
+- **`listo_para_recoger`** falta en el enum `OrderStatus` — agregar con `prisma db push` cuando sea necesario.
+- **Tienda Fase 2**: upload de imágenes de producto desde el panel staff.
+- **Tienda Fase 3**: autofactura CFDI para paquetes de consulta (D01).

@@ -4,10 +4,12 @@ import { useEffect } from 'react'
 import { useCarrito } from '@/hooks/useCarrito'
 import { CheckCircle2, Package, MapPin, Truck, Loader2, AlertTriangle, ShoppingBag, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import { Order, OrderItem, Product } from '@/generated/prisma'
+import { Order, OrderItem } from '@/generated/prisma'
+
+type ProductSnap = { nombre: string; imagenes: string[] }
 
 interface OrderWithItems extends Order {
-  items: (OrderItem & { product: Product | null })[]
+  items: (OrderItem & { product: ProductSnap | null })[]
 }
 
 interface ConfirmacionClientProps {

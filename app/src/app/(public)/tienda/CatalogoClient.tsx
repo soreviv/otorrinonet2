@@ -1,14 +1,16 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { ProductCategory, Product } from '@/generated/prisma'
+import { ProductCategory } from '@/generated/prisma'
 import { getProductosCatalogo } from '@/app/actions/tienda'
 import { FiltroCategoria } from './FiltroCategoria'
 import { ShoppingBag, Box } from 'lucide-react'
 import Link from 'next/link'
 
+type ProductoCatalogo = Awaited<ReturnType<typeof getProductosCatalogo>>[number]
+
 interface CatalogoClientProps {
-  initialProductos: Product[]
+  initialProductos: ProductoCatalogo[]
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
