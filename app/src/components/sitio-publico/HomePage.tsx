@@ -3,7 +3,7 @@ import { PublicHeader } from './PublicHeader'
 import { PublicFooter } from './PublicFooter'
 import {
   Star, Calendar, ChevronRight,
-  ArrowUpRight, MessageCircle,
+  ArrowUpRight, MessageCircle, ShoppingBag,
 } from 'lucide-react'
 import type { HomePageProps, GoogleRatingSummary } from '@/lib/sitio-publico-types'
 import { ServiceCard } from './ServiceCard'
@@ -203,6 +203,33 @@ export function HomePage({
           </div>
         </section>
       )}
+
+      {/* ── TIENDA ─────────────────────────────────────────────────── */}
+      <section className="py-16 md:py-20 bg-slate-50 dark:bg-slate-950">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 md:gap-12 shadow-sm">
+            <div className="w-16 h-16 bg-sky-50 dark:bg-sky-900/30 rounded-2xl flex items-center justify-center shrink-0 text-sky-600 dark:text-sky-400">
+              <ShoppingBag className="w-8 h-8" />
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <p className="text-[11px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-2">Tienda en línea</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-3">
+                Productos recomendados por el Dr. Viveros
+              </h2>
+              <p className="text-slate-500 dark:text-slate-400 leading-relaxed max-w-xl">
+                Dispositivos médicos, suplementos y paquetes de consulta seleccionados por el especialista. Entrega en consultorio o envío a domicilio.
+              </p>
+            </div>
+            <Link
+              href="/tienda"
+              className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white font-bold px-7 py-3.5 rounded-xl transition-all hover:shadow-lg hover:shadow-sky-200 dark:hover:shadow-sky-900 active:scale-[0.98] text-sm shrink-0"
+            >
+              Ver productos
+              <ArrowUpRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* ── BOTTOM CTA ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-sky-600 py-16 md:py-20">

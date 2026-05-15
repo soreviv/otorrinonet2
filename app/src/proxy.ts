@@ -11,10 +11,10 @@ function buildCsp(nonce: string) {
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://js.stripe.com${isDev ? " 'unsafe-eval'" : ''}`,
     // unsafe-inline en style-src: necesario para inline styles de React y next/font en runtime.
     `style-src 'self' 'unsafe-inline'`,
-    // img-src: restringido a dominios conocidos (Google Maps, reseñas Google, Stripe).
-    `img-src 'self' data: blob: https://maps.gstatic.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://*.stripe.com`,
+    // img-src: Google Maps, reseñas Google, Stripe, GA4 (beacons de fallback).
+    `img-src 'self' data: blob: https://maps.gstatic.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://*.stripe.com https://www.google-analytics.com`,
     `font-src 'self'`,
-    `connect-src 'self' https://challenges.cloudflare.com https://api.stripe.com`,
+    `connect-src 'self' https://challenges.cloudflare.com https://api.stripe.com https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net`,
     `frame-src https://maps.google.com https://www.google.com https://challenges.cloudflare.com https://js.stripe.com`,
     `frame-ancestors 'none'`,
     `object-src 'none'`,
