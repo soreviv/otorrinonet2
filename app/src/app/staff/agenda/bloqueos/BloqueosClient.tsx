@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { CalendarOff, Trash2, Plus, Loader2, AlertCircle } from 'lucide-react'
 import { crearBloqueo, eliminarBloqueo } from '@/app/actions/agenda-bloqueos'
 import type { BlockedPeriod } from '@/generated/prisma'
@@ -10,7 +11,13 @@ interface Props {
 }
 
 export function BloqueosClient({ bloqueosIniciales }: Props) {
+  const router = useRouter()
   const [bloqueos, setBloqueos] = useState(bloqueosIniciales)
+
+  // Sincronizar estado local cuando cambian los props desde el servidor
+  if (bloqueosIniciales !== bloqueos && bloqueosIniciales.length !== bloqueos.length) {
+    setBloqueos(bloqueosIniciales)
+  }
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
@@ -27,9 +34,12 @@ export function BloqueosClient({ bloqueosIniciales }: Props) {
     startTransition(async () => {
       const result = await crearBloqueo(new Date(startDate), new Date(endDate), reason)
       if (result.ok) {
-        // En una app real, podrías revalidar con el servidor, aquí actualizamos localmente para feedback inmediato
-        // aunque el revalidatePath del action debería encargarse tras un refresh.
-        window.location.reload()
+        setStartDate('')
+        setEndDate('')
+        setReason('')
+        router.refresh()
+        // Actualizar estado local para feedback inmediato si es necesario,
+        // aunque router.refresh() actualizará los props del server component.
       } else {
         setError(result.error || 'Error al crear el bloqueo')
       }
@@ -44,6 +54,7 @@ export function BloqueosClient({ bloqueosIniciales }: Props) {
       const result = await eliminarBloqueo(id)
       if (result.ok) {
         setBloqueos(prev => prev.filter(b => b.id !== id))
+        router.refresh()
       } else {
         setError(result.error || 'Error al eliminar el bloqueo')
       }

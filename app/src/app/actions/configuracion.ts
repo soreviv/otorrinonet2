@@ -121,7 +121,13 @@ export async function getPublicBlockedDates(): Promise<string[]> {
     }),
     prisma.blockedPeriod.findMany({
       where: {
-        endDate: { gte: new Date() },
+        endDate: {
+          gte: (() => {
+            const d = new Date()
+            d.setHours(0, 0, 0, 0)
+            return d
+          })(),
+        },
       },
     }),
   ])
