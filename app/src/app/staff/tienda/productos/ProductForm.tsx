@@ -6,13 +6,13 @@ import { ProductCategory, DeliveryMode } from '@/generated/prisma'
 import { crearProducto, actualizarProducto } from '@/app/actions/tienda-admin'
 import {
   Save,
-  Plus,
   Trash2,
   Image as ImageIcon,
   Loader2,
   AlertCircle,
   Info
 } from 'lucide-react'
+import { ImagenUploader } from '@/components/tienda/ImagenUploader'
 
 import { Product } from '@/generated/prisma'
 
@@ -49,7 +49,6 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
     metaDesc: initialData?.metaDesc || '',
   })
 
-  const [newImageUrl, setNewImageUrl] = useState('')
   const [slugEditedManually, setSlugEditedManually] = useState(isEditing)
 
   const handleNombreChange = (nombre: string) => {
@@ -98,13 +97,8 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
     }
   }
 
-  const addImage = () => {
-    if (!newImageUrl) return
-    setFormData(prev => ({
-      ...prev,
-      imagenes: [...prev.imagenes, newImageUrl]
-    }))
-    setNewImageUrl('')
+  const addImage = (url: string) => {
+    setFormData(prev => ({ ...prev, imagenes: [...prev.imagenes, url] }))
   }
 
   const removeImage = (index: number) => {
@@ -174,22 +168,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
             <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3">Imágenes</h2>
 
             <div className="space-y-4">
-              <div className="flex gap-2">
-                <input
-                  type="url"
-                  value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
-                  className="flex-1 px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none transition-all"
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                />
-                <button
-                  type="button"
-                  onClick={addImage}
-                  className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
-              </div>
+              <ImagenUploader onUpload={addImage} disabled={loading} />
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {formData.imagenes.map((url, index) => (
