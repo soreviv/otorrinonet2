@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { DollarSign, Check, Pencil } from 'lucide-react'
-import { registrarCobro, TIPOS_CONSULTA, type TipoConsulta, type MetodoPago } from '@/app/actions/cobros'
+import { registrarCobro } from '@/app/actions/cobros'
+import { TIPOS_CONSULTA, type TipoConsulta, type MetodoPago } from '@/lib/cobros-data'
 import type { CobroResumen } from '@/lib/agenda-types'
 
 const METODOS: { value: MetodoPago; label: string }[] = [

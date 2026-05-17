@@ -3,6 +3,8 @@
 import { useRef, useState, useEffect } from 'react'
 import type { PrescriptionDetailProps } from '@/lib/notas-types'
 
+type SigMode = 'dibujar' | 'imagen' | 'sello'
+
 function formatDateTime(iso: string) {
   const d = new Date(iso)
   return d.toLocaleString('es-MX', {
@@ -22,9 +24,12 @@ export function PrescriptionDetail({
   onBack,
 }: PrescriptionDetailProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [hasStrokes, setHasStrokes] = useState(false)
   const [lastPos, setLastPos] = useState({ x: 0, y: 0 })
+  const [sigMode, setSigMode] = useState<SigMode>('dibujar')
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
 
   const isSigned = prescription.status === 'firmada'
 
@@ -86,11 +91,31 @@ export function PrescriptionDetail({
     setHasStrokes(false)
   }
 
-  function handleSign() {
-    if (!hasStrokes) return
-    const canvas = canvasRef.current!
-    onSign?.(prescription.id, canvas.toDataURL('image/png'))
+  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = ev => setUploadedImage(ev.target?.result as string)
+    reader.readAsDataURL(file)
   }
+
+  function handleSign() {
+    if (sigMode === 'dibujar') {
+      if (!hasStrokes) return
+      onSign?.(prescription.id, canvasRef.current!.toDataURL('image/png'))
+    } else if (sigMode === 'imagen') {
+      if (!uploadedImage) return
+      onSign?.(prescription.id, uploadedImage)
+    } else {
+      // sello: firma sin imagen, solo timestamp
+      onSign?.(prescription.id, '')
+    }
+  }
+
+  const canConfirm =
+    sigMode === 'dibujar' ? hasStrokes :
+    sigMode === 'imagen' ? !!uploadedImage :
+    true
 
   const rx = prescription
 
@@ -331,19 +356,20 @@ export function PrescriptionDetail({
                 {isSigned ? 'Firma autógrafa del médico' : 'Firmar receta'}
               </h2>
             </div>
-            {!isSigned && (
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                Dibuja tu firma de puño y letra. Al confirmar, la receta quedará sellada con timestamp y no podrá modificarse.
-              </p>
-            )}
           </div>
 
           <div className="px-5 py-4">
             {isSigned ? (
               <div className="space-y-3">
-                <div className="rounded-xl border-2 border-dashed border-sky-200 dark:border-sky-700/50 bg-sky-50 dark:bg-sky-900/10 h-28 flex items-center justify-center">
-                  <span className="text-xs text-sky-500 dark:text-sky-500 italic">Firma autógrafa registrada ✓</span>
-                </div>
+                {rx.signatureData ? (
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 p-3 flex justify-center">
+                    <img src={rx.signatureData} alt="Firma del médico" className="max-h-24 object-contain" />
+                  </div>
+                ) : (
+                  <div className="rounded-xl border-2 border-dashed border-sky-200 dark:border-sky-700/50 bg-sky-50 dark:bg-sky-900/10 h-20 flex items-center justify-center">
+                    <span className="text-xs text-sky-500 dark:text-sky-400 italic">Sello digital registrado ✓ — espacio para firma física en el impreso</span>
+                  </div>
+                )}
                 {rx.signedAt && (
                   <div className="rounded-lg bg-slate-50 dark:bg-slate-700/50 px-4 py-3 space-y-1">
                     <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">
@@ -366,49 +392,122 @@ export function PrescriptionDetail({
                 )}
               </div>
             ) : (
-              <div className="space-y-3">
-                <div className="relative rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/30 overflow-hidden select-none">
-                  <canvas
-                    ref={canvasRef}
-                    width={600}
-                    height={160}
-                    className="w-full cursor-crosshair touch-none"
-                    onMouseDown={startDraw}
-                    onMouseMove={draw}
-                    onMouseUp={stopDraw}
-                    onMouseLeave={stopDraw}
-                    onTouchStart={startDraw}
-                    onTouchMove={draw}
-                    onTouchEnd={stopDraw}
-                  />
-                  {!hasStrokes && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <p className="text-xs text-slate-400 dark:text-slate-500 italic">Firma autógrafa aquí</p>
-                    </div>
-                  )}
+              <div className="space-y-4">
+                {/* Selector de modo */}
+                <div className="flex rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden text-xs font-medium">
+                  {([
+                    { id: 'dibujar', label: 'Dibujar' },
+                    { id: 'imagen', label: 'Cargar imagen' },
+                    { id: 'sello', label: 'Solo sello digital' },
+                  ] as { id: SigMode; label: string }[]).map(({ id, label }) => (
+                    <button
+                      key={id}
+                      onClick={() => setSigMode(id)}
+                      className={`flex-1 py-2 transition-colors ${
+                        sigMode === id
+                          ? 'bg-sky-600 text-white'
+                          : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={clearCanvas}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors"
-                  >
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                      <path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
-                    </svg>
-                    Limpiar
-                  </button>
-                  <button
-                    onClick={handleSign}
-                    disabled={!hasStrokes}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 disabled:bg-slate-200 dark:disabled:bg-slate-700 disabled:text-slate-400 dark:disabled:text-slate-500 text-white transition-colors shadow-sm"
-                  >
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+
+                {/* Modo dibujar */}
+                {sigMode === 'dibujar' && (
+                  <div className="space-y-3">
+                    <div className="relative rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/30 overflow-hidden select-none">
+                      <canvas
+                        ref={canvasRef}
+                        width={600}
+                        height={160}
+                        className="w-full cursor-crosshair touch-none"
+                        onMouseDown={startDraw}
+                        onMouseMove={draw}
+                        onMouseUp={stopDraw}
+                        onMouseLeave={stopDraw}
+                        onTouchStart={startDraw}
+                        onTouchMove={draw}
+                        onTouchEnd={stopDraw}
+                      />
+                      {!hasStrokes && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <p className="text-xs text-slate-400 dark:text-slate-500 italic">Dibuja tu firma aquí</p>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={clearCanvas}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors"
+                    >
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
+                      </svg>
+                      Limpiar
+                    </button>
+                  </div>
+                )}
+
+                {/* Modo cargar imagen */}
+                {sigMode === 'imagen' && (
+                  <div className="space-y-3">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                    />
+                    {uploadedImage ? (
+                      <div className="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 p-3 flex flex-col items-center gap-2">
+                        <img src={uploadedImage} alt="Vista previa de firma" className="max-h-24 object-contain" />
+                        <button
+                          onClick={() => { setUploadedImage(null); if (fileInputRef.current) fileInputRef.current.value = '' }}
+                          className="text-xs text-slate-400 hover:text-rose-500 transition-colors"
+                        >
+                          Cambiar imagen
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/30 py-8 flex flex-col items-center gap-2 hover:border-sky-400 dark:hover:border-sky-500 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition-colors"
+                      >
+                        <svg className="w-8 h-8 text-slate-300 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        <span className="text-xs text-slate-400 dark:text-slate-500">Seleccionar imagen de firma (PNG, JPG)</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Modo solo sello */}
+                {sigMode === 'sello' && (
+                  <div className="rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/20 px-5 py-6 text-center space-y-2">
+                    <svg className="w-8 h-8 text-slate-300 dark:text-slate-500 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                       <rect x="3" y="11" width="18" height="11" rx="2" />
                       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
-                    Firmar y sellar receta
-                  </button>
-                </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Se sellará con timestamp digital.<br/>El impreso incluirá un espacio en blanco para la firma física del doctor.</p>
+                  </div>
+                )}
+
+                {/* Botón confirmar */}
+                <button
+                  onClick={handleSign}
+                  disabled={!canConfirm}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 disabled:bg-slate-200 dark:disabled:bg-slate-700 disabled:text-slate-400 dark:disabled:text-slate-500 text-white transition-colors shadow-sm"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  Firmar y sellar receta
+                </button>
                 <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center">
                   Al firmar, se genera un timestamp conforme a normatividad mexicana. La receta será inmutable.
                 </p>

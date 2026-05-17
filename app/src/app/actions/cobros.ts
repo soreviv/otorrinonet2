@@ -3,16 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
 import { revalidatePath } from 'next/cache'
-
-export const TIPOS_CONSULTA = [
-  { value: 'primera_vez',  label: 'Primera vez',    monto: 110000 },
-  { value: 'subsecuente',  label: 'Subsecuente',     monto: 100000 },
-  { value: 'lavado_oidos', label: 'Lavado de oídos', monto:  60000 },
-  { value: 'otro',         label: 'Otro',            monto:       0 },
-] as const
-
-export type TipoConsulta = typeof TIPOS_CONSULTA[number]['value']
-export type MetodoPago = 'efectivo' | 'tarjeta' | 'transferencia'
+import { TIPOS_CONSULTA, type TipoConsulta, type MetodoPago } from '@/lib/cobros-data'
 
 export async function registrarCobro(
   appointmentId: string,

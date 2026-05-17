@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { decrypt } from '@/lib/crypto'
 import { generarCfdi, type DatosFiscales } from '@/lib/factura-com'
-import { TIPOS_CONSULTA } from './cobros'
+import { TIPOS_CONSULTA } from '@/lib/cobros-data'
 
 export interface PacienteAutofactura {
   id: string

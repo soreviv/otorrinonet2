@@ -142,7 +142,7 @@ export function NotasClient({
 
   async function handleSignPrescription(id: string, signatureData: string) {
     const signedAt = nowCDMX()
-    const { firmaHash } = await signPrescriptionInDB(id, signatureData)
+    const { firmaHash } = await signPrescriptionInDB(id, signatureData || undefined)
     setPrescriptions(prev =>
       prev.map(rx =>
         rx.id === id
