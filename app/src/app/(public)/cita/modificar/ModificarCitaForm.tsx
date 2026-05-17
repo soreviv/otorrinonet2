@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import Link from 'next/link'
 import { StepDateTimeSelection } from '@/components/agenda/steps/StepDateTimeSelection'
 import { rescheduleAppointmentByToken } from '@/app/actions/appointments'
 import { getPublicBlockedDates } from '@/app/actions/configuracion'
@@ -90,12 +91,12 @@ export default function ModificarCitaForm({
             >
               {submitting ? 'Guardando…' : 'Confirmar nueva fecha'}
             </button>
-            <a
+            <Link
               href="/"
               className="flex-1 text-center py-2.5 rounded-lg font-medium text-sm text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300 transition-colors"
             >
               Cancelar
-            </a>
+            </Link>
           </div>
         </div>
       </div>

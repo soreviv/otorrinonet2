@@ -565,3 +565,11 @@ model StripeWebhookEvent {
   processedAt DateTime @default(now())
   @@map("stripe_webhook_events")
 }
+
+model BlockedPeriod {
+  id        Int      @id @default(autoincrement())
+  startDate DateTime @db.Date
+  endDate   DateTime @db.Date
+  reason    String?
+  createdAt DateTime @default(now())
+}

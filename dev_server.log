@@ -1,0 +1,186 @@
+
+> app@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+✓ Ready in 533ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+- Experiments (use with caution):
+  ✓ optimizeCss
+
+○ Compiling /agendar ...
+ GET /agendar 200 in 10.9s (next.js: 9.5s, proxy.ts: 542ms, application-code: 899ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/agendar" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <SegmentViewNode type="layout" pagePath="layout.tsx">
+                    <SegmentTrieNode>
+                    <link>
+                    <script>
+                    <script>
+                    <script>
+                    <RootLayout>
+                      <html lang="es" className="inter_c15e...">
+                        <body className="min-h-scre...">
+                          <OuterLayoutRouter>
+                          <SiteJsonLd>
+                            <script
++                             nonce="dzKRSXSErML03h5upSrjMg=="
+-                             nonce=""
+                              type="application/ld+json"
+                              dangerouslySetInnerHTML={{__html:"{\"@contex..."}}
+                            >
+                          <CookieBanner>
+                          <Script id="gtag-init" strategy="beforeInte..." nonce="dzKRSXSErM...">
+                            <script
++                             nonce="dzKRSXSErML03h5upSrjMg=="
+-                             nonce=""
+                              dangerouslySetInnerHTML={{__html:"(self.__ne..."}}
+                            >
+                          ...
+                  ...
+
+prisma:error
+Invalid `prisma.blockedPeriod.findMany()` invocation:
+
+
+
+⨯ Error [PrismaClientKnownRequestError]:
+Invalid `prisma.blockedPeriod.findMany()` invocation:
+
+
+
+    at Gr.handleRequestError (src/generated/prisma/runtime/client.js:69:8286)
+    at Gr.handleAndLogRequestError (src/generated/prisma/runtime/client.js:69:7581)
+    at Gr.request (src/generated/prisma/runtime/client.js:69:7288)
+    at async a (src/generated/prisma/runtime/client.js:79:6730)
+    at async getPublicBlockedDates (src/app/actions/configuracion.ts:117:27)
+  67 | ...
+  68 | ...
+> 69 | ...t u=s?{modelName:s,...t.meta}:t.meta;throw new b.PrismaClientKnownRequestError(l,{code:...
+     |                                               ^
+  70 | ...
+  71 | ...
+  72 | ... {
+  code: 'ECONNREFUSED',
+  meta: { modelName: 'BlockedPeriod' },
+  clientVersion: '7.7.0',
+  digest: '1920257459'
+}
+prisma:error
+Invalid `prisma.clinicConfig.findUnique()` invocation:
+
+
+
+ POST /agendar 500 in 2.3s (next.js: 6ms, proxy.ts: 11ms, application-code: 2.2s)
+  └─ ƒ getPublicBlockedDates() in 229ms actions/configuracion.ts
+prisma:error
+Invalid `prisma.blockedPeriod.findMany()` invocation:
+
+
+
+⨯ Error [PrismaClientKnownRequestError]:
+Invalid `prisma.blockedPeriod.findMany()` invocation:
+
+
+
+    at Gr.handleRequestError (src/generated/prisma/runtime/client.js:69:8286)
+    at Gr.handleAndLogRequestError (src/generated/prisma/runtime/client.js:69:7581)
+    at Gr.request (src/generated/prisma/runtime/client.js:69:7288)
+    at async a (src/generated/prisma/runtime/client.js:79:6730)
+    at async getPublicBlockedDates (src/app/actions/configuracion.ts:117:27)
+  67 | ...
+  68 | ...
+> 69 | ...t u=s?{modelName:s,...t.meta}:t.meta;throw new b.PrismaClientKnownRequestError(l,{code:...
+     |                                               ^
+  70 | ...
+  71 | ...
+  72 | ... {
+  code: 'ECONNREFUSED',
+  meta: { modelName: 'BlockedPeriod' },
+  clientVersion: '7.7.0',
+  digest: '1920257459'
+}
+prisma:error
+Invalid `prisma.clinicConfig.findUnique()` invocation:
+
+
+
+ POST /agendar 500 in 798ms (next.js: 6ms, proxy.ts: 26ms, application-code: 766ms)
+  └─ ƒ getPublicBlockedDates() in 10ms actions/configuracion.ts
+ GET /login 200 in 1487ms (next.js: 1315ms, proxy.ts: 20ms, application-code: 152ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/login" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <SegmentViewNode type="layout" pagePath="layout.tsx">
+                    <SegmentTrieNode>
+                    <link>
+                    <script>
+                    <script>
+                    <script>
+                    <RootLayout>
+                      <html lang="es" className="inter_c15e...">
+                        <body className="min-h-scre...">
+                          <OuterLayoutRouter>
+                          <SiteJsonLd>
+                            <script
++                             nonce="cVZ35h95Tuhbu2IiuUghGQ=="
+-                             nonce=""
+                              type="application/ld+json"
+                              dangerouslySetInnerHTML={{__html:"{\"@contex..."}}
+                            >
+                          <CookieBanner>
+                          <Script id="gtag-init" strategy="beforeInte..." nonce="cVZ35h95Tu...">
+                            <script
++                             nonce="cVZ35h95Tuhbu2IiuUghGQ=="
+-                             nonce=""
+                              dangerouslySetInnerHTML={{__html:"(self.__ne..."}}
+                            >
+                          ...
+                  ...
+
+✓ Compiled in 235ms

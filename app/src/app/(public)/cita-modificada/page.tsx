@@ -1,3 +1,4 @@
+import Link from 'next/link'
 export const metadata = { title: 'Cita modificada — ORL Viveros' }
 
 export default function CitaModificadaPage() {
@@ -13,12 +14,12 @@ export default function CitaModificadaPage() {
         <p className="text-slate-500 text-sm mb-6">
           Su cita ha sido actualizada. Recibirá un correo de confirmación con los nuevos detalles.
         </p>
-        <a
+        <Link
           href="/"
           className="inline-block bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition-colors"
         >
           Volver al inicio
-        </a>
+        </Link>
       </div>
     </main>
   )
