@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { confirmAppointmentByToken } from '@/app/actions/appointments'
 
@@ -43,12 +44,12 @@ export default async function ConfirmarCitaPage({
           >
             Sí, confirmar mi cita
           </button>
-          <a
+          <Link
             href="/"
             className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
           >
             Cancelar
-          </a>
+          </Link>
         </form>
       </div>
     </main>

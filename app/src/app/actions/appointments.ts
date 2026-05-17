@@ -50,10 +50,12 @@ export async function submitAppointmentRequest(
     return { ok: false, error: 'No es posible agendar citas en el pasado.' }
   }
 
-  // 4. Días feriados — consultamos directamente para obtener campo Json
-  const clinicRow = await prisma.clinicConfig.findUnique({ where: { id: 'singleton' } })
-  const feriados: string[] = Array.isArray(clinicRow?.diasFeriados) ? clinicRow.diasFeriados as string[] : []
-  if (feriados.includes(data.date)) {
+  // 4. Días bloqueados (feriados + bloqueos dinámicos)
+  const [clinicRow, blockedDates] = await Promise.all([
+    prisma.clinicConfig.findUnique({ where: { id: 'singleton' } }),
+    import('./configuracion').then(m => m.getPublicBlockedDates())
+  ])
+  if (blockedDates.includes(data.date)) {
     return { ok: false, error: 'El consultorio no tiene disponibilidad ese día.' }
   }
 
@@ -163,9 +165,11 @@ export async function rescheduleAppointmentByToken(
     return { ok: false, error: 'No es posible agendar citas en el pasado.' }
   }
 
-  const clinicRow = await prisma.clinicConfig.findUnique({ where: { id: 'singleton' } })
-  const feriados: string[] = Array.isArray(clinicRow?.diasFeriados) ? clinicRow.diasFeriados as string[] : []
-  if (feriados.includes(newDate)) {
+  const [clinicRow, blockedDates] = await Promise.all([
+    prisma.clinicConfig.findUnique({ where: { id: 'singleton' } }),
+    import('./configuracion').then(m => m.getPublicBlockedDates())
+  ])
+  if (blockedDates.includes(newDate)) {
     return { ok: false, error: 'El consultorio no tiene disponibilidad ese día.' }
   }
 

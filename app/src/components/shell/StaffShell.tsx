@@ -4,6 +4,7 @@ import { useState } from 'react'
 import {
   Stethoscope,
   CalendarDays,
+  CalendarOff,
   ClipboardList,
   ScrollText,
   Shield,
@@ -46,6 +47,13 @@ const defaultNavItems: StaffNavItem[] = [
     label: 'Agenda de Citas',
     href: '/staff/agenda',
     icon: CalendarDays,
+  },
+  {
+    id: 'bloqueos',
+    label: 'Bloqueos de Agenda',
+    href: '/staff/agenda/bloqueos',
+    icon: CalendarOff,
+    roles: ['medico', 'recepcionista'],
   },
   {
     id: 'ehr',

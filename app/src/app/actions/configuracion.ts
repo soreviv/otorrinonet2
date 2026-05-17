@@ -114,12 +114,46 @@ export async function getDiasFeriados(): Promise<FechaBloqueo[]> {
 }
 
 export async function getPublicBlockedDates(): Promise<string[]> {
-  const cfg = await prisma.clinicConfig.findUnique({
-    where: { id: 'singleton' },
-    select: { diasFeriados: true },
+  const [cfg, bloqueos] = await Promise.all([
+    prisma.clinicConfig.findUnique({
+      where: { id: 'singleton' },
+      select: { diasFeriados: true },
+    }),
+    prisma.blockedPeriod.findMany({
+      where: {
+        endDate: {
+          gte: (() => {
+            const d = new Date()
+            d.setHours(0, 0, 0, 0)
+            return d
+          })(),
+        },
+      },
+    }),
+  ])
+
+  const dates = new Set<string>()
+
+  // 1. Días feriados (formato 'YYYY-MM-DD')
+  if (cfg?.diasFeriados && Array.isArray(cfg.diasFeriados)) {
+    ;(cfg.diasFeriados as unknown as FechaBloqueo[]).forEach((f) => dates.add(f.date))
+  }
+
+  // 2. Bloqueos (rangos)
+  bloqueos.forEach((b) => {
+    const curr = new Date(b.startDate)
+    const end = new Date(b.endDate)
+    // Asegurar que estamos comparando solo fechas (sin horas que puedan causar problemas de zona horaria)
+    curr.setUTCHours(12, 0, 0, 0)
+    end.setUTCHours(12, 0, 0, 0)
+
+    while (curr <= end) {
+      dates.add(curr.toISOString().split('T')[0])
+      curr.setUTCDate(curr.getUTCDate() + 1)
+    }
   })
-  if (!cfg?.diasFeriados || !Array.isArray(cfg.diasFeriados)) return []
-  return (cfg.diasFeriados as unknown as FechaBloqueo[]).map(f => f.date)
+
+  return Array.from(dates).sort()
 }
 
 export async function saveDiasFeriados(fechas: FechaBloqueo[]): Promise<void> {
