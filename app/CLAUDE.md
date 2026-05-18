@@ -15,7 +15,11 @@ Sistema clínico para el consultorio de otorrinolaringología del **Dr. Alejandr
 - **Prisma 7** + **PostgreSQL** — se usa `prisma db push` (sin carpeta `migrations`)
 - **Tailwind CSS 4**
 - **JWT** en cookie `session` (8 h) — `verifySession()` en `src/lib/dal.ts`
-- **Nodemailer / Resend** — emails transaccionales (recordatorio de cita 24 h antes)
+- **2FA TOTP** — obligatorio para todo el personal; configuración en primer login
+- **Sesiones revocables** — `sessionVersion` en `StaffUser`; incrementar para revocar
+- **Rate-limit en login** — 5 intentos / 15 min → bloqueo 30 min (en memoria, `src/app/actions/auth.ts`)
+- **Stripe** — pagos de la tienda; webhook en `/api/stripe/webhook`
+- **Nodemailer / Resend** — emails transaccionales (recordatorio de cita 24 h antes, ticket de compra)
 - **Cloudflare Turnstile** — protección del formulario público de agendado
 - **Recharts** — gráficas en el dashboard
 
@@ -49,13 +53,43 @@ npm run db:studio     # Prisma Studio
 | `src/lib/clinic-config.ts` | Configuración del doctor/clínica |
 | `src/lib/routes.ts` | Rutas canónicas de la app |
 | `src/lib/sitio-publico-data.ts` | Contenido estático del sitio público |
+| `src/lib/stripe.ts` | Cliente Stripe server-side (lazy init, evita error en build) |
+| `src/lib/stripe-client.ts` | `stripePromise` para Stripe Elements en el browser |
+| `src/lib/schemas/tienda.ts` | Schemas Zod para productos, pedidos y checkout |
+| `src/hooks/useCarrito.ts` | Hook de carrito (localStorage) |
 | `src/components/sitio-publico/PublicHeader.tsx` | Header compartido del sitio público |
 | `src/components/sitio-publico/PublicFooter.tsx` | Footer compartido del sitio público |
 | `src/app/(public)/layout.tsx` | Layout público (pass-through) |
 | `src/app/staff/layout.tsx` | Layout del panel interno (async, verifica sesión) |
 | `src/app/actions/appointments.ts` | Server Action — agendado de citas |
+| `src/app/actions/tienda.ts` | Server Actions — catálogo, stock, checkout |
+| `src/app/actions/tienda-admin.ts` | Server Actions — CRUD productos y pedidos (staff) |
+| `src/app/api/stripe/webhook/route.ts` | Webhook Stripe — confirma pago, decrementa stock |
 | `prisma/schema.prisma` | Schema de la base de datos |
+
+## Tienda en línea
+
+- Carrito en `localStorage` via `useCarrito` — no en BD ni cookies.
+- Stock se decrementa **solo** en webhook `payment_intent.succeeded`.
+- Idempotencia: `StripeWebhookEvent` con PK = `event.id` de Stripe.
+- Imágenes en `/public/assets/tienda/` — upload via API `/api/tienda/upload-imagen`.
+- Variables de entorno requeridas: `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `TIENDA_COSTO_ENVIO_CENTAVOS`.
+
+## Agenda — Bloqueo de fechas
+
+- El personal puede bloquear rangos de fechas (vacaciones, congresos, incapacidad) desde `/staff/agenda`.
+- Modelo `AgendaBlock` en `prisma/schema.prisma`.
+- El formulario público de agendado (`/agendar`) consulta los bloqueos antes de mostrar disponibilidad.
+
+## Infraestructura (VPS)
+
+- **PM2**: proceso `otorrinonet` — `npm run start -- -p 5000` en `/var/www/otorrinonet2/app`.
+- **nginx**: config activa en `/etc/nginx/conf.d/otorrinonet.conf` (el archivo en `sites-available/` **no** es leído por nginx — `nginx.conf` solo incluye `conf.d/`).
+  - `/_next/static/` → `alias` a `.next/static/` (archivos estáticos servidos desde disco, no proxeados).
+  - `/assets/` → `root` en `public/`.
+  - Todo lo demás → proxy a `127.0.0.1:5000`.
 
 ## Pendientes conocidos
 
 - **FIX-09**: botón flotante de WhatsApp y enlace `tel:` en el header — bloqueado hasta que el Dr. Viveros confirme su número de celular. Rellenar `phone` y `whatsapp` en `src/lib/sitio-publico-data.ts` y añadir el botón flotante en `src/app/(public)/layout.tsx`.
+- **Tienda Fase 3**: CFDI (D01 para paquetes de consulta, G03 para físicos) — sin fecha, requiere definir proveedor de facturación.
