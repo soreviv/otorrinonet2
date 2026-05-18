@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import {
   Building2, Stethoscope, Users, Shield, Plus, UserCheck, UserX,
   Save, RefreshCw, Search, Mail, Phone, MapPin, FileText, GraduationCap,
-  CalendarX2, Trash2, Calendar, Star,
+  CalendarX2, CalendarOff, Trash2, Calendar, Star, ArrowRight,
 } from 'lucide-react'
 import {
   saveClinicConfig, createStaffUser, toggleStaffUserStatus, saveDiasFeriados,
@@ -500,7 +501,24 @@ function CalendarioTab({ initial }: { initial: FechaBloqueo[] }) {
 
   return (
     <div className="space-y-4">
-      <Card title="Bloqueo de fechas" icon={<CalendarX2 className="w-4 h-4" strokeWidth={1.75} />}>
+      {/* Acceso rápido a bloqueos de rango */}
+      <Link
+        href="/staff/agenda/bloqueos"
+        className="flex items-center justify-between gap-4 px-5 py-4 bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 rounded-2xl hover:bg-sky-100 dark:hover:bg-sky-950/50 transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-sky-100 dark:bg-sky-900/50 flex items-center justify-center text-sky-600 dark:text-sky-400">
+            <CalendarOff className="w-4 h-4" strokeWidth={2} />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-sky-900 dark:text-sky-100">Bloquear rango de fechas</p>
+            <p className="text-xs text-sky-600 dark:text-sky-400">Vacaciones, congresos, incapacidades — bloquea varios días de una vez</p>
+          </div>
+        </div>
+        <ArrowRight className="w-4 h-4 text-sky-500 group-hover:translate-x-0.5 transition-transform shrink-0" />
+      </Link>
+
+      <Card title="Días feriados y fechas individuales" icon={<CalendarX2 className="w-4 h-4" strokeWidth={1.75} />}>
         {/* Agregar fecha individual */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Field label="Fecha">
