@@ -3,19 +3,12 @@
 import { useState } from 'react'
 import {
   Stethoscope,
-  CalendarDays,
-  CalendarOff,
-  ClipboardList,
-  ScrollText,
-  Shield,
-  Settings,
-  ShoppingBag,
-  Package,
   ChevronLeft,
   ChevronRight,
   LogOut,
   Menu,
 } from 'lucide-react'
+import { staffNavItems } from './staff-nav-items'
 
 export type StaffRole = 'medico' | 'enfermera' | 'recepcionista'
 
@@ -42,63 +35,7 @@ interface StaffShellProps {
   onLogout?: () => void
 }
 
-const defaultNavItems: StaffNavItem[] = [
-  {
-    id: 'agenda',
-    label: 'Agenda de Citas',
-    href: '/staff/agenda',
-    icon: CalendarDays,
-  },
-  {
-    id: 'bloqueos',
-    label: 'Bloqueos de Agenda',
-    href: '/staff/agenda/bloqueos',
-    icon: CalendarOff,
-    roles: ['medico', 'recepcionista'],
-  },
-  {
-    id: 'ehr',
-    label: 'Expediente Clínico',
-    href: '/staff/ehr',
-    icon: ClipboardList,
-    roles: ['medico', 'enfermera'],
-  },
-  {
-    id: 'notas',
-    label: 'Notas y Recetas',
-    href: '/staff/notas',
-    icon: ScrollText,
-    roles: ['medico'],
-  },
-  {
-    id: 'admin',
-    label: 'Administración',
-    href: '/staff/admin',
-    icon: Shield,
-    roles: ['medico'],
-  },
-  {
-    id: 'tienda',
-    label: 'Pedidos de Tienda',
-    href: '/staff/tienda/pedidos',
-    icon: ShoppingBag,
-    roles: ['medico', 'recepcionista'],
-  },
-  {
-    id: 'productos',
-    label: 'Productos de Tienda',
-    href: '/staff/tienda/productos',
-    icon: Package,
-    roles: ['medico', 'recepcionista'],
-  },
-  {
-    id: 'configuracion',
-    label: 'Configuración',
-    href: '/staff/configuracion',
-    icon: Settings,
-    roles: ['medico'],
-  },
-]
+const defaultNavItems: StaffNavItem[] = staffNavItems
 
 const roleLabels: Record<StaffRole, string> = {
   medico: 'Médico',
