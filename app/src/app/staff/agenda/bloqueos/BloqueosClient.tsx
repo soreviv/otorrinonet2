@@ -26,6 +26,12 @@ export function BloqueosClient({ bloqueosIniciales }: Props) {
   const [endDate, setEndDate] = useState('')
   const [reason, setReason] = useState('')
 
+  function handleStartDateChange(value: string) {
+    setStartDate(value)
+    // Auto-rellenar fin con la misma fecha si está vacío o quedó antes del inicio
+    if (!endDate || endDate < value) setEndDate(value)
+  }
+
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
     if (!startDate || !endDate) return
@@ -70,6 +76,11 @@ export function BloqueosClient({ bloqueosIniciales }: Props) {
     })
   }
 
+  const diasEnRango = (start: Date, end: Date) => {
+    const diff = Math.round((new Date(end).getTime() - new Date(start).getTime()) / 86400000) + 1
+    return diff === 1 ? '1 día' : `${diff} días`
+  }
+
   return (
     <div className="space-y-6">
       {/* Formulario Inline */}
@@ -84,50 +95,60 @@ export function BloqueosClient({ bloqueosIniciales }: Props) {
           </div>
         </div>
 
-        <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-          <div className="space-y-1.5">
-            <label htmlFor="startDate" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Fecha Inicio
-            </label>
-            <input
-              id="startDate"
-              type="date"
-              required
-              value={startDate}
-              onChange={e => setStartDate(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-sky-500 transition-all"
-            />
+        <form onSubmit={handleAdd} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-1.5">
+              <label htmlFor="startDate" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Fecha Inicio
+              </label>
+              <input
+                id="startDate"
+                type="date"
+                required
+                value={startDate}
+                onChange={e => handleStartDateChange(e.target.value)}
+                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-sky-500 transition-all"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="endDate" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Fecha Fin
+              </label>
+              <input
+                id="endDate"
+                type="date"
+                required
+                min={startDate || undefined}
+                value={endDate}
+                onChange={e => setEndDate(e.target.value)}
+                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-sky-500 transition-all"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="reason" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Motivo (opcional)
+              </label>
+              <input
+                id="reason"
+                type="text"
+                placeholder="Vacaciones, Congreso, Incapacidad..."
+                value={reason}
+                onChange={e => setReason(e.target.value)}
+                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-sky-500 transition-all"
+              />
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <label htmlFor="endDate" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Fecha Fin
-            </label>
-            <input
-              id="endDate"
-              type="date"
-              required
-              value={endDate}
-              onChange={e => setEndDate(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-sky-500 transition-all"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="reason" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Motivo (opcional)
-            </label>
-            <input
-              id="reason"
-              type="text"
-              placeholder="Vacaciones, Congreso..."
-              value={reason}
-              onChange={e => setReason(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-sky-500 transition-all"
-            />
-          </div>
+
+          {startDate && endDate && startDate !== endDate && (
+            <p className="text-xs text-sky-600 dark:text-sky-400">
+              Se bloquearán {Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000) + 1} días consecutivos.
+            </p>
+          )}
+
           <button
             type="submit"
             disabled={isPending || !startDate || !endDate}
-            className="bg-sky-600 hover:bg-sky-700 disabled:bg-slate-100 disabled:text-slate-400 dark:disabled:bg-slate-800 dark:disabled:text-slate-600 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2"
+            className="bg-sky-600 hover:bg-sky-700 disabled:bg-slate-100 disabled:text-slate-400 dark:disabled:bg-slate-800 dark:disabled:text-slate-600 text-white font-semibold py-2.5 px-6 rounded-xl text-sm transition-all flex items-center gap-2"
           >
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
             Agregar Bloqueo
@@ -153,6 +174,7 @@ export function BloqueosClient({ bloqueosIniciales }: Props) {
               <tr className="bg-slate-50/50 dark:bg-slate-800/50">
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Inicio</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Fin</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Duración</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Motivo</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Acciones</th>
               </tr>
@@ -160,7 +182,7 @@ export function BloqueosClient({ bloqueosIniciales }: Props) {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {bloqueos.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400 text-sm">
+                  <td colSpan={5} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400 text-sm">
                     No hay bloqueos activos programados.
                   </td>
                 </tr>
@@ -172,6 +194,9 @@ export function BloqueosClient({ bloqueosIniciales }: Props) {
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300 font-medium">
                       {formatFecha(b.endDate)}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
+                      {diasEnRango(b.startDate, b.endDate)}
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
                       {b.reason || <span className="italic text-slate-400">Sin motivo especificado</span>}
