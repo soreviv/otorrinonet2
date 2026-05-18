@@ -10,6 +10,7 @@ import {
   Shield,
   Settings,
   ShoppingBag,
+  Package,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -78,9 +79,16 @@ const defaultNavItems: StaffNavItem[] = [
   },
   {
     id: 'tienda',
-    label: 'Tienda',
-    href: '/staff/tienda',
+    label: 'Pedidos de Tienda',
+    href: '/staff/tienda/pedidos',
     icon: ShoppingBag,
+    roles: ['medico', 'recepcionista'],
+  },
+  {
+    id: 'productos',
+    label: 'Productos de Tienda',
+    href: '/staff/tienda/productos',
+    icon: Package,
     roles: ['medico', 'recepcionista'],
   },
   {
