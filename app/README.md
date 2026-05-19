@@ -51,7 +51,7 @@ src/
 ├── components/
 │   ├── sitio-publico/     # Header, Footer, páginas públicas, Breadcrumbs
 │   ├── agenda/            # Formulario de agendado multi-paso
-│   ├── tienda/            # Carrito, checkout, catálogo (cliente)
+│   ├── tienda/            # Carrito, checkout, catálogo, GaleriaProducto (cliente)
 │   ├── notas/             # Notas de evolución, recetas, consentimientos
 │   └── dashboard/         # Gráficas del panel interno
 └── lib/
@@ -95,6 +95,7 @@ src/
 - Las rutas `/legal/*` redirigen 301 a sus equivalentes canónicas (`/privacidad`, `/terminos`, `/cookies`, `/descargo`).
 - El stock de productos se decrementa **solo** en el webhook `payment_intent.succeeded`, nunca al crear la orden.
 - El carrito de la tienda vive en `localStorage` (hook `useCarrito`), no en BD ni cookies.
+- Las imágenes de la tienda usan `next/image` con `fill` + `sizes` para optimización automática (WebP, lazy loading, srcset). La galería del detalle de producto (`GaleriaProducto`) es un componente cliente que permite cambiar la imagen principal haciendo clic en las miniaturas.
 
 ## Infraestructura (VPS)
 

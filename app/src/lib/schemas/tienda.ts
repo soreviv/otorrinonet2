@@ -14,6 +14,8 @@ export const productSchema = z.object({
   imagenes: z.array(z.string()).default([]),
   metaTitle: z.string().optional(),
   metaDesc: z.string().optional(),
+  claveSat: z.string().optional(),
+  claveUnidadSat: z.string().optional(),
 })
 
 export type ProductFormData = z.infer<typeof productSchema>

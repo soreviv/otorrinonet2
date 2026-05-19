@@ -47,6 +47,8 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
     imagenes: initialData?.imagenes || [],
     metaTitle: initialData?.metaTitle || '',
     metaDesc: initialData?.metaDesc || '',
+    claveSat: initialData?.claveSat || '',
+    claveUnidadSat: initialData?.claveUnidadSat || '',
   })
 
   const [slugEditedManually, setSlugEditedManually] = useState(isEditing)
@@ -81,6 +83,8 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
     const payload = {
       ...formData,
       precioUnitario: Math.round(formData.precioPesos * 100),
+      claveSat: formData.claveSat || undefined,
+      claveUnidadSat: formData.claveUnidadSat || undefined,
     }
 
     const res = isEditing
@@ -196,6 +200,38 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
 
         {/* Sidebar content */}
         <div className="space-y-6">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3">Datos Fiscales (SAT)</h2>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                Clave Producto/Servicio
+                <span className="ml-1 text-xs text-slate-400 font-normal">c_ClaveProdServ</span>
+              </label>
+              <input
+                type="text"
+                value={formData.claveSat}
+                onChange={(e) => setFormData({ ...formData, claveSat: e.target.value })}
+                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none transition-all font-mono text-sm"
+                placeholder="ej. 42271803"
+                maxLength={8}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                Clave Unidad
+                <span className="ml-1 text-xs text-slate-400 font-normal">c_ClaveUnidad</span>
+              </label>
+              <input
+                type="text"
+                value={formData.claveUnidadSat}
+                onChange={(e) => setFormData({ ...formData, claveUnidadSat: e.target.value })}
+                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none transition-all font-mono text-sm"
+                placeholder="ej. H87 (pieza) · E48 (servicio)"
+                maxLength={3}
+              />
+            </div>
+          </div>
+
           <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3">Atributos</h2>
 

@@ -490,6 +490,8 @@ model Product {
   imagenes       String[]
   metaTitle      String?
   metaDesc       String?
+  claveSat       String?  // c_ClaveProdServ SAT (para CFDI)
+  claveUnidadSat String?  // c_ClaveUnidad SAT (para CFDI)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   orderItems     OrderItem[]

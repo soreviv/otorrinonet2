@@ -205,6 +205,59 @@ export async function actualizarGuia(
   }
 }
 
+// --- Importación masiva ---
+
+export type FilaImportacion = {
+  nombre: string
+  slug: string
+  descripcion?: string
+  categoria: string
+  modoEntrega: string
+  precioUnitario: number
+  stock: number
+  stockIlimitado: boolean
+  activo: boolean
+  imagenes: string[]
+  claveSat?: string
+  claveUnidadSat?: string
+  metaTitle?: string
+  metaDesc?: string
+}
+
+export type ResultadoFila = { ok: true; nombre: string } | { ok: false; nombre: string; error: string }
+
+export async function importarProductos(filas: FilaImportacion[]): Promise<ResultadoFila[]> {
+  await verifySession()
+
+  const resultados: ResultadoFila[] = []
+
+  for (const fila of filas) {
+    const validated = productSchema.safeParse(fila)
+    if (!validated.success) {
+      resultados.push({ ok: false, nombre: fila.nombre, error: validated.error.issues[0].message })
+      continue
+    }
+
+    const { categoria } = validated.data
+    let { modoEntrega } = validated.data
+    if (categoria === ProductCategory.vacuna) modoEntrega = 'pickup_only'
+
+    try {
+      await prisma.product.create({ data: { ...validated.data, modoEntrega } })
+      resultados.push({ ok: true, nombre: fila.nombre })
+    } catch (error: unknown) {
+      if ((error as { code?: string }).code === 'P2002') {
+        resultados.push({ ok: false, nombre: fila.nombre, error: 'El slug ya existe' })
+      } else {
+        resultados.push({ ok: false, nombre: fila.nombre, error: 'Error al crear el producto' })
+      }
+    }
+  }
+
+  revalidatePath('/staff/tienda/productos')
+  return resultados
+}
+
 // --- Estadísticas ---
 
 export async function getEstadisticasVentas(periodo: 'semana' | 'mes' | 'trimestre') {

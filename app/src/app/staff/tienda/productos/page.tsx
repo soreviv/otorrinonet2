@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getProductosAdmin } from '@/app/actions/tienda-admin'
 import { ProductosList } from './ProductosList'
+import { ImportarProductos } from './ImportarProductos'
 import { Package, Plus } from 'lucide-react'
 
 export default async function ProductosPage() {
@@ -18,13 +19,16 @@ export default async function ProductosPage() {
             Administra los productos, stock y precios de la tienda.
           </p>
         </div>
-        <Link
-          href="/staff/tienda/productos/nuevo"
-          className="inline-flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm shadow-sky-200 dark:shadow-none"
-        >
-          <Plus className="w-4 h-4" />
-          Nuevo producto
-        </Link>
+        <div className="flex items-center gap-3">
+          <ImportarProductos />
+          <Link
+            href="/staff/tienda/productos/nuevo"
+            className="inline-flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm shadow-sky-200 dark:shadow-none"
+          >
+            <Plus className="w-4 h-4" />
+            Nuevo producto
+          </Link>
+        </div>
       </div>
 
       <ProductosList productos={productos} />
