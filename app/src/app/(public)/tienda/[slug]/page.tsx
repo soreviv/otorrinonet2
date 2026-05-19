@@ -5,7 +5,8 @@ import { PublicFooter } from '@/components/sitio-publico/PublicFooter'
 import { Breadcrumbs } from '@/components/sitio-publico/Breadcrumbs'
 import { getProductoPorSlug } from '@/app/actions/tienda'
 import { AgregarAlCarrito } from './AgregarAlCarrito'
-import { Package, Truck, ShieldCheck, ShoppingBag } from 'lucide-react'
+import { GaleriaProducto } from '@/components/tienda/GaleriaProducto'
+import { Package, Truck, ShieldCheck } from 'lucide-react'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -53,29 +54,10 @@ export default async function ProductDetailPage({ params }: Props) {
 
           {/* Columna Izquierda: Galería */}
           <div className="space-y-6">
-            <div className="aspect-square rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm">
-              {product.imagenes?.[0] ? (
-                <img
-                  src={product.imagenes[0]}
-                  alt={product.nombre}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-200">
-                  <ShoppingBag className="w-32 h-32" />
-                </div>
-              )}
-            </div>
-
-            {product.imagenes && product.imagenes.length > 1 && (
-              <div className="grid grid-cols-4 gap-4">
-                {product.imagenes.slice(1).map((img, i) => (
-                  <div key={i} className="aspect-square rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 overflow-hidden">
-                    <img src={img} alt={`${product.nombre} ${i + 2}`} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
+            <GaleriaProducto
+              imagenes={product.imagenes ?? []}
+              nombre={product.nombre}
+            />
 
             <div className="hidden lg:grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
               <div className="flex items-center gap-3 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">

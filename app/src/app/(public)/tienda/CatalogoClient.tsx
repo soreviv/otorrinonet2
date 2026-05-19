@@ -6,6 +6,7 @@ import { getProductosCatalogo } from '@/app/actions/tienda'
 import { FiltroCategoria } from './FiltroCategoria'
 import { ShoppingBag, Box } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 type ProductoCatalogo = Awaited<ReturnType<typeof getProductosCatalogo>>[number]
 
@@ -65,10 +66,12 @@ export function CatalogoClient({ initialProductos }: CatalogoClientProps) {
               >
                 <Link href={`/tienda/${producto.slug}`} className="relative aspect-square overflow-hidden bg-slate-50 dark:bg-slate-800 shrink-0">
                   {producto.imagenes?.[0] ? (
-                    <img
+                    <Image
                       src={producto.imagenes[0]}
                       alt={producto.nombre}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-300">
