@@ -63,7 +63,32 @@ export async function printPrescription(rx: Prescription): Promise<void> {
   }
   .header .clinic-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
   .header h1 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
-  .header .sub { font-size: 10px; opacity: .85; display: flex; gap: 14px; flex-wrap: wrap; }
+  .header .sub { font-size: 11px; color: #e0f2fe; display: flex; gap: 14px; flex-wrap: wrap; }
+
+  /* ── Barra de impresión ── */
+  .print-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: #0c4a6e; color: #fff;
+    padding: 10px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  }
+  .print-bar span { font-size: 13px; font-weight: 600; }
+  .print-bar .btn-print {
+    background: #fff; color: #0c4a6e;
+    border: none; border-radius: 5px;
+    padding: 7px 20px; font-size: 13px; font-weight: 700;
+    cursor: pointer; letter-spacing: .02em;
+  }
+  .print-bar .btn-print:hover { background: #e0f2fe; }
+  .print-bar .btn-close {
+    background: transparent; color: #fff;
+    border: 1px solid rgba(255,255,255,.45); border-radius: 5px;
+    padding: 7px 14px; font-size: 12px; font-weight: 600;
+    cursor: pointer;
+  }
+  .print-bar .btn-close:hover { background: rgba(255,255,255,.1); }
 
   /* ── Doctor strip ── */
   .doc-strip {
@@ -207,11 +232,20 @@ export async function printPrescription(rx: Prescription): Promise<void> {
 
   @media print {
     body { background: #fff; }
-    .no-print { display: none; }
+    .no-print { display: none !important; }
   }
 </style>
 </head>
 <body>
+
+  <!-- Barra de impresión (oculta al imprimir) -->
+  <div class="print-bar no-print">
+    <span>Vista previa de receta</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn-print" onclick="window.print()">Imprimir receta</button>
+      <button class="btn-close" onclick="window.close()">Cerrar</button>
+    </div>
+  </div>
 
   <!-- Header: Clínica -->
   <div class="header">
@@ -317,7 +351,7 @@ export async function printPrescription(rx: Prescription): Promise<void> {
     <span class="validity">Válida por 30 días a partir de la fecha de expedición</span>
   </div>
 
-<script>window.onload = function() { window.print(); }<\/script>
+<script>/* impresión manual via botón de la barra */<\/script>
 </body>
 </html>`
 
