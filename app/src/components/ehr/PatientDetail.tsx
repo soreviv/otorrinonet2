@@ -477,7 +477,6 @@ export function PatientDetail({ patient, currentUserRole, onEdit, onViewDocument
               <div className="space-y-5">
                 <InfoGrid>
                   <InfoRow label="Heredofamiliares" value={p.familyHistory.notes || <span className="italic text-slate-400">Sin antecedentes</span>} />
-                  {p.familyHistory.relevantConditions.length > 0 && <InfoRow label="Condiciones familiares" value={<TagList items={p.familyHistory.relevantConditions} color="amber" />} />}
                   <InfoRow label="Patológicos personales" value={p.personalHistory.pathological || <span className="italic text-slate-400">Ninguno</span>} />
                   <InfoRow label="No patológicos" value={p.personalHistory.nonPathological || <span className="italic text-slate-400">Sin datos</span>} />
                   <InfoRow label="Alergias" value={<TagList items={p.personalHistory.allergies} color="rose" />} />

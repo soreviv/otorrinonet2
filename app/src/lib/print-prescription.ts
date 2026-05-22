@@ -46,7 +46,7 @@ export async function printPrescription(rx: Prescription): Promise<void> {
 <title>Receta — ${esc(rx.patientName)}</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; font-size: 12px; color: #1e293b; background: #fff; }
+  body { font-family: Arial, sans-serif; font-size: 13px; color: #1e293b; background: #fff; }
   @page { size: letter; margin: 12mm 14mm; }
 
   /* ── Header clínica ── */
@@ -93,8 +93,8 @@ export async function printPrescription(rx: Prescription): Promise<void> {
     padding: 9px 16px;
     background: #f8fafc; border-bottom: 1px solid #e2e8f0;
   }
-  .patient-row .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; font-weight: 700; }
-  .patient-row .val { font-weight: 600; font-size: 13px; color: #0f172a; margin-top: 2px; }
+  .patient-row .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; font-weight: 700; }
+  .patient-row .val { font-weight: 600; font-size: 15px; color: #0f172a; margin-top: 2px; }
 
   /* ── Datos clínicos ── */
   .clinical-row {
@@ -102,8 +102,8 @@ export async function printPrescription(rx: Prescription): Promise<void> {
     background: #f8fafc; border-bottom: 1px solid #e2e8f0;
     display: flex; flex-wrap: wrap; gap: 14px;
   }
-  .clinical-row .item .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; font-weight: 700; display: block; }
-  .clinical-row .item .val { font-size: 11px; font-weight: 600; color: #334155; }
+  .clinical-row .item .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; font-weight: 700; display: block; }
+  .clinical-row .item .val { font-size: 13px; font-weight: 600; color: #334155; }
   .clinical-row .allergies { width: 100%; }
   .clinical-row .allergies .val { color: #dc2626; }
 
@@ -112,8 +112,8 @@ export async function printPrescription(rx: Prescription): Promise<void> {
     padding: 7px 16px;
     background: #fffbeb; border-bottom: 1px solid #fde68a;
   }
-  .diag-row .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .05em; color: #92400e; font-weight: 700; }
-  .diag-row .val { font-size: 12px; font-weight: 600; color: #1c1917; margin-top: 2px; }
+  .diag-row .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: #92400e; font-weight: 700; }
+  .diag-row .val { font-size: 14px; font-weight: 600; color: #1c1917; margin-top: 2px; }
 
   /* ── Medicamentos ── */
   .meds-section { padding: 12px 16px 4px; }
@@ -142,13 +142,13 @@ export async function printPrescription(rx: Prescription): Promise<void> {
     flex-shrink: 0; margin-top: 1px;
   }
   .med-body { flex: 1; }
-  .med-name { font-weight: 700; font-size: 13px; color: #0f172a; }
-  .brand { font-weight: 400; font-style: italic; color: #64748b; font-size: 11px; }
-  .med-pres { font-size: 10px; color: #64748b; margin-top: 1px; }
+  .med-name { font-weight: 700; font-size: 15px; color: #0f172a; }
+  .brand { font-weight: 400; font-style: italic; color: #64748b; font-size: 13px; }
+  .med-pres { font-size: 12px; color: #64748b; margin-top: 1px; }
   .med-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 7px; }
-  .med-grid .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; font-weight: 700; display: block; }
-  .med-grid .val { font-weight: 600; font-size: 11px; color: #334155; }
-  .med-inst { font-size: 10px; color: #0369a1; margin-top: 5px; background: #e0f2fe; padding: 3px 7px; border-radius: 4px; }
+  .med-grid .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; font-weight: 700; display: block; }
+  .med-grid .val { font-weight: 600; font-size: 13px; color: #334155; }
+  .med-inst { font-size: 12px; color: #0369a1; margin-top: 5px; background: #e0f2fe; padding: 3px 7px; border-radius: 4px; }
 
   /* ── Timestamp de firma ── */
   .signed-ts {
@@ -188,17 +188,6 @@ export async function printPrescription(rx: Prescription): Promise<void> {
   .sig-line { width: 180px; height: 1px; background: #94a3b8; margin: 0 auto 4px; }
   .sig-name { font-weight: 700; font-size: 11px; color: #0c4a6e; }
   .sig-sub { font-size: 9px; color: #64748b; margin-top: 2px; }
-
-  /* Círculo de sello */
-  .stamp-circle {
-    width: 72px; height: 72px;
-    border-radius: 50%;
-    border: 1.5px dashed #94a3b8;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    margin-bottom: 2px;
-  }
-  .stamp-label { font-size: 8px; color: #94a3b8; text-align: center; line-height: 1.3; max-width: 54px; }
 
   /* QR */
   .qr-box { display: flex; flex-direction: column; align-items: center; gap: 3px; flex-shrink: 0; }
@@ -312,12 +301,6 @@ export async function printPrescription(rx: Prescription): Promise<void> {
         <div class="sig-sub">Firma autógrafa${rx.signatureData ? ' registrada' : ''}</div>
       </div>
 
-      <!-- Sello -->
-      <div style="text-align:center">
-        <div class="stamp-circle">
-          <span class="stamp-label">Sello del médico</span>
-        </div>
-      </div>
     </div>
 
     <!-- QR verificación -->

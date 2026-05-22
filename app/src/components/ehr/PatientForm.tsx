@@ -149,7 +149,6 @@ type FormState = {
   email: string
   address: string
   familyNotes: string
-  familyConditions: string[]
   pathological: string
   nonPathological: string
   allergies: string[]
@@ -157,7 +156,7 @@ type FormState = {
 
 const EMPTY_FORM: FormState = {
   nombre: '', apellidoPaterno: '', apellidoMaterno: '', birthDate: '', sex: 'femenino', curp: '', phone: '', email: '', address: '',
-  familyNotes: '', familyConditions: [],
+  familyNotes: '',
   pathological: '', nonPathological: '', allergies: [],
 }
 
@@ -179,7 +178,6 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
       email: p.generalData.email,
       address: p.generalData.address,
       familyNotes: p.familyHistory.notes,
-      familyConditions: [...p.familyHistory.relevantConditions],
       pathological: p.personalHistory.pathological,
       nonPathological: p.personalHistory.nonPathological,
       allergies: [...p.personalHistory.allergies],
@@ -207,7 +205,7 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
       },
       familyHistory: {
         notes: form.familyNotes,
-        relevantConditions: form.familyConditions,
+        relevantConditions: [],
       },
       personalHistory: {
         pathological: form.pathological,
@@ -289,14 +287,6 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
           <Field id="familyNotes" label="Heredofamiliares">
             <textarea id="familyNotes" rows={2} value={form.familyNotes} onChange={(e) => set('familyNotes', e.target.value)} placeholder="Enfermedades relevantes en familiares directos..." className={textareaCls} />
           </Field>
-          <TagInput
-            label="Condiciones familiares relevantes"
-            items={form.familyConditions}
-            onAdd={(v) => set('familyConditions', [...form.familyConditions, v])}
-            onRemove={(i) => set('familyConditions', form.familyConditions.filter((_, idx) => idx !== i))}
-            placeholder="Ej. Diabetes, Hipertensión"
-            color="amber"
-          />
           <Field id="pathological" label="Antecedentes patológicos personales">
             <textarea id="pathological" rows={2} value={form.pathological} onChange={(e) => set('pathological', e.target.value)} placeholder="Cirugías, hospitalizaciones, enfermedades crónicas..." className={textareaCls} />
           </Field>
