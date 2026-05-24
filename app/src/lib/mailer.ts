@@ -23,7 +23,7 @@ function getTransport(): Transporter {
   return _transport
 }
 
-function esc(s: string | null | undefined): string {
+export function esc(s: string | null | undefined): string {
   if (!s) return ''
   return s
     .replace(/&/g, '&amp;')
