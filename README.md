@@ -1,6 +1,6 @@
 # OtorrinoNet — Plataforma de Práctica Privada ORL
 
-Plataforma integral para la práctica privada del **Dr. Alejandro Viveros Domínguez**, especialista en Otorrinolaringología y Cirugía de Cabeza y Cuello. Combina sitio web de presentación, agendado de citas en línea y expediente clínico electrónico (EHR) en un solo servidor, con cumplimiento de **LFPDPPP**, **NOM-004-SSA3**, **NOM-024-SSA3** y **HL7-FHIR**.
+Plataforma integral para la práctica privada del **Dr. Alejandro Viveros Domínguez**, especialista en Otorrinolaringología y Cirugía de Cabeza y Cuello (CDMX). Combina sitio web de presentación, agendado de citas en línea, expediente clínico electrónico (EHR) y tienda médica en línea en un solo servidor, con cumplimiento de **LFPDPPP**, **NOM-004-SSA3**, **NOM-024-SSA3** y **HL7-FHIR**.
 
 ---
 
@@ -8,58 +8,70 @@ Plataforma integral para la práctica privada del **Dr. Alejandro Viveros Domín
 
 | Capa | Tecnología |
 |---|---|
-| Framework | Next.js 16.2.4 (App Router) |
+| Framework | Next.js 16 (App Router) |
 | UI | React 19 + Tailwind CSS v4 |
 | Lenguaje | TypeScript 5 |
-| ORM | Prisma 7 |
-| Base de datos | PostgreSQL |
-| Auth | JWT (jose) + TOTP 2FA (otplib) |
-| Íconos | Lucide React |
-| Tipografías | Inter · DM Sans · IBM Plex Mono |
+| ORM | Prisma 7 + PostgreSQL |
+| Auth | JWT (jose) + TOTP 2FA (otplib) + bcryptjs |
+| Seguridad de datos | Cifrado AES-256-GCM (node:crypto) |
+| Pagos | Stripe (PaymentIntents + Webhooks) |
+| Email | Nodemailer (citas, recordatorios, tickets de compra) |
+| Captcha | Cloudflare Turnstile |
+| Tests | Vitest + jsdom + @testing-library/react |
+| Infraestructura | Node.js 20+ / PM2 / nginx / VPS |
 
 ---
 
-## Funcionalidades
+## Módulos
 
 | # | Módulo | Ruta | Descripción |
 |---|---|---|---|
-| 1 | **Shell** | — | Design tokens, PatientShell y StaffShell con navegación y roles |
-| 2 | **Sitio Público** | `/`, `/perfil`, `/servicios`, `/ubicacion`, `/contacto` | Cinco páginas standalone de presentación profesional |
-| 3 | **Guía de Vacunación** | `/vacunacion` | Formulario interactivo basado en SSA + CDC; accesible desde la tarjeta de Vacunación en servicios |
-| 4 | **Agenda de Citas** | `/agendar`, `/staff/agenda` | Formulario de 3 pasos para pacientes; calendario de gestión para recepcionista |
-| 5 | **Expediente Clínico (EHR)** | `/staff/ehr` | Historia clínica NOM-004-SSA3 con control de acceso por rol |
-| 6 | **Notas, Recetas y Consentimientos** | `/staff/notas` | Notas SOAP, recetas digitales con firma y timestamp, consentimientos informados |
-| 7 | **Administración** | `/staff/admin` | Usuarios, bitácora de auditoría, exportación FHIR, aviso de privacidad y solicitudes ARCO |
+| 1 | **Sitio público** | `/`, `/perfil`, `/servicios`, `/ubicacion`, `/contacto` | Presentación profesional |
+| 2 | **Agendado de citas** | `/agendar` | Formulario 3 pasos con Turnstile; modifica/cancela cita por token |
+| 3 | **Tienda médica** | `/tienda` | Catálogo, carrito, checkout Stripe, confirmación |
+| 4 | **Expediente clínico (EHR)** | `/staff/ehr` | Historia clínica NOM-004-SSA3 |
+| 5 | **Notas, recetas y consentimientos** | `/staff/notas` | Notas SOAP, recetas con firma SHA-256, consentimientos |
+| 6 | **Agenda staff** | `/staff/agenda` | Calendario, bloqueo de fechas |
+| 7 | **Admin tienda** | `/staff/tienda` | CRUD productos, pedidos, estadísticas |
+| 8 | **Dashboard** | `/staff/dashboard` | Métricas clínicas y de ventas |
+| 9 | **Configuración** | `/staff/configuracion` | Datos del consultorio, logo, cedulas, bloqueos |
+| 10 | **Admin** | `/staff/admin` | Usuarios, bitácora, ARCO, exportación FHIR |
 
 ---
 
 ## Estructura del proyecto
 
 ```
-otorrinonet/
-├── app/                        # Aplicación Next.js
+otorrinonet2/
+├── app/                          # Aplicación Next.js
 │   ├── prisma/
-│   │   ├── schema.prisma       # Esquema de base de datos
-│   │   └── seed.ts             # Datos iniciales
+│   │   ├── schema.prisma         # Esquema de base de datos
+│   │   └── seed.ts               # Datos iniciales
+│   ├── vitest.config.ts          # Configuración de tests
 │   └── src/
 │       ├── app/
-│       │   ├── (public)/       # Sitio público (sin shell)
-│       │   ├── (patient)/      # Portal paciente con PatientShell
-│       │   ├── staff/          # Panel staff con StaffShell
-│       │   └── login/          # Autenticación + configuración 2FA
+│       │   ├── (public)/         # Sitio público y tienda
+│       │   ├── staff/            # Panel interno (requiere sesión + 2FA)
+│       │   ├── login/            # Autenticación (email+pass → 2FA)
+│       │   ├── actions/          # Server Actions
+│       │   └── api/              # API routes (stripe/webhook, cron, csp-report)
 │       ├── components/
-│       │   ├── shell/          # PatientShell, StaffShell, AppShell
-│       │   ├── sitio-publico/  # Componentes del sitio público
-│       │   ├── agenda/         # Componentes de citas
-│       │   ├── ehr/            # Componentes del expediente clínico
-│       │   ├── notas/          # Notas, recetas y consentimientos
-│       │   └── admin/          # Administración y cumplimiento
+│       │   ├── sitio-publico/    # Header, Footer, Breadcrumbs
+│       │   ├── tienda/           # Carrito, checkout, galería
+│       │   ├── ehr/              # Expediente clínico
+│       │   ├── notas/            # Notas, recetas, consentimientos
+│       │   └── shell/            # StaffShell (nav lateral)
+│       ├── __tests__/            # Suite de tests (66/66 en verde)
 │       └── lib/
-│           ├── agenda-types.ts / agenda-data.ts
-│           ├── ehr-types.ts / ehr-data.ts
-│           ├── notas-types.ts / notas-data.ts
-│           └── admin-types.ts / admin-data.ts
-└── product-plan/               # Especificaciones, diseño y plan de producto
+│           ├── dal.ts            # verifySession()
+│           ├── clinic-config.ts  # Datos del doctor/clínica
+│           ├── stripe.ts         # Cliente Stripe server-side
+│           ├── mailer.ts         # Emails transaccionales
+│           └── prisma.ts         # Cliente Prisma singleton
+├── memory/                       # PRD y plan de producto
+├── .jules/                       # Instrucciones para agentes de IA
+├── AGENTS.md                     # Guía para agentes de IA
+└── RESUMEN_EJECUTIVO_OTORRINONET.md
 ```
 
 ---
@@ -75,151 +87,137 @@ otorrinonet/
 
 ## Configuración inicial (desarrollo)
 
-**1. Instalar dependencias**
-
 ```bash
 cd app
 npm install
+cp .env.example .env        # completar variables (ver tabla abajo)
+npx prisma db push          # sincronizar schema con la BD
+npm run db:seed             # datos iniciales
+npm run dev                 # http://localhost:3000
 ```
 
-**2. Variables de entorno**
+---
 
-```bash
-cp .env.example .env
+## Scripts
+
+Todos los comandos se ejecutan desde `app/`.
+
+| Comando | Descripción |
+|---|---|
+| `npm run dev` | Servidor de desarrollo (puerto 3000) |
+| `npm run build` | Build de producción |
+| `npm run start` | Servidor de producción |
+| `npm run lint` | ESLint |
+| `npm run test` | Suite de tests (Vitest) |
+| `npm run test:coverage` | Tests con reporte de cobertura |
+| `npx prisma db push` | Sincronizar schema Prisma con la BD |
+| `npx prisma generate` | Regenerar cliente Prisma |
+| `npm run db:seed` | Cargar datos iniciales |
+| `npm run db:studio` | Prisma Studio (GUI de base de datos) |
+
+---
+
+## Tests
+
+Framework: **Vitest** con jsdom y `@testing-library/react`. **66/66 tests en verde.**
+
+```
+src/__tests__/
+├── schemas/tienda.test.ts          # 7 casos — schemas Zod (checkout, carrito, dirección)
+├── lib/mailer.test.ts              # 5 casos — función esc() escape HTML
+├── hooks/useCarrito.test.ts        # 8 casos — carrito (localStorage, subtotal, envío)
+├── actions/appointments.test.ts   # 17 casos — slots, fechas bloqueadas, reagendamiento
+├── actions/auth.test.ts            # 18 casos — rate-limit, lockout, password reset
+└── api/stripe-webhook.test.ts      # 11 casos — idempotencia, stock, estados de orden
 ```
 
-Editar `app/.env` con los valores reales:
+> Usar `vi.hoisted()` para variables referenciadas dentro de factories de `vi.mock()`.
 
-```env
-# Cadena de conexión a PostgreSQL
-DATABASE_URL="postgresql://USUARIO:CONTRASEÑA@localhost:5432/NOMBRE_DB"
+---
 
-# Secreto de sesión JWT — generar con:
-# node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-SESSION_SECRET="tu-secreto-de-64-chars-hex"
+## Variables de entorno
 
-# Cloudflare Turnstile (protección de formularios) — obtener en: dash.cloudflare.com > Turnstile
-NEXT_PUBLIC_TURNSTILE_SITE_KEY="tu-site-key"    # clave pública (visible en el cliente)
-TURNSTILE_SECRET_KEY="tu-secret-key"            # clave privada (solo servidor, nunca exponer)
-```
+| Variable | Descripción |
+|---|---|
+| `DATABASE_URL` | Cadena de conexión PostgreSQL |
+| `JWT_SECRET` | Secreto para firmar cookies de sesión |
+| `ENCRYPTION_KEY` | Clave AES-256-GCM para cifrado de datos de pacientes |
+| `ENCRYPTION_KDF_SALT` | Salt para derivación de clave |
+| `DOCTOR_NAME` | Nombre completo del médico |
+| `DOCTOR_LICENSE` | Cédula profesional |
+| `DOCTOR_SPECIALTY_LICENSE` | Cédula de especialidad |
+| `DOCTOR_UNIVERSITY` | Universidad de titulación |
+| `CLINIC_NAME` | Nombre del consultorio |
+| `CLINIC_ADDRESS` | Dirección del consultorio |
+| `CLINIC_PHONE` | Teléfono del consultorio |
+| `CLINIC_EMAIL` | Email de contacto |
+| `CLINIC_COFEPRIS` | Licencia COFEPRIS (opcional) |
+| `SMTP_HOST` | Servidor SMTP para emails |
+| `SMTP_PORT` | Puerto SMTP |
+| `SMTP_USER` | Usuario SMTP |
+| `SMTP_PASS` | Contraseña SMTP |
+| `TURNSTILE_SECRET` | Secreto de Cloudflare Turnstile |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Site key pública de Turnstile |
+| `GOOGLE_PLACES_API_KEY` | API key para reseñas de Google Places |
+| `GOOGLE_PLACE_ID` | ID del lugar en Google Places |
+| `CRON_SECRET` | Token para proteger endpoints de cron |
+| `STRIPE_SECRET_KEY` | Clave secreta de Stripe (`sk_live_…`) |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Clave pública de Stripe (`pk_live_…`) |
+| `STRIPE_WEBHOOK_SECRET` | Secreto del webhook de Stripe (`whsec_…`) |
+| `TIENDA_COSTO_ENVIO_CENTAVOS` | Costo de envío en centavos MXN (default: 15000 = $150) |
 
-**3. Crear base de datos en PostgreSQL**
+---
 
-```sql
-CREATE USER otorrinonet WITH PASSWORD 'tu_contraseña';
-CREATE DATABASE otorrinonet_db OWNER otorrinonet;
-```
+## Notas importantes
 
-**4. Aplicar migraciones**
-
-```bash
-npm run db:migrate
-```
-
-Esto crea todas las tablas y genera el cliente Prisma automáticamente.
-
-**5. Sembrar datos iniciales**
-
-```bash
-npm run db:seed
-```
-
-Crea los usuarios del equipo con contraseña por defecto `Cambiar123!`:
-
-| Email | Nombre | Rol |
-|---|---|---|
-| `drviverosorl@gmail.com` | Dr. Alejandro Viveros Domínguez | `medico` |
-| `carmen.salinas@viverosorl.com` | Lic. Carmen Salinas Ruiz | `recepcionista` |
-| `patricia.morales@viverosorl.com` | Enf. Patricia Morales Díaz | `enfermera` |
-
-> **Importante:** Cambia las contraseñas inmediatamente después del primer inicio de sesión.
-
-**6. Iniciar servidor de desarrollo**
-
-```bash
-npm run dev
-```
-
-Abrir [http://localhost:3000](http://localhost:3000)
+- Después de modificar `prisma/schema.prisma` ejecutar `npx prisma db push && npx prisma generate`.
+- El layout `(public)/layout.tsx` es un pass-through; cada componente incluye `<PublicHeader>` y `<PublicFooter>` directamente.
+- La ruta `/agendar` usa `ssr: false` (dynamic import) para evitar errores de hidratación con Turnstile.
+- Las rutas `/legal/*` redirigen 301 a sus canónicas (`/privacidad`, `/terminos`, `/cookies`, `/descargo`).
+- El stock se decrementa **solo** en el webhook `payment_intent.succeeded`, nunca al crear la orden.
+- El carrito vive en `localStorage` (`useCarrito`), no en BD ni cookies.
 
 ---
 
 ## Despliegue en producción
 
-**1. Completar los pasos 1–5 del apartado anterior**
-
-**2. Compilar la aplicación**
-
 ```bash
+cd app
 npm run build
-```
-
-**3. Iniciar con PM2**
-
-```bash
 pm2 start "npm run start -- -p 5000" --name otorrinonet
 pm2 save
-pm2 startup   # Para que inicie automáticamente al reiniciar el servidor
+pm2 startup
 ```
 
-**4. Nginx como proxy inverso** (ejemplo de configuración)
-
-```nginx
-server {
-    listen 443 ssl;
-    server_name tudominio.com www.tudominio.com;
-
-    ssl_certificate     /etc/letsencrypt/live/tudominio.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/tudominio.com/privkey.pem;
-
-    location / {
-        proxy_pass http://127.0.0.1:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-**5. Actualizar en producción** (después de cambios en el código)
+**Actualizar en producción:**
 
 ```bash
 git pull
-npm run build
+cd app && npm run build
 pm2 restart otorrinonet
 ```
 
 ---
 
-## Scripts disponibles
+## Infraestructura (VPS)
 
-```bash
-npm run dev           # Servidor de desarrollo (puerto 3000)
-npm run build         # Compilar para producción
-npm run start         # Iniciar servidor de producción
-npm run lint          # ESLint
-npm run db:generate   # Regenerar cliente Prisma
-npm run db:migrate    # Aplicar migraciones (también regenera el cliente)
-npm run db:push       # Sincronizar esquema sin crear migración
-npm run db:seed       # Sembrar usuarios iniciales
-npm run db:studio     # Abrir Prisma Studio (GUI de base de datos)
-```
+- **PM2**: proceso `otorrinonet` — `npm run start -- -p 5000` en `/var/www/otorrinonet2/app`
+- **nginx**: config activa en `/etc/nginx/conf.d/otorrinonet.conf` (no en `sites-enabled/`)
+  - `/_next/static/` → alias a `.next/static/` (archivos estáticos desde disco)
+  - `/assets/` → root en `public/`
+  - Todo lo demás → proxy a `127.0.0.1:5000`
 
 ---
 
 ## Acceso al sistema
 
-La URL de login es `/login`. Tras autenticarse, el sistema redirige según el rol:
+URL de login: `/login`. El sistema redirige según el rol tras autenticarse.
 
 | Rol | Rutas disponibles |
 |---|---|
-| `medico` | `/staff/ehr`, `/staff/notas`, `/staff/agenda`, `/staff/admin` (acceso completo) |
-| `enfermera` | `/staff/ehr` (solo lectura en datos sensibles), `/staff/notas` |
+| `medico` | Acceso completo a `/staff/*` |
+| `enfermera` | `/staff/ehr` (lectura), `/staff/notas`, `/staff/agenda` |
 | `recepcionista` | `/staff/agenda` |
-
-El EHR y demás módulos de staff son accesibles en `/staff/*` una vez autenticado.
 
 ---
 
@@ -228,17 +226,4 @@ El EHR y demás módulos de staff son accesibles en `/staff/*` una vez autentica
 - **NOM-004-SSA3** — Expediente clínico electrónico estructurado
 - **NOM-024-SSA3** — Sistemas de información de registro electrónico
 - **LFPDPPP** — Aviso de privacidad y derechos ARCO
-- **HL7-FHIR** — Exportación de expedientes en formato estándar
-
----
-
-## Sistema de diseño
-
-**Colores:** Primary `teal` · Secondary `sky` · Neutral `slate`
-
-**Tipografía:**
-- Headings: DM Sans
-- Body: Inter
-- Mono (timestamps, CURP, códigos CIE-10, FHIR): IBM Plex Mono
-
-Tailwind CSS v4 configurado vía bloque `@theme {}` en `src/app/globals.css` (sin `tailwind.config.ts`).
+- **HL7-FHIR** — Exportación de expedientes en formato estándar (en desarrollo)
