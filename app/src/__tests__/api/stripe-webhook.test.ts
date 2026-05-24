@@ -13,7 +13,8 @@ vi.mock('@/lib/mailer', () => ({
   sendOrderTicket: vi.fn().mockResolvedValue(undefined),
 }))
 
-const mockConstructEvent = vi.fn()
+const mockConstructEvent = vi.hoisted(() => vi.fn())
+
 vi.mock('@/lib/stripe', () => ({
   getStripe: vi.fn().mockReturnValue({
     webhooks: { constructEvent: mockConstructEvent },
@@ -21,15 +22,15 @@ vi.mock('@/lib/stripe', () => ({
 }))
 
 // Cliente de transacción Prisma simulado (recibe el callback de $transaction)
-const mockTx = {
+const mockTx = vi.hoisted(() => ({
   order: { update: vi.fn().mockResolvedValue({}) },
   product: {
     findUnique: vi.fn().mockResolvedValue({ stockIlimitado: false }),
     update: vi.fn().mockResolvedValue({}),
   },
-}
+}))
 
-const mockPrisma = {
+const mockPrisma = vi.hoisted(() => ({
   stripeWebhookEvent: {
     findUnique: vi.fn().mockResolvedValue(null),
     create: vi.fn().mockResolvedValue({}),
@@ -42,7 +43,7 @@ const mockPrisma = {
   $transaction: vi.fn().mockImplementation(
     async (cb: (tx: typeof mockTx) => Promise<void>) => cb(mockTx),
   ),
-}
+}))
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }))
 

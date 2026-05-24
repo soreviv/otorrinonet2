@@ -42,7 +42,7 @@ vi.mock('bcryptjs', () => ({
   },
 }))
 
-const mockPrisma = {
+const mockPrisma = vi.hoisted(() => ({
   staffUser: {
     findUnique: vi.fn(),
     update: vi.fn().mockResolvedValue({ sessionVersion: 1 }),
@@ -54,7 +54,7 @@ const mockPrisma = {
     deleteMany: vi.fn().mockResolvedValue({}),
   },
   $transaction: vi.fn().mockResolvedValue([{}, {}]),
-}
+}))
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }))
 
@@ -253,9 +253,11 @@ describe('resetPasswordAction', () => {
       makeFormData({ token: 'tok-real', password: 'NuevaPass1!', confirm: 'NuevaPass1!' }),
     )
 
-    const transactionOps: unknown[] = mockPrisma.$transaction.mock.calls[0][0]
-    const hasSessionVersionIncrement = JSON.stringify(transactionOps).includes('sessionVersion')
-    expect(hasSessionVersionIncrement).toBe(true)
+    expect(mockPrisma.staffUser.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ sessionVersion: { increment: 1 } }),
+      }),
+    )
   })
 })
 

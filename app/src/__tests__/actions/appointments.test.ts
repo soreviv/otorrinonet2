@@ -31,7 +31,7 @@ vi.mock('@/app/actions/configuracion', () => ({
   getPublicBlockedDates: vi.fn().mockResolvedValue([]),
 }))
 
-const mockPrisma = {
+const mockPrisma = vi.hoisted(() => ({
   clinicConfig: {
     findUnique: vi.fn().mockResolvedValue({ appointmentDurationMin: 30 }),
   },
@@ -45,7 +45,7 @@ const mockPrisma = {
     count: vi.fn().mockResolvedValue(0),
     create: vi.fn().mockResolvedValue({ id: 'patient-1' }),
   },
-}
+}))
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }))
 
