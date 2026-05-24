@@ -60,9 +60,17 @@ Las siguientes áreas son de especial interés:
 ## Buenas prácticas internas
 
 - Las sesiones expiran en **8 horas** y se almacenan como JWT en cookie `HttpOnly`
+- Sesiones server-side revocables: `sessionVersion` en `StaffUser` se incrementa al cambiar contraseña
+- Rate-limit en login: 5 intentos fallidos / 15 min → bloqueo automático de 30 min
+- 2FA TOTP obligatorio para todo el personal (Google Authenticator / Authy)
 - Los datos clínicos se almacenan en PostgreSQL; nunca se exponen en logs
+- Cifrado columnar AES-256-GCM para datos sensibles de pacientes (CURP, teléfono, email, dirección)
+- El stock de productos se decrementa únicamente en el webhook `payment_intent.succeeded` de Stripe (nunca en el redirect del cliente)
+- Idempotencia de webhooks: tabla `StripeWebhookEvent` con PK = `event.id` de Stripe
+- HTML escape (`esc()`) aplicado a todos los interpolados de datos externos en plantillas de email
 - Las migraciones de esquema se realizan con `prisma db push` en entorno controlado
-- Las variables de entorno sensibles (`DATABASE_URL`, claves de correo, etc.) nunca se versionan
+- Las variables de entorno sensibles (`DATABASE_URL`, claves de Stripe, `JWT_SECRET`, etc.) nunca se versionan
+- Suite de tests automatizados cubre las áreas de mayor riesgo: detección de solapamiento de slots, flujo de autenticación (rate-limit, token de reset), idempotencia y transacciones del webhook de Stripe
 
 ## Agradecimientos
 

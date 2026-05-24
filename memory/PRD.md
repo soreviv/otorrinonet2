@@ -161,6 +161,23 @@
 - [ ] ~~Dictado por voz + estructura SOAP (Whisper + LLM)~~ — descartado
 - [ ] FHIR export individual y bulk
 
+## Backlog Tests (plan activo — 2026-05-24)
+
+Framework: **Vitest** + jsdom + `@testing-library/react` + `vitest-mock-extended`.
+
+| Sprint | Contenido | Esfuerzo | Estado |
+|--------|-----------|----------|--------|
+| T0 | Instalación: `vitest.config.ts`, `setup.ts`, scripts en `package.json` | ~1 h | ⏳ pendiente |
+| T1-A | Schemas Zod (`src/lib/schemas/tienda.ts`) — 7 casos | ~40 min | ⏳ pendiente |
+| T1-B | `esc()` en `mailer.ts` — 5 casos | ~20 min | ⏳ pendiente |
+| T1-C | `useCarrito` hook — 8 casos, mock localStorage | ~1 h | ⏳ pendiente |
+| T2-A | Solapamiento de slots (`appointments.ts`) — 7 casos, mock Prisma | ~2 h | ⏳ pendiente |
+| T2-B | Rate-limit + lockout + password reset (`auth.ts`) — 7 casos | ~1.5 h | ⏳ pendiente |
+| T2-C | Webhook Stripe — idempotencia + stock — 7 casos | ~1.5 h | ⏳ pendiente |
+| T3 | E2E Playwright (login 2FA, agendar cita, checkout) | largo plazo | 🔲 sin fecha |
+
+**Total estimado T0–T2: ~8 horas.**
+
 ## Backlog largo plazo (baja prioridad / sin fecha)
 - [ ] **Módulo de cobros** — modelo `Cobro` en BD (tipoConsulta, montoTotal, metodoPago, notasExtra); formulario en panel de cita; dashboard financiero (ingresos del día/mes). Decisiones tomadas: sin Stripe, registro manual por el staff. Precios: primera vez $1,100 / subsecuente $1,000 / lavado de oídos $600. Nota aclaratoria: honorarios son por consulta; insumos extra (férulas, tapones, etc.) se cobran en consultorio y se anotan en campo libre. Descartado: pago anticipado online (baja adopción en el perfil de pacientes del consultorio).
 - [ ] Facturación CFDI (Facturama)

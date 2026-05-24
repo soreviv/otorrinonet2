@@ -32,10 +32,30 @@ npm run dev            # http://localhost:3000
 | `npm run build` | Build de producción |
 | `npm run start` | Servidor de producción |
 | `npm run lint` | ESLint |
+| `npm run test` | Suite de tests (Vitest) |
+| `npm run test:coverage` | Tests con reporte de cobertura |
 | `npx prisma db push` | Sincronizar schema Prisma con la BD |
 | `npx prisma generate` | Regenerar cliente Prisma |
 | `npm run db:seed` | Cargar datos iniciales |
 | `npm run db:studio` | Prisma Studio |
+
+## Tests
+
+Framework: **Vitest** con jsdom y `@testing-library/react`.
+
+```
+src/__tests__/
+├── schemas/        # Validaciones Zod (tienda)
+├── lib/            # Helpers puros (mailer.esc, formatDate)
+├── hooks/          # useCarrito (localStorage)
+└── actions/        # Server Actions con mocks de Prisma
+    ├── appointments.test.ts   — solapamiento de slots, fechas bloqueadas
+    ├── auth.test.ts           — rate-limit, lockout, password reset
+    └── api/
+        └── stripe-webhook.test.ts  — idempotencia, stock, estados de orden
+```
+
+> **Estado actual:** suite pendiente de implementación (ver plan de trabajo en memoria).
 
 ## Estructura
 
