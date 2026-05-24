@@ -1,26 +1,31 @@
 # Resumen Ejecutivo: Proyecto OtorrinoNet
-**Fecha:** 12 de mayo de 2026
-**Asunto:** Informe de Auditoría Técnica y Cumplimiento Normativo para Certificación SSA
+**Fecha:** 24 de mayo de 2026
+**Asunto:** Informe de Estado Técnico y Cumplimiento Normativo
 
 ---
 
 ## 1. Introducción
-OtorrinoNet es una plataforma integral de gestión clínica y portal de pacientes diseñada para la práctica privada de otorrinolaringología. El sistema combina un sitio público, agenda de citas inteligente, expediente clínico electrónico (EHR) y un módulo de autofacturación, todo bajo un marco de cumplimiento con la normativa sanitaria mexicana.
+OtorrinoNet es una plataforma integral de gestión clínica y portal de pacientes para la práctica privada de otorrinolaringología del Dr. Alejandro Viveros Domínguez (CDMX). El sistema combina sitio público, agenda de citas inteligente, expediente clínico electrónico (EHR), tienda médica en línea y módulos de automatización, bajo cumplimiento de normativa sanitaria mexicana.
+
+---
 
 ## 2. Análisis de Cumplimiento Normativo
 
 ### NOM-004-SSA3-2012 (Expediente Clínico)
-El sistema cumple con los criterios fundamentales de la norma:
-*   **Integridad y Firma:** Se ha implementado un sistema de firma electrónica para notas de evolución y recetas médicas utilizando algoritmos SHA-256. Una vez firmada, la nota se vuelve inmutable, permitiendo únicamente adiciones mediante un sistema de adendas foliadas con marca de tiempo.
-*   **Estructura:** El EHR captura datos obligatorios como antecedentes heredo-familiares, personales patológicos, no patológicos, signos vitales y notas SOAP.
+- **Integridad y Firma:** Firma electrónica SHA-256 en notas de evolución y recetas. Una vez firmada, la nota es inmutable; solo se permiten adendas foliadas con marca de tiempo.
+- **Estructura:** EHR captura antecedentes heredo-familiares, personales patológicos y no patológicos, signos vitales y notas SOAP.
 
 ### NOM-024-SSA3-2012 (Sistemas de Información de Registro Electrónico)
-*   **Bitácora de Auditoría:** Existe un registro inmutable que rastrea accesos, creaciones, modificaciones y firmas, registrando el ID de usuario, IP, estampa de tiempo y recurso afectado.
-*   **Seguridad y Confidencialidad:** Se implementó cifrado de grado militar (AES-256-GCM) para datos sensibles del paciente (CURP, Teléfono, Dirección), asegurando la protección de datos personales en reposo.
-*   **Autenticación:** Acceso restringido mediante roles con obligatoriedad de autenticación de dos factores (2FA) vía TOTP para todo el personal de salud.
+- **Bitácora de Auditoría:** Registro inmutable de accesos, creaciones, modificaciones y firmas (ID usuario, IP, timestamp, recurso).
+- **Confidencialidad:** Cifrado AES-256-GCM para datos sensibles en reposo (CURP, teléfono, email, dirección).
+- **Autenticación:** 2FA TOTP obligatorio para todo el personal (Google Authenticator / Authy). Sesiones server-side revocables mediante `sessionVersion`.
 
-## 3. Stack Tecnológico y Arquitectura
-El sistema emplea un stack de última generación, optimizado para el cumplimiento normativo y la escalabilidad:
+### LFPDPPP
+- Aviso de privacidad, derechos ARCO y módulo de solicitudes implementados en panel admin.
+
+---
+
+## 3. Stack Tecnológico
 
 | Capa | Tecnología |
 |---|---|
@@ -28,43 +33,86 @@ El sistema emplea un stack de última generación, optimizado para el cumplimien
 | **UI Library** | React 19.2.4 |
 | **Estilos** | Tailwind CSS v4 |
 | **Lenguaje** | TypeScript 5 |
-| **Base de Datos** | PostgreSQL 15+ |
-| **ORM** | Prisma 7.7.0 |
-| **Autenticación** | JWT (jose) + TOTP 2FA (otplib) |
+| **Base de Datos** | PostgreSQL 15+ / Prisma 7.7.0 |
+| **Autenticación** | JWT (jose) + TOTP 2FA (otplib) + bcryptjs |
 | **Seguridad de Datos** | Cifrado AES-256-GCM (node:crypto) |
-| **Infraestructura** | Node.js 20+ |
-
-## 4. Estructura del Proyecto
-La organización del código sigue los estándares de la industria para aplicaciones Next.js empresariales:
-
-```text
-otorrinonet/
-├── app/                        # Aplicación principal
-│   ├── prisma/                 # Modelado de datos y migraciones (PostgreSQL)
-│   └── src/
-│       ├── app/                # Enrutamiento (Public, Patient, Staff)
-│       ├── components/         # UI Components (Shell, EHR, Agenda, Admin)
-│       ├── lib/                # Lógica de negocio, tipos y utilidades (DAL, Audit, Crypto)
-│       └── actions/            # Server Actions (Lógica de servidor protegida)
-├── docs/                       # Documentación legal y plantillas
-└── memory/                     # Especificaciones y plan de producto (PRD)
-```
-
-## 5. Interoperabilidad (HL7-FHIR R4)
-*   **Estado Actual:** El sistema cuenta con la estructura de datos preparada y el Dashboard administrativo habilitado para la exportación FHIR.
-*   **Hallazgo:** Se identifica que los procesos de transformación masiva y los endpoints de exportación individual están en fase de definición lógica, sin implementación funcional completa en el código fuente actual.
-
-## 6. Errores y Ventanas de Mejora
-1.  **Manejo de Errores:** Se observa inconsistencia en el manejo de excepciones en algunas "Server Actions", lo que podría derivar en fallos silenciosos o mensajes poco claros para el usuario final.
-2.  **Validaciones de Interfaz:** Algunas validaciones de campos obligatorios dependen excesivamente del cliente, recomendándose robustecer las validaciones en la capa de servidor (Zod).
-3.  **Logs Técnicos:** Ausencia de un sistema centralizado de monitoreo de errores en tiempo real (ej. Sentry), dificultando el diagnóstico proactivo de fallos en producción.
-
-## 7. Oportunidades e Innovación
-*   **e.firma (SAT):** El sistema está diseñado para escalar hacia la integración con la firma electrónica avanzada del SAT, lo que otorgaría validez legal total frente a autoridades judiciales.
-*   **Motor de Vacunación:** Innovación destacada con un motor de recomendaciones basado en normas SSA y CDC, personalizable según la edad y condiciones crónicas del paciente.
-*   **Telemedicina:** Capacidad latente para integrar consultas por video sin necesidad de software externo.
-*   **Autogestión:** El módulo de autofacturación (Factura.com) e integración con Google Places para reputación digital posicionan a la plataforma por encima del promedio del mercado nacional.
+| **Pagos** | Stripe (PaymentIntents + Webhooks) |
+| **Email** | Nodemailer (citas, recordatorios, tickets) |
+| **Captcha** | Cloudflare Turnstile |
+| **Tests** | Vitest + jsdom + @testing-library/react |
+| **Infraestructura** | Node.js 20+ / PM2 / nginx / VPS |
 
 ---
-**Conclusión:**
-OtorrinoNet presenta una base tecnológica sólida y moderna. Cumple con los pilares de seguridad y registro exigidos por las autoridades sanitarias. La prioridad inmediata para la certificación plena debe ser la finalización del módulo de interoperabilidad FHIR y la estandarización del manejo de errores en el núcleo del sistema.
+
+## 4. Módulos en Producción
+
+| Módulo | Ruta | Estado |
+|--------|------|--------|
+| Sitio público | `/`, `/perfil`, `/servicios`, `/ubicacion`, `/contacto` | ✅ Activo |
+| Agendado de citas | `/agendar` | ✅ Activo |
+| Modificación de cita por paciente | `/cita/modificar` | ✅ Activo |
+| Bloqueo de fechas (vacaciones, congresos) | `/staff/agenda` | ✅ Activo |
+| Expediente clínico (EHR) | `/staff/ehr` | ✅ Activo |
+| Notas SOAP, recetas y consentimientos | `/staff/notas` | ✅ Activo |
+| Recordatorio por email (cron 24 h) | `/api/cron/reminder` | ✅ Activo |
+| NPS post-consulta (Google Places) | `/api/cron/nps` | ✅ Activo |
+| Tienda médica en línea | `/tienda` | ✅ Activo |
+| Admin de tienda (productos, pedidos) | `/staff/tienda` | ✅ Activo |
+| Dashboard clínico | `/staff/dashboard` | ✅ Activo |
+| Configuración del consultorio | `/staff/configuracion` | ✅ Activo |
+| Panel admin (usuarios, bitácora, ARCO) | `/staff/admin` | ✅ Activo |
+
+---
+
+## 5. Mejoras de Seguridad Implementadas (sprint P1)
+
+| Mejora | Detalle |
+|--------|---------|
+| Rate-limit en login | 5 intentos / 15 min → bloqueo 30 min; en memoria |
+| Sesiones revocables | `sessionVersion` en `StaffUser`; se incrementa al cambiar contraseña |
+| HTML escape en emails | Función `esc()` en `mailer.ts`; aplicada a todos los datos externos |
+| Zona horaria correcta | `date-fns-tz` con `fromZonedTime` para `America/Mexico_City` |
+| Detección de solapamiento real | Ventana de `appointmentDurationMin` minutos en lugar de coincidencia exacta |
+| Idempotencia de webhook Stripe | Tabla `StripeWebhookEvent` con PK = `event.id`; previene doble cobro |
+
+---
+
+## 6. Suite de Tests Automatizados
+
+Implementada en mayo 2026. **66/66 tests en verde** con Vitest.
+
+| Módulo | Tests | Qué verifica |
+|--------|-------|-------------|
+| Schemas Zod (tienda) | 7 | Checkout, carrito, dirección, email |
+| `esc()` mailer | 5 | Escape HTML de inputs en emails |
+| Hook `useCarrito` | 8 | Carrito, subtotal, envío, localStorage |
+| Appointments | 17 | Solapamiento de slots, fechas bloqueadas, reagendamiento |
+| Auth | 18 | Rate-limit, lockout, password reset, sessionVersion |
+| Webhook Stripe | 11 | Idempotencia, stock, estados de orden |
+
+---
+
+## 7. Interoperabilidad (HL7-FHIR R4)
+
+- **Estado actual:** La estructura de datos del EHR es compatible con FHIR R4. El dashboard administrativo contempla la exportación.
+- **Pendiente:** Endpoints de exportación individual y bulk no implementados. Requieren definir el sistema receptor (laboratorio, HIS, IMSS).
+
+---
+
+## 8. Pendientes y Roadmap
+
+| Ítem | Estado | Bloqueador |
+|------|--------|-----------|
+| Botón WhatsApp / `tel:` en header (FIX-09) | ⏳ Bloqueado | Confirmar número celular del Dr. Viveros |
+| Autofactura CFDI 4.0 (tienda Fase 3) | ⏳ Sin fecha | Definir proveedor de facturación |
+| Exportación FHIR (P1-F) | ⏳ Sin fecha | Definir sistema receptor |
+| Módulo de cobros interno | ⏳ Sin fecha | Decisión de scope (sin Stripe, registro manual) |
+| E2E tests con Playwright (T3) | ⏳ Sin fecha | Prioridad baja para escala actual |
+| Telemedicina (Daily.co) | ⏳ Sin fecha | Largo plazo |
+| Portal del paciente (login propio) | ⏳ Sin fecha | Largo plazo |
+
+---
+
+## 9. Conclusión
+
+OtorrinoNet cuenta con una base tecnológica sólida, moderna y en producción activa. Cumple con los pilares de seguridad, registro e integridad exigidos por las normas NOM-004, NOM-024 y LFPDPPP. La incorporación de una suite de tests automatizados cubre las áreas de mayor riesgo clínico y financiero (citas, autenticación, pagos). La prioridad para la siguiente fase es la finalización del módulo FHIR y la autofactura CFDI, ambas condicionadas a decisiones del cliente sobre proveedores externos.
