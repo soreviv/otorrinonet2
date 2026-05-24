@@ -179,9 +179,25 @@ Antes de hacer merge de un PR de Jules, Claude Code verifica TypeScript y aplica
 
 ---
 
+## Suite de tests
+
+El proyecto tiene **66 tests en verde** con Vitest (2026-05-24). Correr `npm test` (desde `app/`) antes de abrir cualquier PR.
+
+| Archivo | Cobertura |
+|---------|-----------|
+| `src/__tests__/schemas/tienda.test.ts` | Zod schemas — 7 casos |
+| `src/__tests__/lib/mailer.test.ts` | `esc()` HTML escape — 5 casos |
+| `src/__tests__/hooks/useCarrito.test.ts` | Hook carrito localStorage — 8 casos |
+| `src/__tests__/actions/appointments.test.ts` | Slots, bloqueos, reagendamiento — 17 casos |
+| `src/__tests__/actions/auth.test.ts` | Rate-limit, lockout, password reset — 18 casos |
+| `src/__tests__/api/stripe-webhook.test.ts` | Idempotencia, stock, estados Stripe — 11 casos |
+
+**Regla:** usar `vi.hoisted()` para variables en factories de `vi.mock()`.
+
+---
+
 ## Pendientes conocidos
 
 - **FIX-09**: botón flotante de WhatsApp y enlace `tel:` en el header — bloqueado hasta confirmar número celular del Dr. Viveros.
 - **`listo_para_recoger`** falta en el enum `OrderStatus` — agregar con `prisma db push` cuando sea necesario.
-- **Tienda Fase 2**: upload de imágenes de producto desde el panel staff.
-- **Tienda Fase 3**: autofactura CFDI para paquetes de consulta (D01).
+- **Tienda Fase 3**: autofactura CFDI para paquetes de consulta (D01) — requiere definir proveedor de facturación.

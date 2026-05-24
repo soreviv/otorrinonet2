@@ -41,21 +41,21 @@ npm run dev            # http://localhost:3000
 
 ## Tests
 
-Framework: **Vitest** con jsdom y `@testing-library/react`.
+Framework: **Vitest** con jsdom y `@testing-library/react`. **66/66 tests en verde.**
 
 ```
 src/__tests__/
-├── schemas/        # Validaciones Zod (tienda)
-├── lib/            # Helpers puros (mailer.esc, formatDate)
-├── hooks/          # useCarrito (localStorage)
-└── actions/        # Server Actions con mocks de Prisma
-    ├── appointments.test.ts   — solapamiento de slots, fechas bloqueadas
-    ├── auth.test.ts           — rate-limit, lockout, password reset
-    └── api/
-        └── stripe-webhook.test.ts  — idempotencia, stock, estados de orden
+├── schemas/tienda.test.ts          # T1-A — 7 casos: schemas Zod (checkout, carrito, dirección)
+├── lib/mailer.test.ts              # T1-B — 5 casos: función esc() escape HTML
+├── hooks/useCarrito.test.ts        # T1-C — 8 casos: carrito (localStorage, subtotal, envío)
+├── actions/
+│   ├── appointments.test.ts        # T2-A — 17 casos: slots, fechas bloqueadas, reagendamiento
+│   └── auth.test.ts                # T2-B — 18 casos: rate-limit, lockout, password reset
+└── api/
+    └── stripe-webhook.test.ts      # T2-C — 11 casos: idempotencia, stock, estados de orden
 ```
 
-> **Estado actual:** suite pendiente de implementación (ver plan de trabajo en memoria).
+> **Nota de mocking:** usar siempre `vi.hoisted()` para variables que se pasan a factories de `vi.mock()`, evita el error `Cannot access '...' before initialization`.
 
 ## Estructura
 

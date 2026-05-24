@@ -56,6 +56,24 @@ Ver `CLAUDE.md` para el stack completo, archivos clave y convenciones.
 4. Si se modifica código de producción: el usuario hará el rebuild y restart de PM2.
 5. Verificar con `nginx -t` antes de recargar nginx.
 
+## Suite de tests
+
+El proyecto tiene **66 tests en verde** con Vitest. Ejecutar `npm test` antes de abrir cualquier PR.
+
+```
+src/__tests__/
+├── schemas/tienda.test.ts          # Zod schemas (7 casos)
+├── lib/mailer.test.ts              # esc() escape HTML (5 casos)
+├── hooks/useCarrito.test.ts        # hook carrito localStorage (8 casos)
+├── actions/appointments.test.ts   # slots, fechas bloqueadas (17 casos)
+├── actions/auth.test.ts            # rate-limit, password reset (18 casos)
+└── api/stripe-webhook.test.ts      # idempotencia, stock Stripe (11 casos)
+```
+
+**Regla de mocking:** usar `vi.hoisted()` para variables referenciadas dentro de factories de `vi.mock()`.
+
+Si modificas código en `src/app/actions/`, `src/lib/mailer.ts`, `src/hooks/useCarrito.ts` o el webhook de Stripe, verificar que los tests correspondientes sigan pasando.
+
 ## Qué NO hacer
 
 - No agregar `console.log` con datos sensibles (tokens, IDs de paciente, datos de tarjeta).
@@ -63,3 +81,4 @@ Ver `CLAUDE.md` para el stack completo, archivos clave y convenciones.
 - No modificar el flujo de autenticación (2FA, sesiones) sin instrucción explícita — es zona de alta sensibilidad.
 - No instalar dependencias sin confirmar con el usuario.
 - No correr migraciones de BD — solo `prisma db push`.
+- No modificar archivos de test sin correr `npm test` al final.

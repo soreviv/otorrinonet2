@@ -39,6 +39,24 @@ La aplicación Next.js vive en el subdirectorio `app/`. Todos los comandos npm s
 
 ---
 
+## Estado de la suite de tests
+
+| Sprint | Archivo | Tests | Estado |
+|--------|---------|-------|--------|
+| T0 | `vitest.config.ts`, `setup.ts`, scripts `package.json` | — | ✅ completado (Jules, 2026-05-24) |
+| T1-A | `src/__tests__/schemas/tienda.test.ts` | 7 | ✅ completado (Jules, 2026-05-24) |
+| T1-B | `src/__tests__/lib/mailer.test.ts` | 5 | ✅ completado (Jules, 2026-05-24) |
+| T1-C | `src/__tests__/hooks/useCarrito.test.ts` | 8 | ✅ completado (Jules, 2026-05-24) |
+| T2-A | `src/__tests__/actions/appointments.test.ts` | 17 | ✅ completado (Claude, 2026-05-24) |
+| T2-B | `src/__tests__/actions/auth.test.ts` | 18 | ✅ completado (Claude, 2026-05-24) |
+| T2-C | `src/__tests__/api/stripe-webhook.test.ts` | 11 | ✅ completado (Claude, 2026-05-24) |
+| T3 | E2E Playwright | — | 🔲 largo plazo, sin fecha |
+| **Total** | | **66/66** | **✅ en verde** |
+
+**Regla de mocking:** usar `vi.hoisted()` para cualquier variable que se pase dentro de un factory de `vi.mock()`. De lo contrario Vitest lanzará `Cannot access '...' before initialization`.
+
+---
+
 ## Tareas asignables a Jules
 
 Jules debe trabajar **únicamente** en las tareas marcadas aquí. No modificar código de producción salvo que la tarea lo indique explícitamente.
