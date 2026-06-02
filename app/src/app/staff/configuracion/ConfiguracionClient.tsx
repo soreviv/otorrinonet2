@@ -188,12 +188,18 @@ function MedicoTab({
           </div>
         </div>
 
-        <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+        <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 space-y-6">
           <LogoUploader
             label="Escudo de la universidad"
             helper="Se imprimirá junto a las cédulas profesionales en las recetas."
             value={form.doctorUniversityLogoUrl}
             onChange={(v) => set('doctorUniversityLogoUrl', v)}
+          />
+          <LogoUploader
+            label="Firma del médico"
+            helper="Se usará automáticamente al firmar recetas. Sube una imagen PNG con fondo transparente o blanco (recomendado: 400 × 150 px)."
+            value={form.doctorSignatureImageUrl}
+            onChange={(v) => set('doctorSignatureImageUrl', v)}
           />
         </div>
       </Card>

@@ -1,9 +1,8 @@
 'use client'
 
-import { useRef, useState, useEffect } from 'react'
+import { useState } from 'react'
+import Link from 'next/link'
 import type { PrescriptionDetailProps } from '@/lib/notas-types'
-
-type SigMode = 'dibujar' | 'imagen' | 'sello'
 
 function formatDateTime(iso: string) {
   const d = new Date(iso)
@@ -23,99 +22,20 @@ export function PrescriptionDetail({
   onPrint,
   onBack,
 }: PrescriptionDetailProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [isDrawing, setIsDrawing] = useState(false)
-  const [hasStrokes, setHasStrokes] = useState(false)
-  const [lastPos, setLastPos] = useState({ x: 0, y: 0 })
-  const [sigMode, setSigMode] = useState<SigMode>('dibujar')
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [signing, setSigning] = useState(false)
 
   const isSigned = prescription.status === 'firmada'
+  const hasPreconfiguredSignature = !!prescription.doctorSignatureImageUrl
 
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    ctx.strokeStyle = '#0f766e'
-    ctx.lineWidth = 2.5
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
-  }, [])
-
-  function getPos(e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) {
-    const rect = canvas.getBoundingClientRect()
-    const scaleX = canvas.width / rect.width
-    const scaleY = canvas.height / rect.height
-    if ('touches' in e) {
-      return {
-        x: (e.touches[0].clientX - rect.left) * scaleX,
-        y: (e.touches[0].clientY - rect.top) * scaleY,
-      }
-    }
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
+  async function handleSign() {
+    if (signing) return
+    setSigning(true)
+    try {
+      await onSign?.(prescription.id, prescription.doctorSignatureImageUrl ?? '')
+    } finally {
+      setSigning(false)
     }
   }
-
-  function startDraw(e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) {
-    if (isSigned) return
-    e.preventDefault()
-    const canvas = canvasRef.current!
-    setIsDrawing(true)
-    setLastPos(getPos(e, canvas))
-  }
-
-  function draw(e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) {
-    if (!isDrawing || isSigned) return
-    e.preventDefault()
-    const canvas = canvasRef.current!
-    const ctx = canvas.getContext('2d')!
-    const pos = getPos(e, canvas)
-    ctx.beginPath()
-    ctx.moveTo(lastPos.x, lastPos.y)
-    ctx.lineTo(pos.x, pos.y)
-    ctx.stroke()
-    setLastPos(pos)
-    setHasStrokes(true)
-  }
-
-  function stopDraw() { setIsDrawing(false) }
-
-  function clearCanvas() {
-    const canvas = canvasRef.current!
-    const ctx = canvas.getContext('2d')!
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    setHasStrokes(false)
-  }
-
-  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = ev => setUploadedImage(ev.target?.result as string)
-    reader.readAsDataURL(file)
-  }
-
-  function handleSign() {
-    if (sigMode === 'dibujar') {
-      if (!hasStrokes) return
-      onSign?.(prescription.id, canvasRef.current!.toDataURL('image/png'))
-    } else if (sigMode === 'imagen') {
-      if (!uploadedImage) return
-      onSign?.(prescription.id, uploadedImage)
-    } else {
-      // sello: firma sin imagen, solo timestamp
-      onSign?.(prescription.id, '')
-    }
-  }
-
-  const canConfirm =
-    sigMode === 'dibujar' ? hasStrokes :
-    sigMode === 'imagen' ? !!uploadedImage :
-    true
 
   const rx = prescription
 
@@ -235,7 +155,7 @@ export function PrescriptionDetail({
               </div>
             </div>
             {/* Datos clínicos del paciente */}
-            {(rx.patientAge != null || rx.patientSex || rx.patientAllergies?.length || rx.patientWeight || rx.patientHeight || rx.patientTemperature || rx.patientBloodPressure) && (
+            {(rx.patientAge != null || rx.patientSex || rx.patientAllergies?.length || rx.patientWeight || rx.patientHeight || rx.patientTemperature || rx.patientBloodPressure || rx.patientHeartRate != null || rx.patientRespiratoryRate != null || rx.patientOxygenSaturation != null || rx.patientGlucose != null) && (
               <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2">
                 {rx.patientAge != null && (
                   <div>
@@ -277,6 +197,30 @@ export function PrescriptionDetail({
                   <div>
                     <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Presión arterial</p>
                     <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{rx.patientBloodPressure}</p>
+                  </div>
+                )}
+                {rx.patientHeartRate != null && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Frec. cardíaca</p>
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{rx.patientHeartRate} lpm</p>
+                  </div>
+                )}
+                {rx.patientRespiratoryRate != null && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Frec. respiratoria</p>
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{rx.patientRespiratoryRate} rpm</p>
+                  </div>
+                )}
+                {rx.patientOxygenSaturation != null && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">SpO₂</p>
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{rx.patientOxygenSaturation}%</p>
+                  </div>
+                )}
+                {rx.patientGlucose != null && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Glucosa</p>
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{rx.patientGlucose} mg/dL</p>
                   </div>
                 )}
                 {rx.patientAllergies?.length ? (
@@ -393,120 +337,51 @@ export function PrescriptionDetail({
               </div>
             ) : (
               <div className="space-y-4">
-                {/* Selector de modo */}
-                <div className="flex rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden text-xs font-medium">
-                  {([
-                    { id: 'dibujar', label: 'Dibujar' },
-                    { id: 'imagen', label: 'Cargar imagen' },
-                    { id: 'sello', label: 'Solo sello digital' },
-                  ] as { id: SigMode; label: string }[]).map(({ id, label }) => (
-                    <button
-                      key={id}
-                      onClick={() => setSigMode(id)}
-                      className={`flex-1 py-2 transition-colors ${
-                        sigMode === id
-                          ? 'bg-sky-600 text-white'
-                          : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Modo dibujar */}
-                {sigMode === 'dibujar' && (
-                  <div className="space-y-3">
-                    <div className="relative rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/30 overflow-hidden select-none">
-                      <canvas
-                        ref={canvasRef}
-                        width={600}
-                        height={160}
-                        className="w-full cursor-crosshair touch-none"
-                        onMouseDown={startDraw}
-                        onMouseMove={draw}
-                        onMouseUp={stopDraw}
-                        onMouseLeave={stopDraw}
-                        onTouchStart={startDraw}
-                        onTouchMove={draw}
-                        onTouchEnd={stopDraw}
-                      />
-                      {!hasStrokes && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <p className="text-xs text-slate-400 dark:text-slate-500 italic">Dibuja tu firma aquí</p>
-                        </div>
-                      )}
+                {hasPreconfiguredSignature ? (
+                  <>
+                    <div className="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 p-4 flex justify-center">
+                      <img src={rx.doctorSignatureImageUrl} alt="Firma del médico" className="max-h-24 object-contain" />
                     </div>
-                    <button
-                      onClick={clearCanvas}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors"
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center">
+                      Firma cargada desde configuración
+                    </p>
+                  </>
+                ) : (
+                  <div className="rounded-xl border-2 border-dashed border-amber-200 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/10 px-5 py-5 text-center space-y-2">
+                    <svg className="w-7 h-7 text-amber-400 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+                      <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
+                    <p className="text-xs text-amber-700 dark:text-amber-400">
+                      No hay firma configurada. El sello digital registrará el timestamp sin imagen de firma.
+                    </p>
+                    <Link
+                      href="/staff/configuracion"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-sky-600 dark:text-sky-400 hover:underline"
                     >
-                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                        <path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
+                      Ir a Configuración → Médico
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                        <path d="M5 12h14M12 5l7 7-7 7" />
                       </svg>
-                      Limpiar
-                    </button>
+                    </Link>
                   </div>
                 )}
 
-                {/* Modo cargar imagen */}
-                {sigMode === 'imagen' && (
-                  <div className="space-y-3">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                    {uploadedImage ? (
-                      <div className="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 p-3 flex flex-col items-center gap-2">
-                        <img src={uploadedImage} alt="Vista previa de firma" className="max-h-24 object-contain" />
-                        <button
-                          onClick={() => { setUploadedImage(null); if (fileInputRef.current) fileInputRef.current.value = '' }}
-                          className="text-xs text-slate-400 hover:text-rose-500 transition-colors"
-                        >
-                          Cambiar imagen
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/30 py-8 flex flex-col items-center gap-2 hover:border-sky-400 dark:hover:border-sky-500 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition-colors"
-                      >
-                        <svg className="w-8 h-8 text-slate-300 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                          <polyline points="17 8 12 3 7 8" />
-                          <line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>
-                        <span className="text-xs text-slate-400 dark:text-slate-500">Seleccionar imagen de firma (PNG, JPG)</span>
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {/* Modo solo sello */}
-                {sigMode === 'sello' && (
-                  <div className="rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/20 px-5 py-6 text-center space-y-2">
-                    <svg className="w-8 h-8 text-slate-300 dark:text-slate-500 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                <button
+                  onClick={handleSign}
+                  disabled={signing}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white transition-colors shadow-sm"
+                >
+                  {signing ? (
+                    <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                  ) : (
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                       <rect x="3" y="11" width="18" height="11" rx="2" />
                       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Se sellará con timestamp digital.<br/>El impreso incluirá un espacio en blanco para la firma física del doctor.</p>
-                  </div>
-                )}
-
-                {/* Botón confirmar */}
-                <button
-                  onClick={handleSign}
-                  disabled={!canConfirm}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 disabled:bg-slate-200 dark:disabled:bg-slate-700 disabled:text-slate-400 dark:disabled:text-slate-500 text-white transition-colors shadow-sm"
-                >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
-                  Firmar y sellar receta
+                  )}
+                  {signing ? 'Firmando…' : 'Firmar receta'}
                 </button>
                 <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center">
                   Al firmar, se genera un timestamp conforme a normatividad mexicana. La receta será inmutable.

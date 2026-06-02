@@ -289,7 +289,7 @@ export async function printPrescription(rx: Prescription): Promise<void> {
   </div>
 
   <!-- Datos clínicos -->
-  ${(rx.patientAge != null || rx.patientSex || rx.patientWeight || rx.patientHeight || rx.patientBMI != null || rx.patientTemperature != null || rx.patientBloodPressure || rx.patientAllergies?.length) ? `
+  ${(rx.patientAge != null || rx.patientSex || rx.patientWeight || rx.patientHeight || rx.patientBMI != null || rx.patientTemperature != null || rx.patientBloodPressure || rx.patientHeartRate != null || rx.patientRespiratoryRate != null || rx.patientOxygenSaturation != null || rx.patientGlucose != null || rx.patientAllergies?.length) ? `
   <div class="clinical-row">
     ${rx.patientAge != null ? `<div class="item"><span class="lbl">Edad</span><span class="val">${rx.patientAge} años</span></div>` : ''}
     ${rx.patientSex ? `<div class="item"><span class="lbl">Sexo</span><span class="val">${esc(rx.patientSex)}</span></div>` : ''}
@@ -298,6 +298,10 @@ export async function printPrescription(rx: Prescription): Promise<void> {
     ${rx.patientBMI != null ? `<div class="item"><span class="lbl">IMC</span><span class="val">${rx.patientBMI}</span></div>` : ''}
     ${rx.patientTemperature != null ? `<div class="item"><span class="lbl">Temperatura</span><span class="val">${rx.patientTemperature} °C</span></div>` : ''}
     ${rx.patientBloodPressure ? `<div class="item"><span class="lbl">Presión arterial</span><span class="val">${esc(rx.patientBloodPressure)}</span></div>` : ''}
+    ${rx.patientHeartRate != null ? `<div class="item"><span class="lbl">Frec. cardíaca</span><span class="val">${rx.patientHeartRate} lpm</span></div>` : ''}
+    ${rx.patientRespiratoryRate != null ? `<div class="item"><span class="lbl">Frec. respiratoria</span><span class="val">${rx.patientRespiratoryRate} rpm</span></div>` : ''}
+    ${rx.patientOxygenSaturation != null ? `<div class="item"><span class="lbl">SpO₂</span><span class="val">${rx.patientOxygenSaturation}%</span></div>` : ''}
+    ${rx.patientGlucose != null ? `<div class="item"><span class="lbl">Glucosa</span><span class="val">${rx.patientGlucose} mg/dL</span></div>` : ''}
     ${rx.patientAllergies?.length ? `<div class="item allergies"><span class="lbl">Alergias</span><span class="val">${rx.patientAllergies.map(esc).join(', ')}</span></div>` : ''}
   </div>` : ''}
 
@@ -351,7 +355,12 @@ export async function printPrescription(rx: Prescription): Promise<void> {
     <span class="validity">Válida por 30 días a partir de la fecha de expedición</span>
   </div>
 
-<script>/* impresión manual via botón de la barra */<\/script>
+<script>
+  window.onload = function() {
+    window.focus();
+    window.print();
+  };
+<\/script>
 </body>
 </html>`
 

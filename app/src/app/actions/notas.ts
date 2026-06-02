@@ -100,7 +100,9 @@ function mapPrescription(
   },
   vitals?: {
     peso: number | null; talla: number | null; temperatura: number | null;
-    presionSistolica: number | null; presionDiastolica: number | null
+    presionSistolica: number | null; presionDiastolica: number | null;
+    frecuenciaCardiaca: number | null; frecuenciaRespiratoria: number | null;
+    saturacionOxigeno: number | null; glucosa: number | null;
   } | null,
 ): Prescription {
   const first = rows[0]
@@ -158,6 +160,11 @@ function mapPrescription(
     patientBMI,
     patientTemperature: vitals?.temperatura ?? undefined,
     patientBloodPressure: bp,
+    patientHeartRate: vitals?.frecuenciaCardiaca ?? undefined,
+    patientRespiratoryRate: vitals?.frecuenciaRespiratoria ?? undefined,
+    patientOxygenSaturation: vitals?.saturacionOxigeno ?? undefined,
+    patientGlucose: vitals?.glucosa ?? undefined,
+    doctorSignatureImageUrl: (clinicCfg.doctorSignatureImageUrl as string) || undefined,
   } as Prescription
 }
 
@@ -212,7 +219,7 @@ export async function getNotasData(patientId: string) {
     prisma.vitals.findFirst({
       where: { patientId },
       orderBy: { createdAt: 'desc' },
-      select: { peso: true, talla: true, temperatura: true, presionSistolica: true, presionDiastolica: true },
+      select: { peso: true, talla: true, temperatura: true, presionSistolica: true, presionDiastolica: true, frecuenciaCardiaca: true, frecuenciaRespiratoria: true, saturacionOxigeno: true, glucosa: true },
     }),
   ])
 
@@ -410,7 +417,7 @@ export async function createPrescription(
     prisma.vitals.findFirst({
       where: { patientId },
       orderBy: { createdAt: 'desc' },
-      select: { peso: true, talla: true, temperatura: true, presionSistolica: true, presionDiastolica: true },
+      select: { peso: true, talla: true, temperatura: true, presionSistolica: true, presionDiastolica: true, frecuenciaCardiaca: true, frecuenciaRespiratoria: true, saturacionOxigeno: true, glucosa: true },
     }),
   ])
 

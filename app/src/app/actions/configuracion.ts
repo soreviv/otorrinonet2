@@ -24,6 +24,7 @@ export interface ClinicConfigData {
   doctorSpecialtyLicense: string
   doctorUniversity: string
   doctorUniversityLogoUrl: string
+  doctorSignatureImageUrl: string
 }
 
 export interface StaffUserData {
@@ -71,6 +72,7 @@ export async function getClinicConfig(): Promise<ClinicConfigData> {
     doctorSpecialtyLicense: cfg?.doctorSpecialtyLicense ?? '',
     doctorUniversity: cfg?.doctorUniversity ?? '',
     doctorUniversityLogoUrl: cfg?.doctorUniversityLogoUrl ?? '',
+    doctorSignatureImageUrl: cfg?.doctorSignatureImageUrl ?? '',
   }
 }
 
@@ -92,6 +94,7 @@ export async function saveClinicConfig(data: ClinicConfigData): Promise<void> {
 
   validateDataUrl(data.clinicLogoUrl, 'Logo del consultorio')
   validateDataUrl(data.doctorUniversityLogoUrl, 'Escudo de la universidad')
+  validateDataUrl(data.doctorSignatureImageUrl, 'Firma del médico')
 
   await prisma.clinicConfig.upsert({
     where: { id: 'singleton' },

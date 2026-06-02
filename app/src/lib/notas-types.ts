@@ -95,6 +95,16 @@ export interface Prescription {
   patientTemperature?: number
   /** Presión arterial, ej. "120/80 mmHg" */
   patientBloodPressure?: string
+  /** Frecuencia cardíaca (lpm) */
+  patientHeartRate?: number
+  /** Frecuencia respiratoria (rpm) */
+  patientRespiratoryRate?: number
+  /** Saturación de oxígeno (%) */
+  patientOxygenSaturation?: number
+  /** Glucosa (mg/dL) */
+  patientGlucose?: number
+  /** Firma precargada en configuración (data URL) */
+  doctorSignatureImageUrl?: string
 }
 
 export interface ConsentForm {
