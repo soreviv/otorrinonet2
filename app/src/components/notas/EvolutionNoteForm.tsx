@@ -58,6 +58,7 @@ export function EvolutionNoteForm({ patientName, onSave, onSaveAndSign, onCancel
 
   // GIIS-B015 fields
   const [giisOpen, setGiisOpen] = useState(false)
+  const [giisModificado, setGiisModificado] = useState(false)
   const [servicioSISCE, setServicioSISCE] = useState('')
   const [respTB, setRespTB] = useState('-1')
   const [primeraAnio, setPrimeraAnio] = useState('0')
@@ -81,10 +82,10 @@ export function EvolutionNoteForm({ patientName, onSave, onSaveAndSign, onCancel
       objective,
       assessment,
       plan,
-      servicioAtencion: servicioSISCE ? parseInt(servicioSISCE) : undefined,
-      sintomaticoRespTb: parseInt(respTB),
-      primeraVezAnio: parseInt(primeraAnio),
-      primeraVezUneme: parseInt(primeraUneme),
+      servicioAtencion: giisModificado ? (servicioSISCE ? parseInt(servicioSISCE) : undefined) : undefined,
+      sintomaticoRespTb: giisModificado ? parseInt(respTB) : undefined,
+      primeraVezAnio: giisModificado ? parseInt(primeraAnio) : undefined,
+      primeraVezUneme: giisModificado ? parseInt(primeraUneme) : undefined,
       diagnosticos,
       vitals: {
         presionSistolica: pSis ? parseInt(pSis) : undefined,
@@ -218,11 +219,11 @@ export function EvolutionNoteForm({ patientName, onSave, onSaveAndSign, onCancel
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <div>
                   <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Servicio SIS-CE</label>
-                  <input type="number" value={servicioSISCE} onChange={e => setServicioSISCE(e.target.value)} className={inputCls} placeholder="Ej. 1" />
+                  <input type="number" value={servicioSISCE} onChange={e => { setServicioSISCE(e.target.value); setGiisModificado(true) }} className={inputCls} placeholder="Ej. 1" />
                 </div>
                 <div>
                   <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Sintomático respiratorio TB</label>
-                  <select value={respTB} onChange={e => setRespTB(e.target.value)} className={inputCls}>
+                  <select value={respTB} onChange={e => { setRespTB(e.target.value); setGiisModificado(true) }} className={inputCls}>
                     <option value="-1">No aplica</option>
                     <option value="0">No</option>
                     <option value="1">Sí</option>
@@ -230,14 +231,14 @@ export function EvolutionNoteForm({ patientName, onSave, onSaveAndSign, onCancel
                 </div>
                 <div>
                   <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Primera vez en el año</label>
-                  <select value={primeraAnio} onChange={e => setPrimeraAnio(e.target.value)} className={inputCls}>
+                  <select value={primeraAnio} onChange={e => { setPrimeraAnio(e.target.value); setGiisModificado(true) }} className={inputCls}>
                     <option value="0">No</option>
                     <option value="1">Sí</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Primera vez UNEME</label>
-                  <select value={primeraUneme} onChange={e => setPrimeraUneme(e.target.value)} className={inputCls}>
+                  <select value={primeraUneme} onChange={e => { setPrimeraUneme(e.target.value); setGiisModificado(true) }} className={inputCls}>
                     <option value="-1">No aplica</option>
                     <option value="0">No</option>
                     <option value="1">Sí</option>

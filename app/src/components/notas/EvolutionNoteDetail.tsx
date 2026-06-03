@@ -321,35 +321,35 @@ export function EvolutionNoteDetail({ note, canEdit, onBack, onSave, onSign, onA
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div>
                     <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Sistólica</label>
-                    <input type="number" value={pSis} onChange={e => setPSis(e.target.value)} className={inputCls} placeholder="120" />
+                    <input type="number" value={pSis} onChange={e => setPSis(e.target.value)} className={inputCls} placeholder="120" min={50} max={250} />
                   </div>
                   <div>
                     <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Diastólica</label>
-                    <input type="number" value={pDia} onChange={e => setPDia(e.target.value)} className={inputCls} placeholder="80" />
+                    <input type="number" value={pDia} onChange={e => setPDia(e.target.value)} className={inputCls} placeholder="80" min={30} max={150} />
                   </div>
                   <div>
                     <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">FC (lpm)</label>
-                    <input type="number" value={fc} onChange={e => setFc(e.target.value)} className={inputCls} placeholder="72" />
+                    <input type="number" value={fc} onChange={e => setFc(e.target.value)} className={inputCls} placeholder="72" min={30} max={250} />
                   </div>
                   <div>
                     <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Temp (°C)</label>
-                    <input type="number" step="0.1" value={temp} onChange={e => setTemp(e.target.value)} className={inputCls} placeholder="36.5" />
+                    <input type="number" step="0.1" value={temp} onChange={e => setTemp(e.target.value)} className={inputCls} placeholder="36.5" min={34} max={42} />
                   </div>
                   <div>
                     <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">SpO₂ (%)</label>
-                    <input type="number" value={spo2} onChange={e => setSpo2(e.target.value)} className={inputCls} placeholder="98" />
+                    <input type="number" value={spo2} onChange={e => setSpo2(e.target.value)} className={inputCls} placeholder="98" min={70} max={100} />
                   </div>
                   <div>
                     <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Peso (kg)</label>
-                    <input type="number" step="0.1" value={peso} onChange={e => setPeso(e.target.value)} className={inputCls} placeholder="70" />
+                    <input type="number" step="0.1" value={peso} onChange={e => setPeso(e.target.value)} className={inputCls} placeholder="70" min={1} max={300} />
                   </div>
                   <div>
                     <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Talla (cm)</label>
-                    <input type="number" value={talla} onChange={e => setTalla(e.target.value)} className={inputCls} placeholder="170" />
+                    <input type="number" value={talla} onChange={e => setTalla(e.target.value)} className={inputCls} placeholder="170" min={30} max={250} />
                   </div>
                   <div>
                     <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Cintura (cm)</label>
-                    <input type="number" value={cintura} onChange={e => setCintura(e.target.value)} className={inputCls} placeholder="90" />
+                    <input type="number" value={cintura} onChange={e => setCintura(e.target.value)} className={inputCls} placeholder="90" min={20} max={300} />
                   </div>
                 </div>
 

@@ -345,20 +345,20 @@ export async function createEvolutionNote(
   }
 
   // Signos vitales
-  const v = data.vitals
-  if (v && Object.values(v).some(x => x != null)) {
+  const vitalsData = data.vitals
+  if (vitalsData && Object.values(vitalsData).some(x => x != null)) {
     await prisma.vitals.create({
       data: {
         patientId,
         registradoPorId: session.userId,
-        presionSistolica: v.presionSistolica ?? null,
-        presionDiastolica: v.presionDiastolica ?? null,
-        frecuenciaCardiaca: v.frecuenciaCardiaca ?? null,
-        temperatura: v.temperatura ?? null,
-        saturacionOxigeno: v.saturacionOxigeno ?? null,
-        peso: v.peso ?? null,
-        talla: v.talla ?? null,
-        circunferenciaCintura: v.circunferenciaCintura ?? null,
+        presionSistolica: vitalsData.presionSistolica ?? null,
+        presionDiastolica: vitalsData.presionDiastolica ?? null,
+        frecuenciaCardiaca: vitalsData.frecuenciaCardiaca ?? null,
+        temperatura: vitalsData.temperatura ?? null,
+        saturacionOxigeno: vitalsData.saturacionOxigeno ?? null,
+        peso: vitalsData.peso ?? null,
+        talla: vitalsData.talla ?? null,
+        circunferenciaCintura: vitalsData.circunferenciaCintura ?? null,
         medicalNoteId: note.id,
       },
     })
@@ -370,8 +370,8 @@ export async function createEvolutionNote(
     where: { id: note.id },
     include: { vitals: { orderBy: { createdAt: 'desc' }, take: 1 } },
   })
-  const v = noteWithVitals?.vitals?.[0] || null
-  return mapEvolution(note, pName, session.name, [], [], v)
+  const finalV = noteWithVitals?.vitals?.[0] || null
+  return mapEvolution(note, pName, session.name, [], [], finalV)
 }
 
 // ─── Edición pre-firma ────────────────────────────────────────────────────────
@@ -434,65 +434,48 @@ export async function updateEvolutionNote(
   ])
 
   // Actualizar o crear signos vitales vinculados
+  let finalV: EvolutionNote['vitals'] = updated.vitals?.[0] || null
   const vitalsData = data.vitals
-  if (vitalsData && Object.values(vitalsData).some(x => x != null)) {
-    // Si ya existe un registro de vitals para esta nota, actualizarlo, si no, crear uno.
-    const existingVitals = await prisma.vitals.findFirst({
-      where: { medicalNoteId: noteId },
-    })
+  if (vitalsData) {
+    const existingVitals = updated.vitals?.[0]
+    const hasValues = Object.values(vitalsData).some(x => x != null)
+
+    const vFields = {
+      presionSistolica: vitalsData.presionSistolica ?? null,
+      presionDiastolica: vitalsData.presionDiastolica ?? null,
+      frecuenciaCardiaca: vitalsData.frecuenciaCardiaca ?? null,
+      temperatura: vitalsData.temperatura ?? null,
+      saturacionOxigeno: vitalsData.saturacionOxigeno ?? null,
+      peso: vitalsData.peso ?? null,
+      talla: vitalsData.talla ?? null,
+      circunferenciaCintura: vitalsData.circunferenciaCintura ?? null,
+    }
 
     if (existingVitals) {
-      await prisma.vitals.update({
-        where: { id: existingVitals.id },
-        data: {
-          presionSistolica: vitalsData.presionSistolica ?? null,
-          presionDiastolica: vitalsData.presionDiastolica ?? null,
-          frecuenciaCardiaca: vitalsData.frecuenciaCardiaca ?? null,
-          temperatura: vitalsData.temperatura ?? null,
-          saturacionOxigeno: vitalsData.saturacionOxigeno ?? null,
-          peso: vitalsData.peso ?? null,
-          talla: vitalsData.talla ?? null,
-          circunferenciaCintura: vitalsData.circunferenciaCintura ?? null,
-        },
-      })
-    } else {
-      await prisma.vitals.create({
+      if (hasValues) {
+        finalV = await prisma.vitals.update({
+          where: { id: existingVitals.id },
+          data: vFields,
+        })
+      } else {
+        await prisma.vitals.delete({ where: { id: existingVitals.id } })
+        finalV = null
+      }
+    } else if (hasValues) {
+      finalV = await prisma.vitals.create({
         data: {
           patientId: existing.patientId,
           medicalNoteId: noteId,
           registradoPorId: session.userId,
-          presionSistolica: vitalsData.presionSistolica ?? null,
-          presionDiastolica: vitalsData.presionDiastolica ?? null,
-          frecuenciaCardiaca: vitalsData.frecuenciaCardiaca ?? null,
-          temperatura: vitalsData.temperatura ?? null,
-          saturacionOxigeno: vitalsData.saturacionOxigeno ?? null,
-          peso: vitalsData.peso ?? null,
-          talla: vitalsData.talla ?? null,
-          circunferenciaCintura: vitalsData.circunferenciaCintura ?? null,
+          ...vFields,
         },
       })
     }
   }
 
   void logAction({ action: 'modificacion', resource: 'medical_note', resourceId: noteId, userId: session.userId })
-
-  // Volver a cargar la nota para incluir vitals actualizados
-  const finalNote = await prisma.medicalNote.findUnique({
-    where: { id: noteId },
-    include: {
-      medico: { select: { name: true } },
-      vitals: {
-        orderBy: { createdAt: 'desc' },
-        take: 1,
-      },
-    },
-  })
-
-  if (!finalNote) throw new Error('Nota no encontrada tras actualización.')
-
   const pName = patient ? patientFullName(patient) : ''
-  const finalV = finalNote.vitals?.[0] || null
-  return mapEvolution(finalNote, pName, finalNote.medico?.name ?? session.name, [], [], finalV)
+  return mapEvolution(updated, pName, updated.medico?.name ?? session.name, [], [], finalV)
 }
 
 export async function createPrescription(
