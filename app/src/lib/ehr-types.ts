@@ -34,6 +34,19 @@ export interface GeneralData {
   address: string
 }
 
+export interface Nom024Data {
+  paisNacimiento: number | null
+  entidadNacimiento: string | null
+  sexoCurp: number | null
+  sexoBiologico: number | null
+  genero: number | null
+  derechohabiencia: string | null
+  seConsideraIndigena: number | null
+  seAutodenominaAfromexicano: number | null
+  migrante: number | null
+  paisProcedencia: number | null
+}
+
 export interface Patient {
   id: string
   expedienteNumber: string
@@ -42,6 +55,7 @@ export interface Patient {
   generalData: GeneralData
   familyHistory: FamilyHistory
   personalHistory: PersonalHistory
+  nom024Data: Nom024Data
 }
 
 export interface PatientListProps {

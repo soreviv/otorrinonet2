@@ -10,6 +10,7 @@ import {
   X,
   ArrowLeft,
   Save,
+  Shield,
 } from 'lucide-react'
 
 const inputCls =
@@ -138,6 +139,18 @@ function TagInput({
   )
 }
 
+const DERECHOHABIENCIA_OPTS = [
+  { value: '1', label: 'Ninguna' },
+  { value: '2', label: 'IMSS' },
+  { value: '3', label: 'ISSSTE' },
+  { value: '4', label: 'PEMEX' },
+  { value: '5', label: 'SEDENA' },
+  { value: '6', label: 'SEMAR' },
+  { value: '8', label: 'Otra' },
+  { value: '10', label: 'IMSS Bienestar' },
+  { value: '11', label: 'ISSFAM' },
+]
+
 type FormState = {
   nombre: string
   apellidoPaterno: string
@@ -152,12 +165,23 @@ type FormState = {
   pathological: string
   nonPathological: string
   allergies: string[]
+  // NOM-024 Track 1
+  entidadNacimiento: string
+  sexoCurp: string
+  sexoBiologico: string
+  genero: string
+  derechohabiencia: string[]
+  seConsideraIndigena: string
+  seAutodenominaAfromexicano: string
+  migrante: string
 }
 
 const EMPTY_FORM: FormState = {
   nombre: '', apellidoPaterno: '', apellidoMaterno: '', birthDate: '', sex: 'femenino', curp: '', phone: '', email: '', address: '',
   familyNotes: '',
   pathological: '', nonPathological: '', allergies: [],
+  entidadNacimiento: '', sexoCurp: '', sexoBiologico: '', genero: '', derechohabiencia: [],
+  seConsideraIndigena: '', seAutodenominaAfromexicano: '', migrante: '',
 }
 
 export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: PatientFormProps) {
@@ -167,6 +191,7 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
   const [form, setForm] = useState<FormState>(() => {
     if (!patient) return EMPTY_FORM
     const p = patient
+    const n = p.nom024Data
     return {
       nombre: p.generalData.nombre,
       apellidoPaterno: p.generalData.apellidoPaterno,
@@ -181,11 +206,28 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
       pathological: p.personalHistory.pathological,
       nonPathological: p.personalHistory.nonPathological,
       allergies: [...p.personalHistory.allergies],
+      entidadNacimiento: n?.entidadNacimiento ?? '',
+      sexoCurp: n?.sexoCurp != null ? String(n.sexoCurp) : '',
+      sexoBiologico: n?.sexoBiologico != null ? String(n.sexoBiologico) : '',
+      genero: n?.genero != null ? String(n.genero) : '',
+      derechohabiencia: n?.derechohabiencia ? n.derechohabiencia.split('&') : [],
+      seConsideraIndigena: n?.seConsideraIndigena != null ? String(n.seConsideraIndigena) : '',
+      seAutodenominaAfromexicano: n?.seAutodenominaAfromexicano != null ? String(n.seAutodenominaAfromexicano) : '',
+      migrante: n?.migrante != null ? String(n.migrante) : '',
     }
   })
 
   function set(field: keyof FormState, value: string | string[]) {
     setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  function toggleDerechohabiencia(val: string) {
+    setForm((prev) => {
+      const next = prev.derechohabiencia.includes(val)
+        ? prev.derechohabiencia.filter((v) => v !== val)
+        : [...prev.derechohabiencia, val]
+      return { ...prev, derechohabiencia: next }
+    })
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -212,6 +254,18 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
         nonPathological: form.nonPathological,
         allergies: form.allergies,
         currentMedications: patient?.personalHistory.currentMedications ?? [],
+      },
+      nom024Data: {
+        paisNacimiento: 142,
+        entidadNacimiento: form.entidadNacimiento || null,
+        sexoCurp: form.sexoCurp !== '' ? Number(form.sexoCurp) : null,
+        sexoBiologico: form.sexoBiologico !== '' ? Number(form.sexoBiologico) : null,
+        genero: form.genero !== '' ? Number(form.genero) : null,
+        derechohabiencia: form.derechohabiencia.length > 0 ? form.derechohabiencia.join('&') : null,
+        seConsideraIndigena: form.seConsideraIndigena !== '' ? Number(form.seConsideraIndigena) : null,
+        seAutodenominaAfromexicano: form.seAutodenominaAfromexicano !== '' ? Number(form.seAutodenominaAfromexicano) : null,
+        migrante: form.migrante !== '' ? Number(form.migrante) : null,
+        paisProcedencia: null,
       },
     })
   }
@@ -301,6 +355,97 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
             placeholder="Ej. Penicilina, Polen"
             color="rose"
           />
+        </FormSection>
+
+        <FormSection
+          icon={<Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" strokeWidth={1.5} />}
+          title="Datos NOM-024 (GIIS-B015)"
+          accentColor="bg-emerald-50 dark:bg-emerald-950/30"
+          defaultOpen={false}
+        >
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field id="entidadNacimiento" label="Entidad federativa de nacimiento">
+              <input
+                id="entidadNacimiento"
+                type="text"
+                value={form.entidadNacimiento}
+                onChange={(e) => set('entidadNacimiento', e.target.value.toUpperCase())}
+                placeholder="Ej. 09 (CDMX), 99=se ignora"
+                maxLength={2}
+                className={inputCls + ' font-mono uppercase'}
+              />
+            </Field>
+            <Field id="sexoCurp" label="Sexo CURP (RENAPO)">
+              <select id="sexoCurp" value={form.sexoCurp} onChange={(e) => set('sexoCurp', e.target.value)} className={inputCls}>
+                <option value="">— No especificado —</option>
+                <option value="1">1 — Hombre</option>
+                <option value="2">2 — Mujer</option>
+                <option value="3">3 — No binario</option>
+              </select>
+            </Field>
+            <Field id="sexoBiologico" label="Sexo biológico">
+              <select id="sexoBiologico" value={form.sexoBiologico} onChange={(e) => set('sexoBiologico', e.target.value)} className={inputCls}>
+                <option value="">— No especificado —</option>
+                <option value="1">1 — Hombre</option>
+                <option value="2">2 — Mujer</option>
+                <option value="3">3 — Intersexual</option>
+              </select>
+            </Field>
+            <Field id="genero" label="Género (identidad)">
+              <select id="genero" value={form.genero} onChange={(e) => set('genero', e.target.value)} className={inputCls}>
+                <option value="">— No especificado —</option>
+                <option value="1">1 — Masculino</option>
+                <option value="2">2 — Femenino</option>
+                <option value="3">3 — Transgénero</option>
+                <option value="4">4 — Transexual</option>
+                <option value="5">5 — Travesti</option>
+                <option value="6">6 — Intersexual</option>
+                <option value="88">88 — Otro</option>
+              </select>
+            </Field>
+            <Field id="seConsideraIndigena" label="Se considera indígena">
+              <select id="seConsideraIndigena" value={form.seConsideraIndigena} onChange={(e) => set('seConsideraIndigena', e.target.value)} className={inputCls}>
+                <option value="-1">— Desconocido —</option>
+                <option value="0">0 — No</option>
+                <option value="1">1 — Sí</option>
+                <option value="2">2 — No responde</option>
+                <option value="3">3 — No sabe</option>
+              </select>
+            </Field>
+            <Field id="seAutodenominaAfromexicano" label="Se autodenomina afromexicano">
+              <select id="seAutodenominaAfromexicano" value={form.seAutodenominaAfromexicano} onChange={(e) => set('seAutodenominaAfromexicano', e.target.value)} className={inputCls}>
+                <option value="-1">— Desconocido —</option>
+                <option value="0">0 — No</option>
+                <option value="1">1 — Sí</option>
+                <option value="2">2 — No responde</option>
+                <option value="3">3 — No sabe</option>
+              </select>
+            </Field>
+            <Field id="migrante" label="Condición de migrante">
+              <select id="migrante" value={form.migrante} onChange={(e) => set('migrante', e.target.value)} className={inputCls}>
+                <option value="-1">— Desconocido —</option>
+                <option value="0">0 — No</option>
+                <option value="1">1 — Migrante nacional</option>
+                <option value="2">2 — Migrante internacional</option>
+                <option value="3">3 — Retornado</option>
+              </select>
+            </Field>
+          </div>
+          <Field label="Derechohabiencia">
+            <div className="flex flex-wrap gap-2 mt-1">
+              {DERECHOHABIENCIA_OPTS.map((opt) => (
+                <label key={opt.value} className="flex items-center gap-1.5 cursor-pointer text-sm text-slate-700 dark:text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={form.derechohabiencia.includes(opt.value)}
+                    onChange={() => toggleDerechohabiencia(opt.value)}
+                    className="accent-emerald-600"
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          </Field>
         </FormSection>
 
         <div className="flex items-center justify-end gap-3 pt-2 pb-6">

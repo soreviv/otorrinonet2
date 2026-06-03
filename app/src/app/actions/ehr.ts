@@ -5,7 +5,7 @@ import { verifySession, requireMedico } from '@/lib/dal'
 import { encrypt, decrypt } from '@/lib/crypto'
 import { logAction } from '@/lib/audit'
 import type {
-  Patient, PatientSex, FamilyHistory, PersonalHistory,
+  Patient, PatientSex, FamilyHistory, PersonalHistory, Nom024Data,
 } from '@/lib/ehr-types'
 
 const EMPTY_FAMILY: FamilyHistory = { notes: '', relevantConditions: [] }
@@ -66,6 +66,16 @@ function mapToFrontend(p: {
   antecedentesPersonalesNoPatologicos: string | null
   createdAt: Date
   updatedAt: Date
+  paisNacimiento: number | null
+  entidadNacimiento: string | null
+  sexoCurp: number | null
+  sexoBiologico: number | null
+  genero: number | null
+  derechohabiencia: string | null
+  seConsideraIndigena: number | null
+  seAutodenominaAfromexicano: number | null
+  migrante: number | null
+  paisProcedencia: number | null
 }): Patient {
   const decrypted = decryptPatient({
     curp: p.curp,
@@ -105,6 +115,18 @@ function mapToFrontend(p: {
       allergies: p.alergias,
       currentMedications: [],
     } satisfies PersonalHistory,
+    nom024Data: {
+      paisNacimiento: p.paisNacimiento,
+      entidadNacimiento: p.entidadNacimiento,
+      sexoCurp: p.sexoCurp,
+      sexoBiologico: p.sexoBiologico,
+      genero: p.genero,
+      derechohabiencia: p.derechohabiencia,
+      seConsideraIndigena: p.seConsideraIndigena,
+      seAutodenominaAfromexicano: p.seAutodenominaAfromexicano,
+      migrante: p.migrante,
+      paisProcedencia: p.paisProcedencia,
+    } satisfies Nom024Data,
   }
 }
 
@@ -175,6 +197,8 @@ export async function savePatient(
     telefonoEmergencia: null,
   })
 
+  const nom = data.nom024Data ?? {}
+
   const fields = {
     nombre,
     apellidoPaterno,
@@ -189,6 +213,16 @@ export async function savePatient(
     antecedentesHeredoFamiliares: data.familyHistory.notes || null,
     antecedentesPersonalesPatologicos: data.personalHistory.pathological || null,
     antecedentesPersonalesNoPatologicos: data.personalHistory.nonPathological || null,
+    paisNacimiento: ('paisNacimiento' in nom ? nom.paisNacimiento : undefined) ?? null,
+    entidadNacimiento: ('entidadNacimiento' in nom ? nom.entidadNacimiento : undefined) ?? null,
+    sexoCurp: ('sexoCurp' in nom ? nom.sexoCurp : undefined) ?? null,
+    sexoBiologico: ('sexoBiologico' in nom ? nom.sexoBiologico : undefined) ?? null,
+    genero: ('genero' in nom ? nom.genero : undefined) ?? null,
+    derechohabiencia: ('derechohabiencia' in nom ? nom.derechohabiencia : undefined) ?? null,
+    seConsideraIndigena: ('seConsideraIndigena' in nom ? nom.seConsideraIndigena : undefined) ?? null,
+    seAutodenominaAfromexicano: ('seAutodenominaAfromexicano' in nom ? nom.seAutodenominaAfromexicano : undefined) ?? null,
+    migrante: ('migrante' in nom ? nom.migrante : undefined) ?? null,
+    paisProcedencia: ('paisProcedencia' in nom ? nom.paisProcedencia : undefined) ?? null,
   }
 
   if (id) {

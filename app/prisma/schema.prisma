@@ -61,6 +61,19 @@ model Patient {
   apellidoPaterno  String
   apellidoMaterno  String?
   curp             String?
+
+  // NOM-024-SSA3-2012 — Track 1: datos mínimos de identificación
+  paisNacimiento              Int?     // catálogo DGIS; México=142
+  entidadNacimiento           String?  // 2 chars; 99=SE IGNORA, 00=NO ESP, 88=NO APLICA
+  sexoCurp                    Int?     // 1=Hombre, 2=Mujer, 3=No binario (RENAPO)
+  sexoBiologico               Int?     // 1=Hombre, 2=Mujer, 3=Intersexual
+  genero                      Int?     // 0=No esp, 1=Masc, 2=Fem, 3=Transgénero, 4=Transexual, 5=Travesti, 6=Intersexual, 88=Otro
+  derechohabiencia            String?  // multi-valor separado por &; ej. "2&3"
+  seConsideraIndigena         Int?     // 0=No, 1=Sí, 2=No responde, 3=No sabe, -1=Desconocido
+  seAutodenominaAfromexicano  Int?     // 0=No, 1=Sí, 2=No responde, 3=No sabe, -1=Desconocido
+  migrante                    Int?     // 0=No, 1=Nacional, 2=Internacional, 3=Retornado, -1=Desconocido
+  paisProcedencia             Int?     // catálogo DGIS; solo si migrante=2
+
   fechaNacimiento  DateTime
   sexo             String
   grupoSanguineo   String?

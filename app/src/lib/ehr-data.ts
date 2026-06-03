@@ -31,6 +31,7 @@ export const SAMPLE_PATIENTS: Patient[] = [
       ],
       nonPathological: 'Tabaquismo negado. Alcoholismo social ocasional. Sedentaria.',
     },
+    nom024Data: { paisNacimiento: 142, entidadNacimiento: null, sexoCurp: null, sexoBiologico: null, genero: null, derechohabiencia: null, seConsideraIndigena: null, seAutodenominaAfromexicano: null, migrante: null, paisProcedencia: null },
   },
   {
     id: 'exp-002',
@@ -61,6 +62,7 @@ export const SAMPLE_PATIENTS: Patient[] = [
       ],
       nonPathological: 'Tabaquismo 10 años, suspendido hace 5 años. Ingesta de alcohol moderada los fines de semana.',
     },
+    nom024Data: { paisNacimiento: 142, entidadNacimiento: null, sexoCurp: null, sexoBiologico: null, genero: null, derechohabiencia: null, seConsideraIndigena: null, seAutodenominaAfromexicano: null, migrante: null, paisProcedencia: null },
   },
   {
     id: 'exp-003',
@@ -89,6 +91,7 @@ export const SAMPLE_PATIENTS: Patient[] = [
       currentMedications: [],
       nonPathological: 'Niega tabaquismo y alcoholismo. Activa físicamente.',
     },
+    nom024Data: { paisNacimiento: 142, entidadNacimiento: null, sexoCurp: null, sexoBiologico: null, genero: null, derechohabiencia: null, seConsideraIndigena: null, seAutodenominaAfromexicano: null, migrante: null, paisProcedencia: null },
   },
   {
     id: 'exp-004',
@@ -119,6 +122,7 @@ export const SAMPLE_PATIENTS: Patient[] = [
       ],
       nonPathological: 'Exposición laboral a ruido en planta industrial por más de 15 años. Usa protección auditiva desde hace 3 años.',
     },
+    nom024Data: { paisNacimiento: 142, entidadNacimiento: null, sexoCurp: null, sexoBiologico: null, genero: null, derechohabiencia: null, seConsideraIndigena: null, seAutodenominaAfromexicano: null, migrante: null, paisProcedencia: null },
   },
   {
     id: 'exp-005',
@@ -147,5 +151,6 @@ export const SAMPLE_PATIENTS: Patient[] = [
       currentMedications: [],
       nonPathological: 'No fuma. No consume alcohol. Practica yoga 3 veces por semana.',
     },
+    nom024Data: { paisNacimiento: 142, entidadNacimiento: null, sexoCurp: null, sexoBiologico: null, genero: null, derechohabiencia: null, seConsideraIndigena: null, seAutodenominaAfromexicano: null, migrante: null, paisProcedencia: null },
   },
 ]

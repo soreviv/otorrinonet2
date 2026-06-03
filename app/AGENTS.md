@@ -82,3 +82,22 @@ Si modificas código en `src/app/actions/`, `src/lib/mailer.ts`, `src/hooks/useC
 - No instalar dependencias sin confirmar con el usuario.
 - No correr migraciones de BD — solo `prisma db push`.
 - No modificar archivos de test sin correr `npm test` al final.
+
+## Certificación NOM-024-SSA3-2012 (proyecto activo)
+
+El sistema se está certificando como SIRES ante la DGIS (Secretaría de Salud). 4 tracks en curso:
+
+- **Track 1** — Datos mínimos del paciente: CURP, sexo CURP/biológico/género, derechohabiencia, entidad de nacimiento, indígena, afromexicano, migrante (nuevos campos en modelo `Patient`).
+- **Track 2** — Catálogos fundamentales: CIE-10 en diagnósticos de notas, CLUES del consultorio, catálogos DGIS.
+- **Track 3** — GIIS-B015 Consulta Externa: somatometría + signos vitales en nota clínica, generador archivo de intercambio SIS-CEX en `src/app/api/dgis/exportar-cex/route.ts`, UI en `src/app/staff/dgis/`.
+- **Track 4** — GIIS-A004 SGSI: documentación de 11 dominios ISO 27799, Declaración de Aplicabilidad. Requiere 6 meses de madurez.
+
+**Regla crítica GIIS-B015**: los nombres en el archivo de intercambio deben ser MAYÚSCULAS sin acentos (A-Z + Ñ). Máximo 15% de registros con CURP genérica (`XXXX999999XXXXXX99`). Máximo 5% de diagnósticos con código CIE-10 `R69X`.
+
+**Archivos protegidos nuevos** (no modificar sin coordinación explícita):
+
+| Archivo | Razón |
+|---|---|
+| `src/app/api/dgis/exportar-cex/route.ts` | Generador GIIS-B015 — lógica crítica de interoperabilidad SSA |
+| `src/lib/catalogos/` | Catálogos CIE-10 y DGIS — verificar versión oficial antes de actualizar |
+| `src/lib/schemas/dgis.ts` | Validaciones exactas de la GIIS-B015 — errores invalidan la certificación |

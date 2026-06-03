@@ -93,3 +93,22 @@ npm run db:studio     # Prisma Studio
 
 - **FIX-09**: botón flotante de WhatsApp y enlace `tel:` en el header — bloqueado hasta que el Dr. Viveros confirme su número de celular. Rellenar `phone` y `whatsapp` en `src/lib/sitio-publico-data.ts` y añadir el botón flotante en `src/app/(public)/layout.tsx`.
 - **Tienda Fase 3**: CFDI (D01 para paquetes de consulta, G03 para físicos) — sin fecha, requiere definir proveedor de facturación.
+
+## Certificación NOM-024-SSA3-2012 (en curso)
+
+El sistema está en proceso de certificarse como SIRES ante la DGIS (Secretaría de Salud). Ver plan completo en la memoria del proyecto.
+
+**4 tracks de implementación:**
+
+1. **Datos mínimos del paciente** — agregar CURP, sexo CURP, sexo biológico, género, derechohabiencia, entidad de nacimiento, indicadores indígena/afromexicano/migrante al modelo `Patient`.
+2. **Catálogos fundamentales** — integrar CIE-10 en diagnósticos de notas clínicas, obtener CLUES del consultorio, catálogos de entidad federativa, país, derechohabiencia, tipo de personal.
+3. **GIIS-B015 Consulta Externa** — agregar campos de somatometría y signos vitales a la nota clínica; implementar generador del archivo de intercambio mensual SIS-CEX en `/api/dgis/exportar-cex` y UI en `/staff/dgis`.
+4. **GIIS-A004 SGSI** — documentar los 11 dominios de seguridad (ISO 27799), completar la Declaración de Aplicabilidad (DDA), redactar políticas. Requiere 6 meses de madurez antes de la verificación.
+
+**Archivos nuevos previstos:**
+- `src/lib/catalogos/` — catálogos CIE-10, entidad federativa, país, derechohabiencia
+- `src/app/api/dgis/exportar-cex/route.ts` — generador GIIS-B015
+- `src/app/staff/dgis/` — UI de exportación y reporte mensual
+- `src/lib/schemas/dgis.ts` — schemas Zod para validación GIIS-B015
+
+**Contacto DGIS:** angel.serrano@salud.gob.mx / blanca.pinette@salud.gob.mx · +52 55 6392 2300 ext. 52584
