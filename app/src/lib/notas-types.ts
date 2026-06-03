@@ -28,6 +28,10 @@ export interface EvolutionNote {
   findings: string
   updatedDiagnosis: string
   plan: string
+  servicioAtencion: number | null
+  sintomaticoRespTb: number | null
+  primeraVezAnio: number | null
+  primeraVezUneme: number | null
   diagnosticos: NoteDiagnostico[]
   authorName: string
   authorId: string | null
@@ -36,6 +40,16 @@ export interface EvolutionNote {
   firmaHash: string | null
   firmaUserId: string | null
   addendums: NoteAddendum[]
+  vitals?: {
+    presionSistolica: number | null
+    presionDiastolica: number | null
+    frecuenciaCardiaca: number | null
+    temperatura: number | null
+    saturacionOxigeno: number | null
+    peso: number | null
+    talla: number | null
+    circunferenciaCintura: number | null
+  } | null
   createdAt: string
 }
 

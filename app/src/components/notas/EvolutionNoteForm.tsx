@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, Save, FileSignature } from 'lucide-react'
+import { ArrowLeft, Save, FileSignature, ChevronDown, ChevronUp } from 'lucide-react'
 import { Cie10Search, type DiagnosticoSeleccionado } from '@/components/ehr/Cie10Search'
 
 const textareaCls =
@@ -15,6 +15,10 @@ export interface EvolutionNoteData {
   objective: string
   assessment: string
   plan: string
+  servicioAtencion?: number
+  sintomaticoRespTb?: number
+  primeraVezAnio?: number
+  primeraVezUneme?: number
   diagnosticos: DiagnosticoSeleccionado[]
   vitals?: {
     presionSistolica?: number
@@ -24,6 +28,7 @@ export interface EvolutionNoteData {
     saturacionOxigeno?: number
     peso?: number
     talla?: number
+    circunferenciaCintura?: number
   }
 }
 
@@ -51,6 +56,13 @@ export function EvolutionNoteForm({ patientName, onSave, onSaveAndSign, onCancel
   const [saving, setSaving] = useState(false)
   const [signing, setSigning] = useState(false)
 
+  // GIIS-B015 fields
+  const [giisOpen, setGiisOpen] = useState(false)
+  const [servicioSISCE, setServicioSISCE] = useState('')
+  const [respTB, setRespTB] = useState('-1')
+  const [primeraAnio, setPrimeraAnio] = useState('0')
+  const [primeraUneme, setPrimeraUneme] = useState('-1')
+
   // Vitals (all optional)
   const [pSis, setPSis] = useState('')
   const [pDia, setPDia] = useState('')
@@ -59,6 +71,7 @@ export function EvolutionNoteForm({ patientName, onSave, onSaveAndSign, onCancel
   const [spo2, setSpo2] = useState('')
   const [peso, setPeso] = useState('')
   const [talla, setTalla] = useState('')
+  const [cintura, setCintura] = useState('')
 
   const canSave = subjective.trim().length > 0
 
@@ -68,6 +81,10 @@ export function EvolutionNoteForm({ patientName, onSave, onSaveAndSign, onCancel
       objective,
       assessment,
       plan,
+      servicioAtencion: servicioSISCE ? parseInt(servicioSISCE) : undefined,
+      sintomaticoRespTb: parseInt(respTB),
+      primeraVezAnio: parseInt(primeraAnio),
+      primeraVezUneme: parseInt(primeraUneme),
       diagnosticos,
       vitals: {
         presionSistolica: pSis ? parseInt(pSis) : undefined,
@@ -77,6 +94,7 @@ export function EvolutionNoteForm({ patientName, onSave, onSaveAndSign, onCancel
         saturacionOxigeno: spo2 ? parseInt(spo2) : undefined,
         peso: peso ? parseFloat(peso) : undefined,
         talla: talla ? parseFloat(talla) : undefined,
+        circunferenciaCintura: cintura ? parseInt(cintura) : undefined,
       },
     }
   }
@@ -149,39 +167,85 @@ export function EvolutionNoteForm({ patientName, onSave, onSaveAndSign, onCancel
           <Cie10Search value={diagnosticos} onChange={setDiagnosticos} maxDiagnosticos={5} />
         </div>
 
-        {/* Signos vitales */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-          <Label>Signos vitales (opcional)</Label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
-            <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">T/A Sistólica</label>
-              <input type="number" value={pSis} onChange={e => setPSis(e.target.value)} className={inputCls} placeholder="120" min={50} max={250} />
+        {/* Signos vitales (GIIS-B015) */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setGiisOpen(!giisOpen)}
+            className="w-full flex items-center justify-between p-5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          >
+            <Label>Signos vitales (GIIS-B015)</Label>
+            {giisOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          </button>
+
+          {giisOpen && (
+            <div className="px-5 pb-5 space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">T/A Sistólica</label>
+                  <input type="number" value={pSis} onChange={e => setPSis(e.target.value)} className={inputCls} placeholder="120" min={50} max={250} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">T/A Diastólica</label>
+                  <input type="number" value={pDia} onChange={e => setPDia(e.target.value)} className={inputCls} placeholder="80" min={30} max={150} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Frec. Cardíaca (lpm)</label>
+                  <input type="number" value={fc} onChange={e => setFc(e.target.value)} className={inputCls} placeholder="72" min={30} max={250} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Temperatura (°C)</label>
+                  <input type="number" step="0.1" value={temp} onChange={e => setTemp(e.target.value)} className={inputCls} placeholder="36.5" min={34} max={42} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">SpO₂ (%)</label>
+                  <input type="number" value={spo2} onChange={e => setSpo2(e.target.value)} className={inputCls} placeholder="98" min={70} max={100} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Peso (kg)</label>
+                  <input type="number" step="0.1" value={peso} onChange={e => setPeso(e.target.value)} className={inputCls} placeholder="70" min={1} max={300} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Talla (cm)</label>
+                  <input type="number" value={talla} onChange={e => setTalla(e.target.value)} className={inputCls} placeholder="170" min={30} max={250} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Cintura (cm)</label>
+                  <input type="number" value={cintura} onChange={e => setCintura(e.target.value)} className={inputCls} placeholder="90" min={20} max={300} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Servicio SIS-CE</label>
+                  <input type="number" value={servicioSISCE} onChange={e => setServicioSISCE(e.target.value)} className={inputCls} placeholder="Ej. 1" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Sintomático respiratorio TB</label>
+                  <select value={respTB} onChange={e => setRespTB(e.target.value)} className={inputCls}>
+                    <option value="-1">No aplica</option>
+                    <option value="0">No</option>
+                    <option value="1">Sí</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Primera vez en el año</label>
+                  <select value={primeraAnio} onChange={e => setPrimeraAnio(e.target.value)} className={inputCls}>
+                    <option value="0">No</option>
+                    <option value="1">Sí</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Primera vez UNEME</label>
+                  <select value={primeraUneme} onChange={e => setPrimeraUneme(e.target.value)} className={inputCls}>
+                    <option value="-1">No aplica</option>
+                    <option value="0">No</option>
+                    <option value="1">Sí</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">T/A Diastólica</label>
-              <input type="number" value={pDia} onChange={e => setPDia(e.target.value)} className={inputCls} placeholder="80" min={30} max={150} />
-            </div>
-            <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Frec. Cardíaca (lpm)</label>
-              <input type="number" value={fc} onChange={e => setFc(e.target.value)} className={inputCls} placeholder="72" min={30} max={250} />
-            </div>
-            <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Temperatura (°C)</label>
-              <input type="number" step="0.1" value={temp} onChange={e => setTemp(e.target.value)} className={inputCls} placeholder="36.5" min={34} max={42} />
-            </div>
-            <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">SpO₂ (%)</label>
-              <input type="number" value={spo2} onChange={e => setSpo2(e.target.value)} className={inputCls} placeholder="98" min={70} max={100} />
-            </div>
-            <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Peso (kg)</label>
-              <input type="number" step="0.1" value={peso} onChange={e => setPeso(e.target.value)} className={inputCls} placeholder="70" min={1} max={300} />
-            </div>
-            <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Talla (cm)</label>
-              <input type="number" value={talla} onChange={e => setTalla(e.target.value)} className={inputCls} placeholder="170" min={30} max={250} />
-            </div>
-          </div>
+          )}
         </div>
 
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">

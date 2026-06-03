@@ -17,14 +17,37 @@ interface Props {
     objetivo: string
     analisis: string
     plan: string
+    servicioAtencion?: number
+    sintomaticoRespTb?: number
+    primeraVezAnio?: number
+    primeraVezUneme?: number
+    vitals?: {
+      presionSistolica?: number
+      presionDiastolica?: number
+      frecuenciaCardiaca?: number
+      temperatura?: number
+      saturacionOxigeno?: number
+      peso?: number
+      talla?: number
+      circunferenciaCintura?: number
+    }
   }) => Promise<EvolutionNote>
   onSign: () => Promise<EvolutionNote>
   onAddAddendum: (contenido: string) => Promise<void>
   onPrint?: () => void
 }
 
+const SELECT_LABELS: Record<string, Record<number, string>> = {
+  respTB: { [-1]: 'No aplica', [0]: 'No', [1]: 'Sí' },
+  primeraAnio: { [0]: 'No', [1]: 'Sí' },
+  primeraUneme: { [-1]: 'No aplica', [0]: 'No', [1]: 'Sí' },
+}
+
 const textareaCls =
   'w-full px-3 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 transition resize-none'
+
+const inputCls =
+  'w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 transition'
 
 const readonlyCls =
   'w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-300 whitespace-pre-wrap min-h-[5rem]'
@@ -55,6 +78,23 @@ export function EvolutionNoteDetail({ note, canEdit, onBack, onSave, onSign, onA
   const [objetivo, setObjetivo] = useState(current.findings)
   const [analisis, setAnalisis] = useState(current.updatedDiagnosis)
   const [plan, setPlan] = useState(current.plan)
+
+  // GIIS-B015 fields
+  const [servicioSISCE, setServicioSISCE] = useState(current.servicioAtencion?.toString() ?? '')
+  const [respTB, setRespTB] = useState(current.sintomaticoRespTb?.toString() ?? '-1')
+  const [primeraAnio, setPrimeraAnio] = useState(current.primeraVezAnio?.toString() ?? '0')
+  const [primeraUneme, setPrimeraUneme] = useState(current.primeraVezUneme?.toString() ?? '-1')
+
+  // Vitals
+  const [pSis, setPSis] = useState(current.vitals?.presionSistolica?.toString() ?? '')
+  const [pDia, setPDia] = useState(current.vitals?.presionDiastolica?.toString() ?? '')
+  const [fc, setFc] = useState(current.vitals?.frecuenciaCardiaca?.toString() ?? '')
+  const [temp, setTemp] = useState(current.vitals?.temperatura?.toString() ?? '')
+  const [spo2, setSpo2] = useState(current.vitals?.saturacionOxigeno?.toString() ?? '')
+  const [peso, setPeso] = useState(current.vitals?.peso?.toString() ?? '')
+  const [talla, setTalla] = useState(current.vitals?.talla?.toString() ?? '')
+  const [cintura, setCintura] = useState(current.vitals?.circunferenciaCintura?.toString() ?? '')
+
   const [saving, setSaving] = useState(false)
   const [savingError, setSavingError] = useState<string | null>(null)
 
@@ -74,6 +114,21 @@ export function EvolutionNoteDetail({ note, canEdit, onBack, onSave, onSign, onA
     setObjetivo(current.findings)
     setAnalisis(current.updatedDiagnosis)
     setPlan(current.plan)
+
+    setServicioSISCE(current.servicioAtencion?.toString() ?? '')
+    setRespTB(current.sintomaticoRespTb?.toString() ?? '-1')
+    setPrimeraAnio(current.primeraVezAnio?.toString() ?? '0')
+    setPrimeraUneme(current.primeraVezUneme?.toString() ?? '-1')
+
+    setPSis(current.vitals?.presionSistolica?.toString() ?? '')
+    setPDia(current.vitals?.presionDiastolica?.toString() ?? '')
+    setFc(current.vitals?.frecuenciaCardiaca?.toString() ?? '')
+    setTemp(current.vitals?.temperatura?.toString() ?? '')
+    setSpo2(current.vitals?.saturacionOxigeno?.toString() ?? '')
+    setPeso(current.vitals?.peso?.toString() ?? '')
+    setTalla(current.vitals?.talla?.toString() ?? '')
+    setCintura(current.vitals?.circunferenciaCintura?.toString() ?? '')
+
     setEditing(true)
     setSavingError(null)
   }
@@ -88,6 +143,20 @@ export function EvolutionNoteDetail({ note, canEdit, onBack, onSave, onSign, onA
         objetivo,
         analisis,
         plan,
+        servicioAtencion: servicioSISCE ? parseInt(servicioSISCE) : undefined,
+        sintomaticoRespTb: parseInt(respTB),
+        primeraVezAnio: parseInt(primeraAnio),
+        primeraVezUneme: parseInt(primeraUneme),
+        vitals: {
+          presionSistolica: pSis ? parseInt(pSis) : undefined,
+          presionDiastolica: pDia ? parseInt(pDia) : undefined,
+          frecuenciaCardiaca: fc ? parseInt(fc) : undefined,
+          temperatura: temp ? parseFloat(temp) : undefined,
+          saturacionOxigeno: spo2 ? parseInt(spo2) : undefined,
+          peso: peso ? parseFloat(peso) : undefined,
+          talla: talla ? parseFloat(talla) : undefined,
+          circunferenciaCintura: cintura ? parseInt(cintura) : undefined,
+        },
       })
       setCurrent(updated)
       setEditing(false)
@@ -246,6 +315,75 @@ export function EvolutionNoteDetail({ note, canEdit, onBack, onSave, onSign, onA
                 <Label>P — Plan</Label>
                 <textarea rows={3} value={plan} onChange={(e) => setPlan(e.target.value)} className={textareaCls} data-testid="edit-plan" />
               </div>
+
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
+                <Label>Signos vitales / GIIS-B015</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Sistólica</label>
+                    <input type="number" value={pSis} onChange={e => setPSis(e.target.value)} className={inputCls} placeholder="120" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Diastólica</label>
+                    <input type="number" value={pDia} onChange={e => setPDia(e.target.value)} className={inputCls} placeholder="80" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">FC (lpm)</label>
+                    <input type="number" value={fc} onChange={e => setFc(e.target.value)} className={inputCls} placeholder="72" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Temp (°C)</label>
+                    <input type="number" step="0.1" value={temp} onChange={e => setTemp(e.target.value)} className={inputCls} placeholder="36.5" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">SpO₂ (%)</label>
+                    <input type="number" value={spo2} onChange={e => setSpo2(e.target.value)} className={inputCls} placeholder="98" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Peso (kg)</label>
+                    <input type="number" step="0.1" value={peso} onChange={e => setPeso(e.target.value)} className={inputCls} placeholder="70" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Talla (cm)</label>
+                    <input type="number" value={talla} onChange={e => setTalla(e.target.value)} className={inputCls} placeholder="170" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Cintura (cm)</label>
+                    <input type="number" value={cintura} onChange={e => setCintura(e.target.value)} className={inputCls} placeholder="90" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Servicio SIS-CE</label>
+                    <input type="number" value={servicioSISCE} onChange={e => setServicioSISCE(e.target.value)} className={inputCls} placeholder="Ej. 1" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Sintomático resp. TB</label>
+                    <select value={respTB} onChange={e => setRespTB(e.target.value)} className={inputCls}>
+                      <option value="-1">No aplica</option>
+                      <option value="0">No</option>
+                      <option value="1">Sí</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">1ª vez año</label>
+                    <select value={primeraAnio} onChange={e => setPrimeraAnio(e.target.value)} className={inputCls}>
+                      <option value="0">No</option>
+                      <option value="1">Sí</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">1ª vez UNEME</label>
+                    <select value={primeraUneme} onChange={e => setPrimeraUneme(e.target.value)} className={inputCls}>
+                      <option value="-1">No aplica</option>
+                      <option value="0">No</option>
+                      <option value="1">Sí</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
               {current.diagnosticos.length > 0 && (
                 <DiagnosticosDisplay diagnosticos={current.diagnosticos} />
               )}
@@ -280,6 +418,7 @@ export function EvolutionNoteDetail({ note, canEdit, onBack, onSave, onSign, onA
               {current.diagnosticos.length > 0 && (
                 <DiagnosticosDisplay diagnosticos={current.diagnosticos} />
               )}
+              <GIISB015Display note={current} />
             </>
           )}
 
@@ -483,6 +622,54 @@ function Section({ label, value, testId }: { label: string; value: string; testI
       <div className={readonlyCls} data-testid={testId}>
         {value || <span className="italic text-slate-400 dark:text-slate-600">Sin información</span>}
       </div>
+    </div>
+  )
+}
+
+function GIISB015Display({ note }: { note: EvolutionNote }) {
+  const hasVitals = note.vitals && Object.values(note.vitals).some(v => v !== null)
+  const hasFields =
+    note.servicioAtencion !== null ||
+    note.sintomaticoRespTb !== null ||
+    note.primeraVezAnio !== null ||
+    note.primeraVezUneme !== null
+
+  if (!hasVitals && !hasFields) return null
+
+  return (
+    <div className="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
+      <Label>Datos GIIS-B015 / Signos Vitales</Label>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2">
+        {note.vitals?.presionSistolica && note.vitals?.presionDiastolica && (
+          <DataField label="T/A" value={`${note.vitals.presionSistolica}/${note.vitals.presionDiastolica} mmHg`} />
+        )}
+        {note.vitals?.frecuenciaCardiaca && <DataField label="FC" value={`${note.vitals.frecuenciaCardiaca} lpm`} />}
+        {note.vitals?.temperatura && <DataField label="Temp" value={`${note.vitals.temperatura} °C`} />}
+        {note.vitals?.saturacionOxigeno && <DataField label="SpO₂" value={`${note.vitals.saturacionOxigeno} %`} />}
+        {note.vitals?.peso && <DataField label="Peso" value={`${note.vitals.peso} kg`} />}
+        {note.vitals?.talla && <DataField label="Talla" value={`${note.vitals.talla} cm`} />}
+        {note.vitals?.circunferenciaCintura && <DataField label="Cintura" value={`${note.vitals.circunferenciaCintura} cm`} />}
+
+        {note.servicioAtencion !== null && <DataField label="Servicio SIS-CE" value={note.servicioAtencion.toString()} />}
+        {note.sintomaticoRespTb !== null && (
+          <DataField label="Sint. Resp. TB" value={SELECT_LABELS.respTB[note.sintomaticoRespTb] || '—'} />
+        )}
+        {note.primeraVezAnio !== null && (
+          <DataField label="1ª vez año" value={SELECT_LABELS.primeraAnio[note.primeraVezAnio] || '—'} />
+        )}
+        {note.primeraVezUneme !== null && (
+          <DataField label="1ª vez UNEME" value={SELECT_LABELS.primeraUneme[note.primeraVezUneme] || '—'} />
+        )}
+      </div>
+    </div>
+  )
+}
+
+function DataField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{label}</p>
+      <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{value}</p>
     </div>
   )
 }
