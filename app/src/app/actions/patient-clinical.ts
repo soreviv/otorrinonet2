@@ -61,6 +61,10 @@ export async function getPatientEvolutionNotes(patientId: string): Promise<Evolu
         include: { cie10: { select: { descripcion: true } } },
         orderBy: { createdAt: 'asc' },
       },
+      vitals: {
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+      },
     },
   })
 
@@ -83,6 +87,10 @@ export async function getPatientEvolutionNotes(patientId: string): Promise<Evolu
     findings: n.objetivo ?? '',
     updatedDiagnosis: n.analisis ?? '',
     plan: n.plan ?? '',
+    servicioAtencion: n.servicioAtencion,
+    sintomaticoRespTb: n.sintomaticoRespTb,
+    primeraVezAnio: n.primeraVezAnio,
+    primeraVezUneme: n.primeraVezUneme,
     diagnosticos: n.diagnoses.map(d => ({
       codigo: d.cie10Codigo,
       descripcion: d.cie10.descripcion,
@@ -101,6 +109,7 @@ export async function getPatientEvolutionNotes(patientId: string): Promise<Evolu
       fecha: a.fecha.toISOString(),
       firmaHash: a.firmaHash,
     })),
+    vitals: n.vitals?.[0] || null,
     createdAt: n.fecha.toISOString(),
   }))
 }

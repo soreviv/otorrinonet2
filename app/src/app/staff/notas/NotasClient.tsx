@@ -78,6 +78,10 @@ export function NotasClient({
       objetivo: data.objective,
       analisis: data.assessment,
       plan: data.plan,
+      servicioAtencion: data.servicioAtencion,
+      sintomaticoRespTb: data.sintomaticoRespTb,
+      primeraVezAnio: data.primeraVezAnio,
+      primeraVezUneme: data.primeraVezUneme,
       diagnosticos: data.diagnosticos.map(d => ({
         codigo: d.codigo,
         descripcion: d.descripcion,
@@ -96,6 +100,10 @@ export function NotasClient({
       objetivo: data.objective,
       analisis: data.assessment,
       plan: data.plan,
+      servicioAtencion: data.servicioAtencion,
+      sintomaticoRespTb: data.sintomaticoRespTb,
+      primeraVezAnio: data.primeraVezAnio,
+      primeraVezUneme: data.primeraVezUneme,
       diagnosticos: data.diagnosticos.map(d => ({
         codigo: d.codigo,
         descripcion: d.descripcion,
@@ -114,6 +122,20 @@ export function NotasClient({
     objetivo: string
     analisis: string
     plan: string
+    servicioAtencion?: number
+    sintomaticoRespTb?: number
+    primeraVezAnio?: number
+    primeraVezUneme?: number
+    vitals?: {
+      presionSistolica?: number
+      presionDiastolica?: number
+      frecuenciaCardiaca?: number
+      temperatura?: number
+      saturacionOxigeno?: number
+      peso?: number
+      talla?: number
+      circunferenciaCintura?: number
+    }
   }): Promise<EvolutionNote> {
     const updated = await updateEvolutionNote(noteId, data)
     replaceNote(updated)

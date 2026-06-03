@@ -24,6 +24,10 @@ interface MedicalNoteRow {
   objetivo: string | null
   analisis: string | null
   plan: string | null
+  servicioAtencion: number | null
+  sintomaticoRespTb: number | null
+  primeraVezAnio: number | null
+  primeraVezUneme: number | null
   firmada: boolean
   firmaHash: string | null
   fechaFirma: Date | null
@@ -54,6 +58,7 @@ function mapEvolution(
   authorName: string,
   addendums: NoteAddendum[] = [],
   diagnosticos: NoteDiagnostico[] = [],
+  vitals: EvolutionNote['vitals'] = null,
 ): EvolutionNote {
   return {
     id: n.id,
@@ -65,7 +70,12 @@ function mapEvolution(
     findings: n.objetivo ?? '',
     updatedDiagnosis: n.analisis ?? '',
     plan: n.plan ?? '',
+    servicioAtencion: n.servicioAtencion,
+    sintomaticoRespTb: n.sintomaticoRespTb,
+    primeraVezAnio: n.primeraVezAnio,
+    primeraVezUneme: n.primeraVezUneme,
     diagnosticos,
+    vitals,
     authorName,
     authorId: n.medicoId,
     signed: n.firmada,
@@ -200,6 +210,10 @@ export async function getNotasData(patientId: string) {
       orderBy: { fecha: 'desc' },
       include: {
         medico: { select: { id: true, name: true } },
+        vitals: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
         addendums: { orderBy: { fecha: 'asc' } },
         diagnoses: {
           include: { cie10: { select: { descripcion: true } } },
@@ -266,7 +280,8 @@ export async function getNotasData(patientId: string) {
         descripcion: d.cie10.descripcion,
         tipo: d.tipoDiagnostico,
       }))
-      return mapEvolution(n, pName, n.medico?.name ?? session.name, addendums, diagnosticos)
+      const v = n.vitals?.[0] || null
+      return mapEvolution(n, pName, n.medico?.name ?? session.name, addendums, diagnosticos, v)
     }),
     prescriptions,
     consentForms: consents.map(c => mapConsent(c, pName, session.name)),
@@ -283,11 +298,16 @@ export async function createEvolutionNote(
     objetivo?: string
     analisis?: string
     plan?: string
+    servicioAtencion?: number
+    sintomaticoRespTb?: number
+    primeraVezAnio?: number
+    primeraVezUneme?: number
     diagnosticos?: { codigo: string; descripcion: string; tipo?: string }[]
     vitals?: {
       presionSistolica?: number; presionDiastolica?: number
       frecuenciaCardiaca?: number; temperatura?: number
       saturacionOxigeno?: number; peso?: number; talla?: number
+      circunferenciaCintura?: number
     }
   },
 ): Promise<EvolutionNote> {
@@ -305,6 +325,10 @@ export async function createEvolutionNote(
         objetivo: data.objetivo || null,
         analisis: data.analisis || null,
         plan: data.plan || null,
+        servicioAtencion: data.servicioAtencion ?? null,
+        sintomaticoRespTb: data.sintomaticoRespTb ?? null,
+        primeraVezAnio: data.primeraVezAnio ?? null,
+        primeraVezUneme: data.primeraVezUneme ?? null,
       },
     }),
   ])
@@ -321,26 +345,33 @@ export async function createEvolutionNote(
   }
 
   // Signos vitales
-  const v = data.vitals
-  if (v && Object.values(v).some(x => x != null)) {
+  const vitalsData = data.vitals
+  if (vitalsData && Object.values(vitalsData).some(x => x != null)) {
     await prisma.vitals.create({
       data: {
         patientId,
         registradoPorId: session.userId,
-        presionSistolica: v.presionSistolica ?? null,
-        presionDiastolica: v.presionDiastolica ?? null,
-        frecuenciaCardiaca: v.frecuenciaCardiaca ?? null,
-        temperatura: v.temperatura ?? null,
-        saturacionOxigeno: v.saturacionOxigeno ?? null,
-        peso: v.peso ?? null,
-        talla: v.talla ?? null,
+        presionSistolica: vitalsData.presionSistolica ?? null,
+        presionDiastolica: vitalsData.presionDiastolica ?? null,
+        frecuenciaCardiaca: vitalsData.frecuenciaCardiaca ?? null,
+        temperatura: vitalsData.temperatura ?? null,
+        saturacionOxigeno: vitalsData.saturacionOxigeno ?? null,
+        peso: vitalsData.peso ?? null,
+        talla: vitalsData.talla ?? null,
+        circunferenciaCintura: vitalsData.circunferenciaCintura ?? null,
+        medicalNoteId: note.id,
       },
     })
   }
 
   void logAction({ action: 'creacion', resource: 'medical_note', resourceId: note.id, userId: session.userId })
   const pName = patient ? patientFullName(patient) : ''
-  return mapEvolution(note, pName, session.name, [])
+  const noteWithVitals = await prisma.medicalNote.findUnique({
+    where: { id: note.id },
+    include: { vitals: { orderBy: { createdAt: 'desc' }, take: 1 } },
+  })
+  const finalV = noteWithVitals?.vitals?.[0] || null
+  return mapEvolution(note, pName, session.name, [], [], finalV)
 }
 
 // ─── Edición pre-firma ────────────────────────────────────────────────────────
@@ -353,6 +384,16 @@ export async function updateEvolutionNote(
     objetivo?: string
     analisis?: string
     plan?: string
+    servicioAtencion?: number
+    sintomaticoRespTb?: number
+    primeraVezAnio?: number
+    primeraVezUneme?: number
+    vitals?: {
+      presionSistolica?: number; presionDiastolica?: number
+      frecuenciaCardiaca?: number; temperatura?: number
+      saturacionOxigeno?: number; peso?: number; talla?: number
+      circunferenciaCintura?: number
+    }
   },
 ): Promise<EvolutionNote> {
   const session = await verifySession()
@@ -377,14 +418,64 @@ export async function updateEvolutionNote(
         objetivo: data.objetivo ?? null,
         analisis: data.analisis ?? null,
         plan: data.plan ?? null,
+        servicioAtencion: data.servicioAtencion ?? null,
+        sintomaticoRespTb: data.sintomaticoRespTb ?? null,
+        primeraVezAnio: data.primeraVezAnio ?? null,
+        primeraVezUneme: data.primeraVezUneme ?? null,
       },
-      include: { medico: { select: { name: true } } },
+      include: {
+        medico: { select: { name: true } },
+        vitals: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
     }),
   ])
 
+  // Actualizar o crear signos vitales vinculados
+  let finalV: EvolutionNote['vitals'] = updated.vitals?.[0] || null
+  const vitalsData = data.vitals
+  if (vitalsData) {
+    const existingVitals = updated.vitals?.[0]
+    const hasValues = Object.values(vitalsData).some(x => x != null)
+
+    const vFields = {
+      presionSistolica: vitalsData.presionSistolica ?? null,
+      presionDiastolica: vitalsData.presionDiastolica ?? null,
+      frecuenciaCardiaca: vitalsData.frecuenciaCardiaca ?? null,
+      temperatura: vitalsData.temperatura ?? null,
+      saturacionOxigeno: vitalsData.saturacionOxigeno ?? null,
+      peso: vitalsData.peso ?? null,
+      talla: vitalsData.talla ?? null,
+      circunferenciaCintura: vitalsData.circunferenciaCintura ?? null,
+    }
+
+    if (existingVitals) {
+      if (hasValues) {
+        finalV = await prisma.vitals.update({
+          where: { id: existingVitals.id },
+          data: vFields,
+        })
+      } else {
+        await prisma.vitals.delete({ where: { id: existingVitals.id } })
+        finalV = null
+      }
+    } else if (hasValues) {
+      finalV = await prisma.vitals.create({
+        data: {
+          patientId: existing.patientId,
+          medicalNoteId: noteId,
+          registradoPorId: session.userId,
+          ...vFields,
+        },
+      })
+    }
+  }
+
   void logAction({ action: 'modificacion', resource: 'medical_note', resourceId: noteId, userId: session.userId })
   const pName = patient ? patientFullName(patient) : ''
-  return mapEvolution(updated, pName, updated.medico?.name ?? session.name, [])
+  return mapEvolution(updated, pName, updated.medico?.name ?? session.name, [], [], finalV)
 }
 
 export async function createPrescription(
@@ -481,6 +572,10 @@ export async function signEvolutionNoteInDB(id: string): Promise<EvolutionNote> 
           include: { cie10: { select: { descripcion: true } } },
           orderBy: { createdAt: 'asc' },
         },
+        vitals: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
       },
     }),
   ])
@@ -505,8 +600,9 @@ export async function signEvolutionNoteInDB(id: string): Promise<EvolutionNote> 
     descripcion: d.cie10.descripcion,
     tipo: d.tipoDiagnostico,
   }))
+  const v = signed.vitals?.[0] || null
 
-  return mapEvolution(signed, pName, signed.medico?.name ?? session.name, addendums, diagnosticos)
+  return mapEvolution(signed, pName, signed.medico?.name ?? session.name, addendums, diagnosticos, v)
 }
 
 export async function signPrescriptionInDB(recetaId: string, firmaImagen?: string): Promise<{ firmaHash: string }> {
