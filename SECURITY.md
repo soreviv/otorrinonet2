@@ -80,6 +80,28 @@ Las siguientes áreas son de especial interés:
 | Secrets | Variables de entorno sensibles nunca versionadas |
 | Tests de seguridad | Suite automatizada cubre: solapamiento de slots, rate-limit, password reset, idempotencia de webhook |
 
+## Seguridad en el contexto NOM-024 / GIIS-A004
+
+El sistema está implementando el **Sistema de Gestión de Seguridad de la Información (SGSI)** conforme a la GIIS-A004-01-07 de la DGIS, basado en ISO 27799 / ISO/IEC 27002. Cubre 11 dominios con 134 controles.
+
+**Dominios relevantes ya implementados en código:**
+
+| Dominio SGSI | Control implementado |
+|---|---|
+| 7. Control de Acceso | 2FA TOTP, sesiones revocables, roles por área, rate-limit |
+| 8.3 Controles criptográficos | JWT firmado HS256, bcrypt en contraseñas, AES-256-GCM en datos sensibles |
+| 6.5 Copias de seguridad | Pendiente documentar procedimiento formal de backup |
+| 9. Gestión de Incidentes | Pendiente redactar procedimiento de respuesta |
+| 10. Continuidad del Negocio | Pendiente plan formal de recuperación ante desastres |
+
+**Pendiente de documentar (Track 4 del plan de certificación):**
+- Política de Seguridad de la Información (firmada por el Dr. Viveros)
+- Inventario de activos (VPS, BD, software, expedientes)
+- Evaluación de riesgos (NMX-I-27005)
+- Declaración de Aplicabilidad (DDA) — archivo Excel GIIS-A004-SGSI-Anexo-A.xlsx
+
+El SGSI debe operar documentado **mínimo 6 meses** antes de solicitar la verificación ante la DGIS.
+
 ---
 
 ## Agradecimientos

@@ -44,9 +44,11 @@ export async function printPrescription(rx: Prescription): Promise<void> {
 <head>
 <meta charset="UTF-8">
 <title>Receta — ${esc(rx.patientName)}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; font-size: 13px; color: #1e293b; background: #fff; }
+  body { font-family: 'Inter', Arial, sans-serif; font-size: 13px; color: #1e293b; background: #fff; }
   @page { size: letter; margin: 12mm 14mm; }
 
   /* ── Header clínica ── */
@@ -62,7 +64,7 @@ export async function printPrescription(rx: Prescription): Promise<void> {
     display: flex; align-items: center; justify-content: center;
   }
   .header .clinic-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-  .header h1 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .header h1 { font-family: 'DM Sans', Arial, sans-serif; font-size: 15px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 3px; }
   .header .sub { font-size: 11px; color: #e0f2fe; display: flex; gap: 14px; flex-wrap: wrap; }
 
   /* ── Barra de impresión ── */
@@ -105,10 +107,10 @@ export async function printPrescription(rx: Prescription): Promise<void> {
     border: 1px solid #bae6fd;
   }
   .doc-strip .uni-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-  .doc-strip .name { font-weight: 700; font-size: 12px; color: #0c4a6e; }
+  .doc-strip .name { font-family: 'DM Sans', Arial, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: -0.01em; color: #0c4a6e; }
   .doc-strip .uni { font-size: 10px; color: #64748b; margin-top: 2px; }
   .doc-strip .cedulas { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
-  .ced { font-family: monospace; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+  .ced { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
   .ced.general { background: #f1f5f9; color: #475569; }
   .ced.especialidad { background: #dbeafe; color: #1e40af; }
 
@@ -148,7 +150,7 @@ export async function printPrescription(rx: Prescription): Promise<void> {
     padding-bottom: 7px;
     border-bottom: 2px solid #e2e8f0;
   }
-  .rx-symbol { font-size: 26px; color: #0369a1; font-style: italic; font-weight: 900; line-height: 1; }
+  .rx-symbol { font-family: 'DM Sans', Arial, sans-serif; font-size: 26px; color: #0369a1; font-style: italic; font-weight: 900; line-height: 1; }
   .meds-title { font-size: 11px; font-weight: 700; color: #0c4a6e; text-transform: uppercase; letter-spacing: .06em; }
 
   .med-card {
@@ -167,7 +169,7 @@ export async function printPrescription(rx: Prescription): Promise<void> {
     flex-shrink: 0; margin-top: 1px;
   }
   .med-body { flex: 1; }
-  .med-name { font-weight: 700; font-size: 15px; color: #0f172a; }
+  .med-name { font-family: 'DM Sans', Arial, sans-serif; font-weight: 700; font-size: 15px; letter-spacing: -0.01em; color: #0f172a; }
   .brand { font-weight: 400; font-style: italic; color: #64748b; font-size: 13px; }
   .med-pres { font-size: 12px; color: #64748b; margin-top: 1px; }
   .med-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 7px; }
@@ -178,7 +180,7 @@ export async function printPrescription(rx: Prescription): Promise<void> {
   /* ── Timestamp de firma ── */
   .signed-ts {
     margin: 4px 16px 0;
-    font-size: 9px; font-family: monospace; color: #64748b;
+    font-size: 9px; font-family: 'IBM Plex Mono', monospace; color: #64748b;
     background: #f1f5f9; padding: 4px 8px; border-radius: 4px;
   }
 
@@ -211,13 +213,13 @@ export async function printPrescription(rx: Prescription): Promise<void> {
     margin: 0 auto 4px;
   }
   .sig-line { width: 180px; height: 1px; background: #94a3b8; margin: 0 auto 4px; }
-  .sig-name { font-weight: 700; font-size: 11px; color: #0c4a6e; }
+  .sig-name { font-family: 'DM Sans', Arial, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: -0.01em; color: #0c4a6e; }
   .sig-sub { font-size: 9px; color: #64748b; margin-top: 2px; }
 
   /* QR */
   .qr-box { display: flex; flex-direction: column; align-items: center; gap: 3px; flex-shrink: 0; }
   .qr-box img { width: 80px; height: 80px; }
-  .qr-label { font-size: 8px; color: #64748b; text-align: center; max-width: 80px; line-height: 1.3; }
+  .qr-label { font-family: 'IBM Plex Mono', monospace; font-size: 8px; color: #64748b; text-align: center; max-width: 80px; line-height: 1.3; }
 
   /* ── Pie de página ── */
   .footer {

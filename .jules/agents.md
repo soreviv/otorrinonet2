@@ -57,6 +57,90 @@ La aplicación Next.js vive en el subdirectorio `app/`. Todos los comandos npm s
 
 ---
 
+## Certificación NOM-024-SSA3-2012 (proyecto activo)
+
+El sistema se está certificando como SIRES ante la DGIS. Las tareas nuevas de Jules están en el Track 1, 2 y 3 del plan de certificación. El Track 4 (SGSI) lo maneja Claude Code.
+
+**Reglas críticas de la GIIS-B015** (respetar en todo el código nuevo):
+- Nombres de pacientes y prestadores: **MAYÚSCULAS, sin acentos**, solo A-Z + Ñ. Caracteres especiales permitidos: `-`, `,`, `.`, `/`, `'`, `¨`.
+- CURP: 18 caracteres. Genérica: `XXXX999999XXXXXX99`. Máximo 15% de registros con CURP genérica.
+- Diagnósticos CIE-10: máximo 5% de registros con código `R69X`.
+- Todos los campos del diccionario de datos son obligatorios en el archivo de intercambio (excepto `codigoCIEDiagnostico2` y `codigoCIEDiagnostico3` que son nullable).
+
+---
+
+### TAREA NOM-1 — Campos de identificación del paciente
+
+**Rama sugerida:** `feat/nom024-datos-paciente`
+**Archivos a modificar:** `app/prisma/schema.prisma`, `app/src/app/staff/pacientes/` (formulario)
+
+Agregar al modelo `Patient` en Prisma los siguientes campos:
+
+```prisma
+curp                      String?   // 18 chars, validar algoritmo RENAPO
+paisNacimiento            Int?      // Catálogo PAIS DGIS (México = 142)
+entidadNacimiento         String?   // 2 chars: 99=SE IGNORA, 00=NO ESPEC, 88=NO APLICA
+sexoCURP                  Int?      // 1=Hombre, 2=Mujer, 3=No binario
+sexoBiologico             Int?      // 1=Hombre, 2=Mujer, 3=Intersexual
+genero                    Int?      // 0=No espec, 1=Masc, 2=Fem, 3=Trans, 4=Transex, 5=Travesti, 6=Intersex, 88=Otro
+derechohabiencia          String?   // Multi-valor separado por &: 0=No espec, 1=Ninguna, 2=IMSS, 3=ISSSTE, 4=PEMEX, 5=SEDENA, 6=SEMAR, 8=Otra, 10=IMSS Bienestar, 11=ISSFAM, 14=OPD IMSS BIENESTAR, 99=SE IGNORA
+seConsideraIndigena       Int?      // 0=No, 1=Sí, 2=No responde, 3=No sabe, -1=Desconocido
+seAutodenominaAfromexicano Int?     // 0/1/2/3/-1
+migrante                  Int?      // 0=No, 1=Nacional, 2=Internacional, 3=Retornado, -1=Desconocido
+paisProcedencia           Int?      // Solo si migrante=2
+```
+
+Después de modificar el schema: `npx prisma db push && npx prisma generate`.
+
+Actualizar el formulario de paciente en el panel staff con los nuevos campos (selectores con catálogos hardcodeados por ahora).
+
+---
+
+### TAREA NOM-2 — Catálogos CIE-10 en notas clínicas
+
+**Rama sugerida:** `feat/nom024-cie10`
+**Archivo nuevo:** `app/src/lib/catalogos/cie10.ts`
+**Archivos a modificar:** formulario de nota clínica en `app/src/app/staff/notas/`
+
+1. Crear el archivo `app/src/lib/catalogos/cie10.ts` con los códigos CIE-10 más frecuentes en otorrinolaringología (H60-H95, J00-J99, R01-R09) como array de `{ codigo: string; descripcion: string }`. La lista completa se obtiene del catálogo oficial de la DGIS — para esta tarea incluir al menos 50 códigos frecuentes de ORL.
+
+2. Agregar a `app/prisma/schema.prisma` en el modelo de nota clínica (o en `ClinicalNote`):
+```prisma
+codigoCIEDiagnostico1     String?
+codigoCIEDiagnostico2     String?
+codigoCIEDiagnostico3     String?
+```
+
+3. Agregar en el formulario de nota un campo de autocomplete con búsqueda por código o descripción. El valor almacenado es el código CIE-10 (ej. `H65.0`).
+
+4. Agregar validación: no permitir guardar diagnóstico `R69X` sin al menos un diagnóstico previo válido en el mismo paciente.
+
+---
+
+### TAREA NOM-3 — Somatometría y signos vitales en la nota clínica
+
+**Rama sugerida:** `feat/nom024-somatometria`
+**Archivos a modificar:** schema Prisma + formulario de nota clínica
+
+Agregar al modelo de nota clínica en Prisma:
+
+```prisma
+peso                  Float?    // kg, rango 1-400; 999=desconocido
+talla                 Int?      // cm, rango 30-220; 999=desconocido
+circunferenciaCintura Int?      // cm, rango 20-300; 0=desconocido
+sistolica             Int?      // mmHg, rango 50-300; 0=desconocido
+diastolica            Int?      // mmHg, rango 20-200; 0=desconocido
+frecuenciaCardiaca    Int?      // lpm, rango 40-220; 0=desconocido
+frecuenciaRespiratoria Int?     // rpm, rango 10-99; 0=desconocido
+temperatura           Float?    // °C, rango 30-44; 0=desconocido
+saturacionOxigeno     Int?      // % SpO2, rango 1-100; 0=desconocido
+glucemia              Int?      // mg/dL, rango 20-999; 0=desconocido
+```
+
+Agregar en el formulario de nota clínica una sección "Somatometría y signos vitales" con inputs numéricos y validación de rangos. Mostrar como sección colapsable para no saturar la UI.
+
+---
+
 ## Tareas asignables a Jules
 
 Jules debe trabajar **únicamente** en las tareas marcadas aquí. No modificar código de producción salvo que la tarea lo indique explícitamente.
@@ -191,8 +275,38 @@ Usar `vi.stubGlobal('localStorage', ...)` o un mock simple de `localStorage` con
 
 ## Lo que Jules NO debe hacer
 
-- Modificar archivos de producción fuera del alcance de la tarea asignada.
-- Ejecutar `prisma migrate dev` (solo `prisma db push`).
-- Eliminar o reescribir lógica existente para "limpiar" — solo agregar tests.
-- Agregar dependencias de producción (solo `devDependencies`).
-- Hacer push a `main` directamente — siempre abrir un PR.
+### Regla principal — alcance mínimo
+
+> **Jules solo debe tocar los archivos que la tarea indique explícitamente.**
+> Si la tarea no menciona un archivo, Jules **no debe modificarlo, renombrarlo, moverlo ni eliminarlo**, aunque parezca relacionado, desactualizado o mejorable.
+
+Esta regla es absoluta. No hay excepciones por "limpieza", "consistencia" ni "refactor aprovechando el cambio".
+
+### Otras restricciones
+
+- No ejecutar `prisma migrate dev` — solo `prisma db push`.
+- No eliminar ni reescribir lógica existente fuera del alcance de la tarea.
+- No agregar dependencias de producción (solo `devDependencies` cuando la tarea lo requiera).
+- No hacer push a `master` directamente — siempre abrir un PR.
+- No modificar **bajo ninguna circunstancia** los archivos protegidos de Claude Code:
+  - `app/src/proxy.ts`
+  - `app/src/lib/stripe.ts`
+  - `app/src/lib/stripe-client.ts`
+  - `app/src/lib/dal.ts`
+  - `app/src/lib/session.ts`
+  - `app/src/app/api/stripe/webhook/route.ts`
+  - `app/next.config.ts`
+  - `app/package.json` / `app/package-lock.json` (salvo que la tarea lo pida explícitamente)
+- En las tareas NOM-024: los datos en BD pueden tener acentos; la normalización a MAYÚSCULAS sin acentos ocurre **solo al generar el archivo de intercambio SIS-CEX**, no al guardar en BD.
+
+## Estado de tareas completadas
+
+| Tarea | Estado | Fecha |
+|---|---|---|
+| T0 — Configuración Vitest | ✅ Completado | 2026-05-24 |
+| T1-A — Tests schemas Zod | ✅ Completado | 2026-05-24 |
+| T1-B — Tests `esc()` mailer | ✅ Completado | 2026-05-24 |
+| T1-C — Tests `useCarrito` | ✅ Completado | 2026-05-24 |
+| NOM-1 — Campos paciente | 🔲 Pendiente | — |
+| NOM-2 — CIE-10 en notas | 🔲 Pendiente | — |
+| NOM-3 — Somatometría | 🔲 Pendiente | — |

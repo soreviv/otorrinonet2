@@ -48,24 +48,99 @@ function clinicEmail(): string | null {
   return process.env.CLINIC_EMAIL ?? null
 }
 
-// ─── Layout HTML compartido ──────────────────────────────────────────────────
+// ─── Layout HTML compartido (Design System OtorrinoNet) ─────────────────────
 
-function emailLayout(content: string, cfg: ClinicConfig): string {
-  return `
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1a1a1a">
-      <div style="background:#0369a1;padding:20px 24px;border-radius:8px 8px 0 0">
-        <p style="color:#fff;font-weight:700;font-size:1.25em;margin:0">${esc(cfg.clinicName)}</p>
-      </div>
-      <div style="border:1px solid #e5e7eb;border-top:none;padding:24px;border-radius:0 0 8px 8px">
-        ${content}
-        <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
-        <p style="color:#9ca3af;font-size:0.75em;margin:0">
-          ${esc(cfg.clinicName)}${cfg.clinicAddress ? ' — ' + esc(cfg.clinicAddress) : ''}
-          ${cfg.clinicPhone ? ' · ' + esc(cfg.clinicPhone) : ''}
-        </p>
-      </div>
-    </div>
-  `.trim()
+const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">`
+
+const LOGO_URL = 'https://www.otorrinonet.com/assets/logo-otorrinonet-white.svg'
+
+interface EmailLayoutOptions {
+  headerBg?: string
+  iconChip?: string  // HTML del ícono dentro del chip superior
+}
+
+function emailLayout(content: string, cfg: ClinicConfig, opts: EmailLayoutOptions = {}): string {
+  const headerBg = opts.headerBg ?? '#0284c7'
+  const addr = cfg.clinicAddress ? esc(cfg.clinicAddress) : 'Chosica 730, Col. Lindavista, GAM, CDMX'
+  const phone = cfg.clinicPhone ? esc(cfg.clinicPhone) : ''
+  const url = appUrl()
+
+  return `<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${FONTS}</head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:'Inter',Arial,sans-serif;">
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f1f5f9;padding:32px 16px;">
+<tr><td align="center">
+<table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width:600px;width:100%;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07);">
+  <!-- Header -->
+  <tr><td style="background:${headerBg};padding:22px 28px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%"><tr>
+      <td style="width:52px;padding-right:12px;vertical-align:middle;">
+        <img src="${LOGO_URL}" alt="OtorrinoNet" height="44" style="display:block;height:44px;width:auto;">
+      </td>
+      <td style="vertical-align:middle;">
+        <div style="font-family:'DM Sans',Arial,sans-serif;font-size:14px;font-weight:700;color:rgba(255,255,255,.92);line-height:1.2;">${esc(cfg.doctorName)}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:2px;">Otorrinolaringólogo &amp; Cirugía de Cabeza y Cuello · CDMX</div>
+      </td>
+    </tr></table>
+  </td></tr>
+  <!-- Body -->
+  <tr><td style="padding:28px;">
+    ${content}
+  </td></tr>
+  <!-- Footer -->
+  <tr><td style="background:#1e293b;padding:20px 28px;text-align:center;">
+    <p style="margin:0;font-size:11px;color:#94a3b8;line-height:1.8;">
+      ${esc(cfg.doctorName)}${cfg.doctorLicense ? ` &nbsp;·&nbsp; Céd. Prof. ${esc(cfg.doctorLicense)}` : ''}<br>
+      ${addr}${phone ? ` &nbsp;·&nbsp; Tel. ${phone}` : ''}<br>
+      <a href="${url}" style="color:#7dd3fc;text-decoration:none;">${url.replace(/^https?:\/\//, '')}</a>
+      &nbsp;·&nbsp; <a href="${url}/privacidad" style="color:#7dd3fc;text-decoration:none;">Aviso de privacidad</a>
+    </p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>`.trim()
+}
+
+// ─── Ícono SVG check ─────────────────────────────────────────────────────────
+const SVG_CHECK = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`
+const SVG_CLOCK = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`
+const SVG_X     = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>`
+
+function infoGrid(rows: [string, string][]): string {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f8fafc;border-radius:8px;padding:4px 0;margin-bottom:20px;">
+    ${rows.map(([k, v]) => `<tr>
+      <td style="padding:8px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;white-space:nowrap;vertical-align:top;">${k}</td>
+      <td style="padding:8px 16px;font-size:13px;font-weight:600;color:#0f172a;">${v}</td>
+    </tr>`).join('')}
+  </table>`
+}
+
+function ctaButton(label: string, href: string, color = '#0284c7'): string {
+  return `<a href="${href}" style="display:inline-block;background:${color};color:#fff;font-size:14px;font-weight:600;padding:12px 26px;border-radius:8px;text-decoration:none;">${label}</a>`
+}
+
+function ctaSecondary(label: string, href: string): string {
+  return `<a href="${href}" style="display:inline-block;background:#fff;color:#475569;font-size:13px;font-weight:600;padding:11px 22px;border-radius:8px;text-decoration:none;border:1px solid #e2e8f0;">${label}</a>`
+}
+
+function iconChip(icon: string, bg: string, color: string): string {
+  return `<div style="width:52px;height:52px;border-radius:14px;background:${bg};display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;color:${color};">${icon}</div>`
+}
+
+function emailTitle(title: string): string {
+  return `<div style="font-family:'DM Sans',Arial,sans-serif;font-size:22px;font-weight:700;color:#0f172a;line-height:1.2;margin-bottom:8px;">${title}</div>`
+}
+
+function emailLead(html: string): string {
+  return `<p style="font-size:14px;color:#475569;line-height:1.65;margin:0 0 20px;">${html}</p>`
+}
+
+function emailDivider(): string {
+  return `<hr style="border:none;border-top:1px solid #e2e8f0;margin:20px 0;">`
+}
+
+function emailNote(html: string): string {
+  return `<p style="font-size:12px;color:#94a3b8;line-height:1.6;margin:0;">${html}</p>`
 }
 
 // ─── Restablecimiento de contraseña ─────────────────────────────────────────
@@ -144,31 +219,42 @@ export async function sendAppointmentConfirmationToPatient(
   const typeLabel   = APPOINTMENT_TYPE_LABEL[data.appointmentType] ?? data.appointmentType
   const dateStr     = formatDate(data.fecha)
 
+  const infoRows: [string, string][] = [
+    ['Servicio', esc(typeLabel)],
+    ['Fecha', esc(dateStr)],
+    ['Hora', `<span style="font-family:'IBM Plex Mono',monospace;">${esc(data.hora)} hrs</span>`],
+    ...(cfg.clinicAddress ? [['Consultorio', esc(cfg.clinicAddress)] as [string, string]] : []),
+    ...(data.motivo ? [['Motivo', esc(data.motivo)] as [string, string]] : []),
+  ]
+
   const content = `
-    <p>Estimado/a <strong>${esc(data.patientName)}</strong>,</p>
-    <p>Su solicitud de cita ha sido recibida. Los detalles son:</p>
-    <table style="border-collapse:collapse;width:100%;margin:16px 0">
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:40%">Tipo de consulta</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(typeLabel)}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Fecha</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(dateStr)}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.hora)}</td></tr>
-      ${cfg.clinicAddress ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Lugar</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(cfg.clinicAddress)}</td></tr>` : ''}
-      ${data.motivo ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Motivo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.motivo)}</td></tr>` : ''}
-    </table>
-    <p>Por favor confirme su asistencia o modifique la fecha si lo necesita:</p>
-    <p>
-      <a href="${confirmUrl}" style="display:inline-block;padding:10px 20px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Confirmar cita</a>
-      <a href="${modifyUrl}"  style="display:inline-block;padding:10px 20px;background:#0369a1;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Modificar fecha</a>
-      <a href="${cancelUrl}"  style="display:inline-block;padding:10px 20px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-bottom:8px">Cancelar cita</a>
+    ${iconChip(`<span style="color:#047857">${SVG_CHECK}</span>`, '#ecfdf5', '#047857')}
+    ${emailTitle('¡Tu cita está confirmada!')}
+    ${emailLead(`Hola <b>${esc(data.patientName)}</b>, tu cita ha sido registrada. Aquí tienes los detalles:`)}
+    ${infoGrid(infoRows)}
+    <p style="margin:0 0 12px;">
+      ${ctaButton('Confirmar asistencia', confirmUrl, '#047857')}
+      &nbsp;
+      ${ctaSecondary('Reagendar', modifyUrl)}
+      &nbsp;
+      ${ctaSecondary('Cancelar', cancelUrl)}
     </p>
-    ${cfg.clinicPhone ? `<p style="color:#6b7280;font-size:0.875em">Si tiene dudas llámenos al ${esc(cfg.clinicPhone)}.</p>` : ''}
+    <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin:20px 0 10px;">Qué llevar</p>
+    <ul style="list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:8px;">
+      <li style="font-size:13px;color:#475569;">✓ &nbsp;Identificación oficial vigente</li>
+      <li style="font-size:13px;color:#475569;">✓ &nbsp;Estudios o resultados previos (si los tienes)</li>
+      <li style="font-size:13px;color:#475569;">✓ &nbsp;Lista de medicamentos actuales</li>
+    </ul>
+    ${emailDivider()}
+    ${emailNote(`¿Necesitas cancelar o cambiar tu cita?${cfg.clinicPhone ? ` Llámanos al <b style="color:#334155">${esc(cfg.clinicPhone)}</b> con al menos 2 horas de anticipación o` : ''} hazlo desde <a href="${appUrl()}" style="color:#0284c7;">otorrinonet.mx</a>.`)}
   `
 
   await getTransport().sendMail({
     from: sender(cfg),
     to: `"${data.patientName}" <${data.patientEmail}>`,
-    subject: `Cita agendada — ${dateStr} a las ${data.hora}`,
+    subject: `✓ Tu cita está confirmada — ${dateStr} a las ${data.hora}`,
     html: emailLayout(content, cfg),
-    text: `Cita agendada: ${typeLabel} el ${dateStr} a las ${data.hora}.\nConfirmar: ${confirmUrl}\nModificar: ${modifyUrl}\nCancelar: ${cancelUrl}`,
+    text: `Cita confirmada: ${typeLabel} el ${dateStr} a las ${data.hora}.\nConfirmar: ${confirmUrl}\nModificar: ${modifyUrl}\nCancelar: ${cancelUrl}`,
   })
 }
 
@@ -218,24 +304,27 @@ export async function sendAppointmentCancellation(
     ? 'El consultorio ha cancelado su cita. Puede agendar una nueva desde el portal.'
     : 'Su cita ha sido cancelada correctamente.'
 
+  const motivo = cancelledBy === 'clinic' ? 'Reagendada por el consultorio' : 'Cancelada a petición del paciente'
+
   const content = `
-    <p>Estimado/a <strong>${esc(data.patientName)}</strong>,</p>
-    <p>${reason}</p>
-    <table style="border-collapse:collapse;width:100%;margin:16px 0">
-      <tr><td style="padding:8px 12px;background:#fef2f2;border:1px solid #e5e7eb;font-weight:600;width:40%">Fecha cancelada</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(dateStr)}</td></tr>
-      <tr><td style="padding:8px 12px;background:#fef2f2;border:1px solid #e5e7eb;font-weight:600">Hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.hora)}</td></tr>
-    </table>
-    <p>
-      <a href="${appUrl()}/agendar" style="display:inline-block;padding:10px 20px;background:#0369a1;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Agendar nueva cita</a>
-    </p>
-    ${cfg.clinicPhone ? `<p style="color:#6b7280;font-size:0.875em">Si tiene preguntas contáctenos al ${esc(cfg.clinicPhone)}.</p>` : ''}
+    ${iconChip(`<span style="color:#e11d48">${SVG_X}</span>`, '#fff1f2', '#e11d48')}
+    ${emailTitle('Tu cita fue cancelada')}
+    ${emailLead(`Hola <b>${esc(data.patientName)}</b>, lamentamos informarte que tu cita del <b>${esc(dateStr)} a las ${esc(data.hora)} hrs</b> ha sido cancelada.`)}
+    ${infoGrid([
+      ['Motivo', motivo],
+      ['Fecha cancelada', `${esc(dateStr)} · ${esc(data.hora)} hrs`],
+    ])}
+    ${emailLead('Puedes agendar una nueva cita de inmediato — tu historial clínico se conserva.')}
+    <p style="margin:0 0 20px;">${ctaButton('Reagendar cita', `${appUrl()}/agendar`)}</p>
+    ${emailDivider()}
+    ${emailNote(`Si tienes dudas o necesitas atención urgente${cfg.clinicPhone ? ` llámanos al <b style="color:#334155">${esc(cfg.clinicPhone)}</b>` : ''}. Lamentamos los inconvenientes causados.`)}
   `
 
   await getTransport().sendMail({
     from: sender(cfg),
     to: `"${data.patientName}" <${data.patientEmail}>`,
-    subject: `Cita cancelada — ${cfg.clinicName}`,
-    html: emailLayout(content, cfg),
+    subject: `Tu cita del ${dateStr} ha sido cancelada`,
+    html: emailLayout(content, cfg, { headerBg: '#334155' }),
     text: `${reason} Cita cancelada: ${dateStr} ${data.hora}.`,
   })
 }
@@ -252,19 +341,24 @@ export async function sendAppointmentReschedule(
   const typeLabel  = APPOINTMENT_TYPE_LABEL[data.appointmentType] ?? data.appointmentType
   const dateStr    = formatDate(data.fecha)
 
+  const infoRowsR: [string, string][] = [
+    ['Servicio', esc(typeLabel)],
+    ['Nueva fecha', esc(dateStr)],
+    ['Nueva hora', `<span style="font-family:'IBM Plex Mono',monospace;">${esc(data.hora)} hrs</span>`],
+    ...(cfg.clinicAddress ? [['Lugar', esc(cfg.clinicAddress)] as [string, string]] : []),
+  ]
+
   const content = `
-    <p>Estimado/a <strong>${esc(data.patientName)}</strong>,</p>
-    <p>Su cita ha sido <strong>reagendada</strong>. Los nuevos detalles son:</p>
-    <table style="border-collapse:collapse;width:100%;margin:16px 0">
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:40%">Tipo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(typeLabel)}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Nueva fecha</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(dateStr)}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Nueva hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.hora)}</td></tr>
-      ${cfg.clinicAddress ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Lugar</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(cfg.clinicAddress)}</td></tr>` : ''}
-    </table>
-    <p>
-      <a href="${confirmUrl}" style="display:inline-block;padding:10px 20px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Confirmar nueva cita</a>
-      <a href="${modifyUrl}"  style="display:inline-block;padding:10px 20px;background:#0369a1;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Modificar fecha</a>
-      <a href="${cancelUrl}"  style="display:inline-block;padding:10px 20px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-bottom:8px">Cancelar</a>
+    ${iconChip(`<span style="color:#047857">${SVG_CHECK}</span>`, '#ecfdf5', '#047857')}
+    ${emailTitle('Tu cita fue reagendada')}
+    ${emailLead(`Hola <b>${esc(data.patientName)}</b>, tu cita ha sido <b>reagendada</b>. Aquí tienes los nuevos detalles:`)}
+    ${infoGrid(infoRowsR)}
+    <p style="margin:0 0 20px;">
+      ${ctaButton('Confirmar nueva cita', confirmUrl, '#047857')}
+      &nbsp;
+      ${ctaSecondary('Modificar fecha', modifyUrl)}
+      &nbsp;
+      ${ctaSecondary('Cancelar', cancelUrl)}
     </p>
   `
 
@@ -295,23 +389,15 @@ export async function sendNpsEmail(data: NpsEmailData, cfg: ClinicConfig): Promi
   const waLink = data.whatsapp ? `https://wa.me/${data.whatsapp.replace(/\D/g, '')}?text=${waText}` : null
 
   const content = `
-    <p>Estimado/a <strong>${esc(data.patientName)}</strong>,</p>
-    <p>Esperamos que su consulta haya sido de su agrado. Su opinión nos ayuda a mejorar y orienta a otros pacientes que buscan atención especializada.</p>
-    <p>¿Nos regalaría un minuto para dejar su reseña?</p>
-    <p style="margin:24px 0">
-      <a href="${REVIEW_URL}" style="display:inline-block;padding:12px 24px;background:#f59e0b;color:#fff;text-decoration:none;border-radius:6px;font-weight:700;font-size:1em">
-        ★ Dejar reseña en Google
-      </a>
+    ${iconChip('<span style="color:#d97706;font-size:22px;">★</span>', '#fffbeb', '#d97706')}
+    ${emailTitle('¿Cómo fue su consulta?')}
+    ${emailLead(`Hola <b>${esc(data.patientName)}</b>, esperamos que su consulta haya sido de su agrado. Su opinión nos ayuda a mejorar y orienta a otros pacientes que buscan atención especializada.`)}
+    <p style="margin:0 0 20px;">
+      ${ctaButton('★ Dejar reseña en Google', REVIEW_URL, '#d97706')}
+      ${waLink ? `&nbsp;${ctaSecondary('Comentar por WhatsApp', waLink)}` : ''}
     </p>
-    ${waLink ? `
-    <p>También puede compartir su experiencia directamente por WhatsApp:</p>
-    <p>
-      <a href="${waLink}" style="display:inline-block;padding:10px 20px;background:#25d366;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">
-        Enviar comentario por WhatsApp
-      </a>
-    </p>
-    ` : ''}
-    <p style="color:#9ca3af;font-size:0.8em;margin-top:24px">Si ya dejó su reseña, muchas gracias. Puede ignorar este correo.</p>
+    ${emailDivider()}
+    ${emailNote('Si ya dejó su reseña, muchas gracias. Puede ignorar este correo.')}
   `
 
   await getTransport().sendMail({
@@ -350,28 +436,39 @@ export async function sendReminderEmail(data: ReminderEmailData, cfg: ClinicConf
   const typeLabel  = APPOINTMENT_TYPE_LABEL[data.appointmentType] ?? data.appointmentType
   const dateStr    = formatDate(data.fecha)
 
+  const infoRowsRem: [string, string][] = [
+    ['Servicio', esc(typeLabel)],
+    ['Hora', `<span style="font-family:'IBM Plex Mono',monospace;">${esc(data.hora)} hrs</span>`],
+    ...(cfg.clinicAddress ? [['Lugar', esc(cfg.clinicAddress)] as [string, string]] : []),
+  ]
+
   const content = `
-    <p>Estimado/a <strong>${esc(data.patientName)}</strong>,</p>
-    <p>Le recordamos que mañana tiene una cita programada en ${esc(cfg.clinicName)}.</p>
-    <table style="border-collapse:collapse;width:100%;margin:16px 0">
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600;width:40%">Tipo</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(typeLabel)}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Fecha</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(dateStr)}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Hora</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(data.hora)}</td></tr>
-      ${cfg.clinicAddress ? `<tr><td style="padding:8px 12px;background:#f0f9ff;border:1px solid #e5e7eb;font-weight:600">Lugar</td><td style="padding:8px 12px;border:1px solid #e5e7eb">${esc(cfg.clinicAddress)}</td></tr>` : ''}
-    </table>
-    <p>
-      <a href="${confirmUrl}" style="display:inline-block;padding:10px 20px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Confirmar asistencia</a>
-      <a href="${modifyUrl}"  style="display:inline-block;padding:10px 20px;background:#0369a1;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-right:8px;margin-bottom:8px">Cambiar fecha</a>
-      <a href="${cancelUrl}"  style="display:inline-block;padding:10px 20px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-bottom:8px">Cancelar cita</a>
+    ${iconChip(`<span style="color:#d97706">${SVG_CLOCK}</span>`, '#fffbeb', '#d97706')}
+    ${emailTitle('Tu cita es mañana')}
+    ${emailLead(`Hola <b>${esc(data.patientName)}</b>, te recordamos que tienes una cita programada <b>mañana, ${esc(dateStr)}</b>.`)}
+    ${infoGrid(infoRowsRem)}
+    <p style="margin:0 0 20px;">
+      ${ctaButton('Confirmar asistencia', confirmUrl)}
+      &nbsp;
+      ${ctaSecondary('Reagendar', modifyUrl)}
+      &nbsp;
+      ${ctaSecondary('Cancelar', cancelUrl)}
     </p>
-    ${cfg.clinicPhone ? `<p style="color:#6b7280;font-size:0.875em">Si tiene dudas llámenos al ${esc(cfg.clinicPhone)}.</p>` : ''}
+    <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin:0 0 10px;">Recomendaciones</p>
+    <ul style="list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:6px;">
+      <li style="font-size:13px;color:#475569;">✓ &nbsp;Llega 10 minutos antes para tu registro</li>
+      <li style="font-size:13px;color:#475569;">✓ &nbsp;Trae identificación oficial y estudios previos</li>
+      <li style="font-size:13px;color:#475569;">✓ &nbsp;Si presentas fiebre o síntomas graves, notifícanos antes</li>
+    </ul>
+    ${emailDivider()}
+    ${emailNote(`Para cancelar sin penalización notifícanos con al menos 2 horas de anticipación${cfg.clinicPhone ? ` al <b style="color:#334155">${esc(cfg.clinicPhone)}</b>` : ''} o desde <a href="${appUrl()}" style="color:#0284c7;">otorrinonet.mx</a>.`)}
   `
 
   await getTransport().sendMail({
     from: sender(cfg),
     to: `"${data.patientName}" <${data.patientEmail}>`,
-    subject: `Recordatorio de cita mañana — ${data.hora} — ${cfg.clinicName}`,
-    html: emailLayout(content, cfg),
+    subject: `Recordatorio: tu cita es mañana a las ${data.hora} hrs`,
+    html: emailLayout(content, cfg, { headerBg: '#0369a1' }),
     text: `Recordatorio: ${typeLabel} mañana ${dateStr} a las ${data.hora}.\nConfirmar: ${confirmUrl}\nCambiar: ${modifyUrl}\nCancelar: ${cancelUrl}`,
   })
 }
@@ -513,5 +610,76 @@ export async function sendOrderTicket(params: {
     subject: `Confirmación de pedido #${params.order.id.slice(-8).toUpperCase()} — ${params.cfg.clinicName}`,
     html: emailLayout(content, params.cfg),
     text: `Hola ${params.order.compradorNombre}, gracias por tu compra. Pedido #${params.order.id.slice(-8).toUpperCase()}, Total: ${formatCurrency(params.order.total)}`,
+  })
+}
+
+// ─── Receta firmada ───────────────────────────────────────────────────────────
+
+export interface SignedPrescriptionEmailData {
+  patientName: string
+  patientEmail: string
+  doctorName: string
+  fecha: string
+  prescriptionId: string
+  firmaHash?: string | null
+  diagnostico?: string | null
+  medications: {
+    name: string
+    brandName?: string
+    dose: string
+    frequency: string
+    duration?: string
+    route?: string
+  }[]
+}
+
+export async function sendSignedPrescriptionEmail(
+  data: SignedPrescriptionEmailData,
+  cfg: ClinicConfig,
+): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return
+
+  const verifyUrl = `${appUrl()}/verificar/receta/${data.prescriptionId}${data.firmaHash ? `?hash=${data.firmaHash}` : ''}`
+  const folio = `rx-${data.prescriptionId.slice(-8)}`
+  const dateStr = formatDate(data.fecha)
+
+  const medsHtml = data.medications.map(m => `
+    <div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+      <div style="font-family:'DM Sans',Arial,sans-serif;font-size:14px;font-weight:700;color:#0f172a;">
+        ${esc(m.name)}${m.brandName ? ` <span style="font-size:12px;font-style:italic;color:#94a3b8;">(${esc(m.brandName)})</span>` : ''}
+      </div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+        ${m.dose ? `<span style="background:#f1f5f9;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:600;color:#475569;">${esc(m.dose)}</span>` : ''}
+        ${m.frequency ? `<span style="background:#f1f5f9;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:600;color:#475569;">${esc(m.frequency)}</span>` : ''}
+        ${m.duration ? `<span style="background:#f1f5f9;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:600;color:#475569;">${esc(m.duration)}</span>` : ''}
+        ${m.route ? `<span style="background:#f1f5f9;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:600;color:#475569;">${esc(m.route)}</span>` : ''}
+      </div>
+    </div>`).join('')
+
+  const infoRowsRx: [string, string][] = [
+    ...(data.diagnostico ? [['Diagnóstico', esc(data.diagnostico)] as [string, string]] : []),
+    ['Médico', `${esc(data.doctorName)}${cfg.doctorLicense ? ` · Céd. ${esc(cfg.doctorLicense)}` : ''}`],
+    ['Folio', `<span style="font-family:'IBM Plex Mono',monospace;">${esc(folio)}</span>`],
+    ['Firmada', `<span style="font-family:'IBM Plex Mono',monospace;">${esc(dateStr)}</span>`],
+  ]
+
+  const content = `
+    ${iconChip('<span style="font-family:DM Sans,Arial,sans-serif;font-size:26px;font-weight:700;color:#047857;line-height:1;">℞</span>', '#ecfdf5', '#047857')}
+    ${emailTitle('Tu receta está lista')}
+    ${emailLead(`Hola <b>${esc(data.patientName)}</b>, el Dr. Viveros ha firmado tu receta médica del <b>${dateStr}</b>. Puedes descargarla a continuación:`)}
+    ${infoGrid(infoRowsRx)}
+    <p style="margin:0 0 20px;">${ctaButton('Descargar receta PDF', verifyUrl, '#047857')}</p>
+    <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin:0 0 10px;">Medicamentos prescritos</p>
+    ${medsHtml}
+    ${emailDivider()}
+    ${emailNote(`Este documento tiene validez legal con firma electrónica SHA-256 conforme a la NOM-004-SSA3-2012. El enlace de descarga estará disponible por 30 días. ¿Tienes dudas sobre tu medicación? <a href="mailto:${cfg.clinicEmail || 'contacto@otorrinonet.com'}" style="color:#0284c7;">Escríbenos</a>.`)}
+  `
+
+  await getTransport().sendMail({
+    from: sender(cfg),
+    to: `"${data.patientName}" <${data.patientEmail}>`,
+    subject: `℞ Tu receta médica está lista — ${esc(cfg.doctorName)}`,
+    html: emailLayout(content, cfg),
+    text: `Tu receta del ${dateStr} está lista. Descárgala en: ${verifyUrl}`,
   })
 }

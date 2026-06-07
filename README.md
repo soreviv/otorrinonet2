@@ -223,7 +223,17 @@ URL de login: `/login`. El sistema redirige según el rol tras autenticarse.
 
 ## Cumplimiento normativo
 
-- **NOM-004-SSA3** — Expediente clínico electrónico estructurado
-- **NOM-024-SSA3** — Sistemas de información de registro electrónico
-- **LFPDPPP** — Aviso de privacidad y derechos ARCO
-- **HL7-FHIR** — Exportación de expedientes en formato estándar (en desarrollo)
+| Norma | Estado |
+|---|---|
+| **NOM-004-SSA3** — Expediente clínico electrónico estructurado | ✅ Implementado |
+| **LFPDPPP** — Aviso de privacidad, derechos ARCO, cifrado AES-256-GCM | ✅ Implementado |
+| **NOM-024-SSA3** — Certificación SIRES ante DGIS | 🔄 En proceso (4 tracks activos) |
+| **GIIS-B015** — Reporte SIS Consulta Externa | 🔄 En desarrollo (Track 3) |
+| **GIIS-A004** — SGSI (ISO 27799) | 🔄 En documentación (Track 4, 6 meses) |
+| **HL7-FHIR** — Interoperabilidad estándar | ⏳ Largo plazo |
+
+### Proceso de certificación NOM-024
+
+La DGIS (Secretaría de Salud) certifica el sistema como SIRES mediante el **Procedimiento de Evaluación de la Conformidad (PEC)**. Los 4 aspectos evaluados son: datos mínimos de identificación, catálogos fundamentales, GIIS aplicables (GIIS-B015 para consulta externa) y el Sistema de Gestión de Seguridad de la Información (GIIS-A004).
+
+Contacto DGIS: `angel.serrano@salud.gob.mx` · `blanca.pinette@salud.gob.mx` · Homero 213, Chapultepec Morales, CDMX.

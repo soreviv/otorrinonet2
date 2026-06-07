@@ -201,3 +201,22 @@ El proyecto tiene **66 tests en verde** con Vitest (2026-05-24). Correr `npm tes
 - **FIX-09**: botón flotante de WhatsApp y enlace `tel:` en el header — bloqueado hasta confirmar número celular del Dr. Viveros.
 - **`listo_para_recoger`** falta en el enum `OrderStatus` — agregar con `prisma db push` cuando sea necesario.
 - **Tienda Fase 3**: autofactura CFDI para paquetes de consulta (D01) — requiere definir proveedor de facturación.
+
+## Certificación NOM-024-SSA3-2012 (proyecto activo)
+
+El sistema se está certificando como SIRES ante la DGIS. La implementación se divide en 4 tracks:
+
+- **Track 1** — Datos mínimos del paciente: CURP, sexo CURP/biológico/género, derechohabiencia, entidad de nacimiento, indígena, afromexicano, migrante.
+- **Track 2** — Catálogos fundamentales: CIE-10 en diagnósticos de notas, CLUES del consultorio, catálogos DGIS.
+- **Track 3** — GIIS-B015: somatometría + signos vitales en nota clínica, generador del archivo de intercambio SIS-CEX (`/api/dgis/exportar-cex`), UI en `/staff/dgis`.
+- **Track 4** — GIIS-A004 SGSI: documentación de 11 dominios ISO 27799, Declaración de Aplicabilidad (6 meses de madurez obligatorios).
+
+**Archivos nuevos protegidos para Claude Code** (no modificar sin coordinación):
+
+| Archivo | Razón |
+|---|---|
+| `app/src/app/api/dgis/exportar-cex/route.ts` | Generador GIIS-B015 — lógica crítica de interoperabilidad con SSA |
+| `app/src/lib/catalogos/` | Catálogos CIE-10 y DGIS — no modificar sin verificar versión oficial |
+| `app/src/lib/schemas/dgis.ts` | Validaciones exactas de la GIIS-B015 — errores rompen la certificación |
+
+**Regla crítica**: nombres en archivo de intercambio en MAYÚSCULAS sin acentos. Máx 15% de CURP genérica. Máx 5% de diagnóstico R69X.
