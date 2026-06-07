@@ -6,6 +6,7 @@ import {
   Settings,
   ShoppingBag,
   Package,
+  DatabaseZap,
 } from 'lucide-react'
 import type { StaffRole } from './StaffShell'
 
@@ -50,6 +51,13 @@ export const staffNavItems = [
     href: '/staff/tienda/productos',
     icon: Package,
     roles: ['medico', 'recepcionista'] as StaffRole[],
+  },
+  {
+    id: 'dgis',
+    label: 'Exportación DGIS',
+    href: '/staff/dgis',
+    icon: DatabaseZap,
+    roles: ['medico'] as StaffRole[],
   },
   {
     id: 'configuracion',

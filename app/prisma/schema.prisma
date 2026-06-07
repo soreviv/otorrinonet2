@@ -408,6 +408,10 @@ model ClinicConfig {
   notificationEmail      String?
   googleReviewsJson      Json?
   googleReviewsCachedAt  DateTime?
+  // NOM-024 / DGIS
+  clues                  String?
+  curpPrestador          String?
+  servicioAtencionCex    Int?
   updatedAt              DateTime @updatedAt
 
   @@map("clinic_config")

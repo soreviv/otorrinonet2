@@ -13,6 +13,12 @@ export const CLINIC_CONFIG = {
   clinicEmail: process.env.CLINIC_EMAIL ?? '',
   clinicLogoUrl: '' as string,
   clinicCofepris: process.env.CLINIC_COFEPRIS ?? undefined,
+  // NOM-024 / DGIS
+  clues: process.env.DGIS_CLUES ?? '',
+  curpPrestador: process.env.DGIS_CURP_PRESTADOR ?? '',
+  servicioAtencionCex: process.env.DGIS_SERVICIO_ATENCION
+    ? parseInt(process.env.DGIS_SERVICIO_ATENCION)
+    : null as number | null,
 }
 
 export async function getClinicConfigFromDB(): Promise<typeof CLINIC_CONFIG> {
@@ -32,6 +38,9 @@ export async function getClinicConfigFromDB(): Promise<typeof CLINIC_CONFIG> {
       clinicEmail: cfg.clinicEmail || CLINIC_CONFIG.clinicEmail,
       clinicLogoUrl: cfg.clinicLogoUrl || '',
       clinicCofepris: cfg.clinicCofepris || CLINIC_CONFIG.clinicCofepris,
+      clues: cfg.clues || CLINIC_CONFIG.clues,
+      curpPrestador: cfg.curpPrestador || CLINIC_CONFIG.curpPrestador,
+      servicioAtencionCex: cfg.servicioAtencionCex ?? CLINIC_CONFIG.servicioAtencionCex,
     }
   } catch {
     return CLINIC_CONFIG
