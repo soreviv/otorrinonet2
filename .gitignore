@@ -47,3 +47,4 @@ credentials.json
 *.key
 .credentials
 .claude/design-system/
+sgsi/
