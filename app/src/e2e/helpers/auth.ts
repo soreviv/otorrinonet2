@@ -1,5 +1,5 @@
 import { Page } from '@playwright/test'
-import { authenticator } from 'otplib'
+import { generate } from 'otplib'
 
 export async function loginStaff(page: Page) {
   const email = process.env.E2E_STAFF_EMAIL!
@@ -13,7 +13,7 @@ export async function loginStaff(page: Page) {
 
   // Pantalla de 2FA — el campo se llama "code" en /login/verify-2fa
   await page.waitForURL(/verify-2fa/)
-  const token = authenticator.generate(totpSecret)
+  const token = await generate({ secret: totpSecret })
   await page.fill('input[name="code"]', token)
   await page.click('button[type="submit"]')
 

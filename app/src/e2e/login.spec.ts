@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './helpers/setup'
 import { loginStaff } from './helpers/auth'
 
 test.describe('Login — Panel staff', () => {
@@ -33,8 +33,11 @@ test.describe('Login — Panel staff', () => {
 
   test('cierra sesión correctamente', async ({ page }) => {
     await loginStaff(page)
-    // Busca botón de cierre de sesión
-    await page.getByRole('button', { name: /cerrar sesión|salir/i }).click()
+    // Descarta el banner de cookies si está visible
+    const cookieBanner = page.locator('[aria-label="Cerrar sin aceptar"]')
+    if (await cookieBanner.isVisible()) await cookieBanner.click()
+    // Busca botón de cierre de sesión y hace clic aunque un overlay lo cubra
+    await page.getByRole('button', { name: /cerrar sesión|salir/i }).click({ force: true })
     await expect(page).toHaveURL(/login|\//)
   })
 })
