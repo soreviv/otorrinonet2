@@ -225,6 +225,75 @@ function parseName(fullName: string): { nombre: string; apellidoPaterno: string;
   }
 }
 
+// ─── Preregistro del paciente ─────────────────────────────────────────────────
+
+const PreregistroSchema = z.object({
+  token:           z.string().min(1),
+  fechaNacimiento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida'),
+  sexo:            z.enum(['masculino', 'femenino', 'otro']),
+  curp:            z.string().max(18).optional(),
+  domicilio:       z.string().max(300).optional(),
+  alergias:        z.array(z.string().max(100)).max(20).optional(),
+  medicamentos:    z.string().max(1000).optional(),
+  antecedentes:    z.string().max(2000).optional(),
+  ipAddress:       z.string().optional(),
+})
+
+export type PreregistroPayload = z.infer<typeof PreregistroSchema>
+
+export async function submitPreregistro(
+  payload: PreregistroPayload,
+): Promise<{ ok: boolean; error?: string }> {
+  const parsed = PreregistroSchema.safeParse(payload)
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos.' }
+  const d = parsed.data
+
+  const appointment = await prisma.appointment.findUnique({ where: { actionToken: d.token } })
+  if (!appointment) return { ok: false, error: 'Enlace inválido o expirado.' }
+  if (appointment.status === 'cancelada') return { ok: false, error: 'Esta cita ya fue cancelada.' }
+  if (!appointment.patientId) return { ok: false, error: 'No se encontró el expediente asociado a esta cita.' }
+
+  // Idempotencia: si ya completó el preregistro, retornar éxito
+  if (appointment.preregistroAt) return { ok: true }
+
+  const fechaNac = new Date(d.fechaNacimiento + 'T12:00:00')
+
+  await prisma.$transaction([
+    // Actualizar datos del paciente
+    prisma.patient.update({
+      where: { id: appointment.patientId },
+      data: {
+        fechaNacimiento: fechaNac,
+        sexo: d.sexo,
+        curp:     d.curp      ? encrypt(d.curp)      : undefined,
+        direccion: d.domicilio ? encrypt(d.domicilio) : undefined,
+        alergias: d.alergias ?? [],
+        antecedentesPersonalesPatologicos: d.antecedentes
+          ? (d.medicamentos ? `Medicamentos: ${d.medicamentos}\n\n${d.antecedentes}` : d.antecedentes)
+          : (d.medicamentos ? `Medicamentos: ${d.medicamentos}` : undefined),
+      },
+    }),
+    // Registrar aceptación del aviso de privacidad
+    prisma.patientConsent.create({
+      data: {
+        patientId:          appointment.patientId,
+        tipoConsentimiento: 'aviso_privacidad',
+        version:            '2.0',
+        aceptado:           true,
+        fechaAceptacion:    new Date(),
+        ipAddress:          d.ipAddress ?? null,
+      },
+    }),
+    // Marcar preregistro completado
+    prisma.appointment.update({
+      where: { id: appointment.id },
+      data:  { preregistroAt: new Date() },
+    }),
+  ])
+
+  return { ok: true }
+}
+
 async function findOrCreatePortalPatient(fullName: string, email: string, phone: string): Promise<string | null> {
   try {
     const { nombre, apellidoPaterno, apellidoMaterno } = parseName(fullName)

@@ -41,6 +41,8 @@ La aplicación Next.js vive en el subdirectorio `app/`. Todos los comandos npm s
 
 ## Estado de la suite de tests
 
+### Vitest (unitarios + integración)
+
 | Sprint | Archivo | Tests | Estado |
 |--------|---------|-------|--------|
 | T0 | `vitest.config.ts`, `setup.ts`, scripts `package.json` | — | ✅ completado (Jules, 2026-05-24) |
@@ -50,16 +52,27 @@ La aplicación Next.js vive en el subdirectorio `app/`. Todos los comandos npm s
 | T2-A | `src/__tests__/actions/appointments.test.ts` | 17 | ✅ completado (Claude, 2026-05-24) |
 | T2-B | `src/__tests__/actions/auth.test.ts` | 18 | ✅ completado (Claude, 2026-05-24) |
 | T2-C | `src/__tests__/api/stripe-webhook.test.ts` | 11 | ✅ completado (Claude, 2026-05-24) |
-| T3 | E2E Playwright | — | 🔲 largo plazo, sin fecha |
-| **Total** | | **66/66** | **✅ en verde** |
+| T4 | `src/__tests__/lib/giis-b015.test.ts` | 28 | ✅ completado (Claude, 2026-06-13) |
+| **Total Vitest** | | **~94** | **✅ en verde** |
+
+### Playwright (E2E)
+
+| Archivo | Tests | Estado |
+|---------|-------|--------|
+| `src/e2e/smoke.spec.ts` | 3 | ✅ completado (Claude, 2026-06-13) |
+| `src/e2e/login.spec.ts` | 5 | ✅ completado (Claude, 2026-06-13) |
+| `src/e2e/agendar.spec.ts` | 2 | ✅ completado (Claude, 2026-06-13) |
+| **Total E2E** | **10/10** | **✅ en verde** |
+
+Nota: Turnstile de producción no es bypasseable en runtime — el test de agendar cubre hasta paso 0→1.
 
 **Regla de mocking:** usar `vi.hoisted()` para cualquier variable que se pase dentro de un factory de `vi.mock()`. De lo contrario Vitest lanzará `Cannot access '...' before initialization`.
 
 ---
 
-## Certificación NOM-024-SSA3-2012 (proyecto activo)
+## Certificación NOM-024-SSA3-2012
 
-El sistema se está certificando como SIRES ante la DGIS. Las tareas nuevas de Jules están en el Track 1, 2 y 3 del plan de certificación. El Track 4 (SGSI) lo maneja Claude Code.
+El sistema se está certificando como SIRES ante la DGIS. **Tracks 1, 2 y 3 completados.** El Track 4 (SGSI) lo maneja Claude Code y requiere 6 meses de madurez documental antes de la verificación.
 
 **Reglas críticas de la GIIS-B015** (respetar en todo el código nuevo):
 - Nombres de pacientes y prestadores: **MAYÚSCULAS, sin acentos**, solo A-Z + Ñ. Caracteres especiales permitidos: `-`, `,`, `.`, `/`, `'`, `¨`.
@@ -299,7 +312,7 @@ Esta regla es absoluta. No hay excepciones por "limpieza", "consistencia" ni "re
   - `app/package.json` / `app/package-lock.json` (salvo que la tarea lo pida explícitamente)
 - En las tareas NOM-024: los datos en BD pueden tener acentos; la normalización a MAYÚSCULAS sin acentos ocurre **solo al generar el archivo de intercambio SIS-CEX**, no al guardar en BD.
 
-## Estado de tareas completadas
+## Estado de tareas
 
 | Tarea | Estado | Fecha |
 |---|---|---|
@@ -307,6 +320,13 @@ Esta regla es absoluta. No hay excepciones por "limpieza", "consistencia" ni "re
 | T1-A — Tests schemas Zod | ✅ Completado | 2026-05-24 |
 | T1-B — Tests `esc()` mailer | ✅ Completado | 2026-05-24 |
 | T1-C — Tests `useCarrito` | ✅ Completado | 2026-05-24 |
-| NOM-1 — Campos paciente | 🔲 Pendiente | — |
-| NOM-2 — CIE-10 en notas | 🔲 Pendiente | — |
-| NOM-3 — Somatometría | 🔲 Pendiente | — |
+| T2-A — Tests appointments | ✅ Completado | 2026-05-24 |
+| T2-B — Tests auth | ✅ Completado | 2026-05-24 |
+| T2-C — Tests webhook Stripe | ✅ Completado | 2026-05-24 |
+| T3 — E2E Playwright | ✅ Completado (10/10) | 2026-06-13 |
+| T4 — Tests GIIS-B015 | ✅ Completado (28 casos) | 2026-06-13 |
+| NOM-1 — Campos paciente | ✅ Completado | 2026-06-13 |
+| NOM-2 — CIE-10 en notas | ✅ Completado | 2026-06-13 |
+| NOM-3 — Somatometría y signos vitales | ✅ Completado | 2026-06-13 |
+| NOM-4 — Generador GIIS-B015 + UI DGIS | ✅ Completado | 2026-06-13 |
+| NOM-5 — SGSI (Track 4 / GIIS-A004) | 🔄 En documentación | — (6 meses madurez) |

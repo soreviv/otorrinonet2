@@ -148,6 +148,7 @@ model Appointment {
   patientConfirmed Boolean   @default(false)
   reminderSent     Boolean   @default(false)
   npsSentAt        DateTime?
+  preregistroAt    DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 

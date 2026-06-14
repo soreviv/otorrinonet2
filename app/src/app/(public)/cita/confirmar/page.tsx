@@ -9,7 +9,7 @@ async function handleConfirm(formData: FormData) {
   const token = formData.get('token') as string
   const result = await confirmAppointmentByToken(token)
   if (result.ok) {
-    redirect('/cita-confirmada')
+    redirect(`/cita-confirmada?token=${token}`)
   } else {
     redirect(`/?error=${encodeURIComponent(result.error ?? 'error')}`)
   }

@@ -94,6 +94,12 @@ El sistema está implementando el **Sistema de Gestión de Seguridad de la Infor
 | 9. Gestión de Incidentes | Pendiente redactar procedimiento de respuesta |
 | 10. Continuidad del Negocio | Pendiente plan formal de recuperación ante desastres |
 
+**Medidas de integridad para interoperabilidad GIIS-B015:**
+- Validación estricta de CURP mediante regex oficial (≤ 15% genérica).
+- Diagnósticos R69X limitados a ≤ 5% por reporte.
+- Nombres normalizados en MAYÚSCULAS sin acentos antes de escribir el archivo de intercambio.
+- 28 tests unitarios en verde que validan la lógica de serialización y las reglas DGIS.
+
 **Pendiente de documentar (Track 4 del plan de certificación):**
 - Política de Seguridad de la Información (firmada por el Dr. Viveros)
 - Inventario de activos (VPS, BD, software, expedientes)

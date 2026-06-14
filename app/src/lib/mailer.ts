@@ -213,9 +213,10 @@ export async function sendAppointmentConfirmationToPatient(
 ): Promise<void> {
   if (process.env.NODE_ENV === 'test') return
 
-  const confirmUrl  = `${appUrl()}/cita/confirmar?token=${data.actionToken}`
-  const cancelUrl   = `${appUrl()}/cita/cancelar?token=${data.actionToken}`
-  const modifyUrl   = `${appUrl()}/cita/modificar?token=${data.actionToken}`
+  const confirmUrl      = `${appUrl()}/cita/confirmar?token=${data.actionToken}`
+  const cancelUrl       = `${appUrl()}/cita/cancelar?token=${data.actionToken}`
+  const modifyUrl       = `${appUrl()}/cita/modificar?token=${data.actionToken}`
+  const preregistroUrl  = `${appUrl()}/cita/preregistro?token=${data.actionToken}`
   const typeLabel   = APPOINTMENT_TYPE_LABEL[data.appointmentType] ?? data.appointmentType
   const dateStr     = formatDate(data.fecha)
 
@@ -239,6 +240,11 @@ export async function sendAppointmentConfirmationToPatient(
       &nbsp;
       ${ctaSecondary('Cancelar', cancelUrl)}
     </p>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px 20px;margin:20px 0;">
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#15803d;margin:0 0 8px;">Agilice su consulta</p>
+      <p style="font-size:13px;color:#166534;margin:0 0 14px;">Complete su información previa en línea — le tomará menos de 3 minutos y el doctor la tendrá lista cuando llegue.</p>
+      ${ctaButton('Completar mi información', preregistroUrl, '#15803d')}
+    </div>
     <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin:20px 0 10px;">Qué llevar</p>
     <ul style="list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:8px;">
       <li style="font-size:13px;color:#475569;">✓ &nbsp;Identificación oficial vigente</li>

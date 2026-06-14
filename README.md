@@ -29,13 +29,15 @@ Plataforma integral para la práctica privada del **Dr. Alejandro Viveros Domín
 | 1 | **Sitio público** | `/`, `/perfil`, `/servicios`, `/ubicacion`, `/contacto` | Presentación profesional |
 | 2 | **Agendado de citas** | `/agendar` | Formulario 3 pasos con Turnstile; modifica/cancela cita por token |
 | 3 | **Tienda médica** | `/tienda` | Catálogo, carrito, checkout Stripe, confirmación |
-| 4 | **Expediente clínico (EHR)** | `/staff/ehr` | Historia clínica NOM-004-SSA3 |
-| 5 | **Notas, recetas y consentimientos** | `/staff/notas` | Notas SOAP, recetas con firma SHA-256, consentimientos |
-| 6 | **Agenda staff** | `/staff/agenda` | Calendario, bloqueo de fechas |
-| 7 | **Admin tienda** | `/staff/tienda` | CRUD productos, pedidos, estadísticas |
-| 8 | **Dashboard** | `/staff/dashboard` | Métricas clínicas y de ventas |
-| 9 | **Configuración** | `/staff/configuracion` | Datos del consultorio, logo, cedulas, bloqueos |
-| 10 | **Admin** | `/staff/admin` | Usuarios, bitácora, ARCO, exportación FHIR |
+| 4 | **Autofactura CFDI 4.0** | `/autofactura` | Generación de factura electrónica post-compra |
+| 5 | **Expediente clínico (EHR)** | `/staff/ehr` | Historia clínica NOM-004-SSA3 con campos NOM-024 Track 1 |
+| 6 | **Notas, recetas y consentimientos** | `/staff/notas` | Notas SOAP, recetas con firma SHA-256, somatometría y signos vitales |
+| 7 | **Agenda staff** | `/staff/agenda` | Calendario, bloqueo de fechas |
+| 8 | **Admin tienda** | `/staff/tienda` | CRUD productos, pedidos, estadísticas |
+| 9 | **Dashboard** | `/staff/dashboard` | Métricas clínicas y de ventas |
+| 10 | **Configuración** | `/staff/configuracion` | Datos del consultorio, logo, cédulas, bloqueos |
+| 11 | **Admin** | `/staff/admin` | Usuarios, bitácora, ARCO, exportación FHIR |
+| 12 | **Exportación DGIS** | `/staff/dgis` | UI para generación del archivo GIIS-B015 (SIS-CEX) |
 
 ---
 
@@ -119,12 +121,15 @@ Todos los comandos se ejecutan desde `app/`.
 
 ## Tests
 
-Framework: **Vitest** con jsdom y `@testing-library/react`. **66/66 tests en verde.**
+### Tests unitarios — Vitest
+
+Framework: **Vitest** con jsdom y `@testing-library/react`. **~94 tests en verde.**
 
 ```
 src/__tests__/
 ├── schemas/tienda.test.ts          # 7 casos — schemas Zod (checkout, carrito, dirección)
 ├── lib/mailer.test.ts              # 5 casos — función esc() escape HTML
+├── lib/giis-b015.test.ts           # 28 casos — generador GIIS-B015 (normName, serializeRow, buildGiisFile)
 ├── hooks/useCarrito.test.ts        # 8 casos — carrito (localStorage, subtotal, envío)
 ├── actions/appointments.test.ts   # 17 casos — slots, fechas bloqueadas, reagendamiento
 ├── actions/auth.test.ts            # 18 casos — rate-limit, lockout, password reset
@@ -132,6 +137,17 @@ src/__tests__/
 ```
 
 > Usar `vi.hoisted()` para variables referenciadas dentro de factories de `vi.mock()`.
+
+### Tests E2E — Playwright
+
+**10/10 tests en verde.** Requieren servidor levantado en el puerto 5000.
+
+```
+src/e2e/
+├── smoke.spec.ts    # 3 casos — páginas públicas básicas
+├── login.spec.ts    # 5 casos — login 2FA, cierre de sesión, guard /staff
+└── agendar.spec.ts  # 2 casos — carga del formulario, paso 0→1
+```
 
 ---
 
@@ -227,9 +243,10 @@ URL de login: `/login`. El sistema redirige según el rol tras autenticarse.
 |---|---|
 | **NOM-004-SSA3** — Expediente clínico electrónico estructurado | ✅ Implementado |
 | **LFPDPPP** — Aviso de privacidad, derechos ARCO, cifrado AES-256-GCM | ✅ Implementado |
-| **NOM-024-SSA3** — Certificación SIRES ante DGIS | 🔄 En proceso (4 tracks activos) |
-| **GIIS-B015** — Reporte SIS Consulta Externa | 🔄 En desarrollo (Track 3) |
-| **GIIS-A004** — SGSI (ISO 27799) | 🔄 En documentación (Track 4, 6 meses) |
+| **NOM-024 Track 1** — Datos mínimos del paciente (CURP, sexo, derechohabiencia, etc.) | ✅ Implementado |
+| **NOM-024 Track 2** — Catálogos fundamentales (CIE-10 en diagnósticos) | ✅ Implementado |
+| **NOM-024 Track 3** — GIIS-B015 SIS Consulta Externa | ✅ Implementado (`/api/dgis/exportar-cex`, `/staff/dgis`) |
+| **NOM-024 Track 4** — GIIS-A004 SGSI (ISO 27799, 11 dominios) | 🔄 En documentación (requiere 6 meses de madurez) |
 | **HL7-FHIR** — Interoperabilidad estándar | ⏳ Largo plazo |
 
 ### Proceso de certificación NOM-024

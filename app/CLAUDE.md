@@ -55,16 +55,20 @@ npm run db:studio     # Prisma Studio
 | `src/lib/sitio-publico-data.ts` | Contenido estático del sitio público |
 | `src/lib/stripe.ts` | Cliente Stripe server-side (lazy init, evita error en build) |
 | `src/lib/stripe-client.ts` | `stripePromise` para Stripe Elements en el browser |
+| `src/lib/giis-b015.ts` | Generador del archivo de intercambio GIIS-B015 (SIS-CEX) |
 | `src/lib/schemas/tienda.ts` | Schemas Zod para productos, pedidos y checkout |
 | `src/hooks/useCarrito.ts` | Hook de carrito (localStorage) |
 | `src/components/sitio-publico/PublicHeader.tsx` | Header compartido del sitio público |
 | `src/components/sitio-publico/PublicFooter.tsx` | Footer compartido del sitio público |
 | `src/app/(public)/layout.tsx` | Layout público (pass-through) |
+| `src/app/(public)/autofactura/` | Autofactura CFDI 4.0 post-compra |
 | `src/app/staff/layout.tsx` | Layout del panel interno (async, verifica sesión) |
+| `src/app/staff/dgis/` | UI de exportación GIIS-B015 y reporte mensual |
 | `src/app/actions/appointments.ts` | Server Action — agendado de citas |
 | `src/app/actions/tienda.ts` | Server Actions — catálogo, stock, checkout |
 | `src/app/actions/tienda-admin.ts` | Server Actions — CRUD productos y pedidos (staff) |
 | `src/app/api/stripe/webhook/route.ts` | Webhook Stripe — confirma pago, decrementa stock |
+| `src/app/api/dgis/exportar-cex/` | API route — genera archivo de intercambio mensual SIS-CEX |
 | `prisma/schema.prisma` | Schema de la base de datos |
 
 ## Tienda en línea
@@ -92,7 +96,8 @@ npm run db:studio     # Prisma Studio
 ## Pendientes conocidos
 
 - **FIX-09**: botón flotante de WhatsApp y enlace `tel:` en el header — bloqueado hasta que el Dr. Viveros confirme su número de celular. Rellenar `phone` y `whatsapp` en `src/lib/sitio-publico-data.ts` y añadir el botón flotante en `src/app/(public)/layout.tsx`.
-- **Tienda Fase 3**: CFDI (D01 para paquetes de consulta, G03 para físicos) — sin fecha, requiere definir proveedor de facturación.
+- **Módulo de cobros**: registro manual de honorarios (primera vez $1,100 / subsecuente $1,000 / lavado $600) — sin fecha, decisión pendiente de scope.
+- **FHIR export**: endpoints individuales y bulk — requiere definir sistema receptor (laboratorio, HIS, IMSS).
 
 ## Certificación NOM-024-SSA3-2012 (en curso)
 
@@ -100,15 +105,11 @@ El sistema está en proceso de certificarse como SIRES ante la DGIS (Secretaría
 
 **4 tracks de implementación:**
 
-1. **Datos mínimos del paciente** — agregar CURP, sexo CURP, sexo biológico, género, derechohabiencia, entidad de nacimiento, indicadores indígena/afromexicano/migrante al modelo `Patient`.
-2. **Catálogos fundamentales** — integrar CIE-10 en diagnósticos de notas clínicas, obtener CLUES del consultorio, catálogos de entidad federativa, país, derechohabiencia, tipo de personal.
-3. **GIIS-B015 Consulta Externa** — agregar campos de somatometría y signos vitales a la nota clínica; implementar generador del archivo de intercambio mensual SIS-CEX en `/api/dgis/exportar-cex` y UI en `/staff/dgis`.
-4. **GIIS-A004 SGSI** — documentar los 11 dominios de seguridad (ISO 27799), completar la Declaración de Aplicabilidad (DDA), redactar políticas. Requiere 6 meses de madurez antes de la verificación.
+1. **Track 1 ✅ Implementado** — Datos mínimos del paciente: CURP, sexo CURP, sexo biológico, género, derechohabiencia, entidad de nacimiento, indicadores indígena/afromexicano/migrante en modelo `Patient`.
+2. **Track 2 ✅ Implementado** — Catálogos fundamentales: CIE-10 en diagnósticos de notas clínicas, CLUES del consultorio, catálogos DGIS.
+3. **Track 3 ✅ Implementado** — GIIS-B015 Consulta Externa: somatometría + signos vitales en nota clínica, generador SIS-CEX en `src/app/api/dgis/exportar-cex/`, UI en `src/app/staff/dgis/`.
+4. **Track 4 🔄 En documentación** — GIIS-A004 SGSI: 11 dominios ISO 27799, Declaración de Aplicabilidad (DDA), políticas. Requiere 6 meses de madurez antes de la verificación ante DGIS.
 
-**Archivos nuevos previstos:**
-- `src/lib/catalogos/` — catálogos CIE-10, entidad federativa, país, derechohabiencia
-- `src/app/api/dgis/exportar-cex/route.ts` — generador GIIS-B015
-- `src/app/staff/dgis/` — UI de exportación y reporte mensual
-- `src/lib/schemas/dgis.ts` — schemas Zod para validación GIIS-B015
+**Reglas críticas GIIS-B015:** nombres en MAYÚSCULAS sin acentos (A-Z + Ñ). Máx 15% CURP genérica. Máx 5% diagnóstico R69X.
 
 **Contacto DGIS:** angel.serrano@salud.gob.mx / blanca.pinette@salud.gob.mx · +52 55 6392 2300 ext. 52584

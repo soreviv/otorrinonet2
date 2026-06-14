@@ -10,8 +10,42 @@ import { printPrescription } from '@/lib/print-prescription'
 import {
   ChevronDown, ArrowLeft, Pencil, User, HeartPulse, ClipboardList,
   Pill, Lock, Phone, Mail,
-  MapPin, FileText, Printer, ScrollText, FlaskConical, AlertCircle,
+  MapPin, FileText, Printer, ScrollText, FlaskConical, AlertCircle, Shield,
 } from 'lucide-react'
+
+// ─── Catálogos NOM-024 ────────────────────────────────────────────────────────
+
+const SEXO_CURP: Record<number, string> = { 1: 'Hombre', 2: 'Mujer', 3: 'No binario' }
+const SEXO_BIOLOGICO: Record<number, string> = { 1: 'Hombre', 2: 'Mujer', 3: 'Intersexual' }
+const GENERO: Record<number, string> = { 0: 'No especificado', 1: 'Masculino', 2: 'Femenino', 3: 'Transgénero', 4: 'Transexual', 5: 'Travesti', 6: 'Intersexual', 88: 'Otro' }
+const INDIGENA_AFRO: Record<number, string> = { 0: 'No', 1: 'Sí', 2: 'No responde', 3: 'No sabe', [-1]: 'Desconocido' }
+const MIGRANTE: Record<number, string> = { 0: 'No', 1: 'Migrante nacional', 2: 'Migrante internacional', 3: 'Retornado', [-1]: 'Desconocido' }
+const DERECHOHABIENCIA_MAP: Record<string, string> = {
+  '0': 'No especificado', '1': 'Ninguna', '2': 'IMSS', '3': 'ISSSTE',
+  '4': 'PEMEX', '5': 'SEDENA', '6': 'SEMAR', '8': 'Otra',
+  '10': 'IMSS Bienestar', '11': 'ISSFAM', '14': 'OPD IMSS Bienestar', '99': 'Se ignora',
+}
+const ENTIDADES: Record<string, string> = {
+  '01': 'Aguascalientes', '02': 'Baja California', '03': 'Baja California Sur',
+  '04': 'Campeche', '05': 'Coahuila', '06': 'Colima', '07': 'Chiapas',
+  '08': 'Chihuahua', '09': 'Ciudad de México', '10': 'Durango', '11': 'Guanajuato',
+  '12': 'Guerrero', '13': 'Hidalgo', '14': 'Jalisco', '15': 'Estado de México',
+  '16': 'Michoacán', '17': 'Morelos', '18': 'Nayarit', '19': 'Nuevo León',
+  '20': 'Oaxaca', '21': 'Puebla', '22': 'Querétaro', '23': 'Quintana Roo',
+  '24': 'San Luis Potosí', '25': 'Sinaloa', '26': 'Sonora', '27': 'Tabasco',
+  '28': 'Tamaulipas', '29': 'Tlaxcala', '30': 'Veracruz', '31': 'Yucatán',
+  '32': 'Zacatecas', '00': 'No especificado', '88': 'No aplica', '99': 'Se ignora',
+}
+
+function catLabel(map: Record<number | string, string>, val: number | string | null | undefined): string {
+  if (val == null) return '—'
+  return map[val] ?? `(${val})`
+}
+
+function derechoLabel(val: string | null | undefined): string {
+  if (!val) return '—'
+  return val.split('&').map(v => DERECHOHABIENCIA_MAP[v] ?? v).join(', ')
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -500,6 +534,32 @@ export function PatientDetail({ patient, currentUserRole, onEdit, onViewDocument
                 )}
               </div>
             </Section>
+
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-emerald-50 dark:bg-emerald-950/30">
+                  <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" strokeWidth={1.5} />
+                </div>
+                <span className="text-sm font-bold text-slate-800 dark:text-slate-200 tracking-wide uppercase">Datos NOM-024 / GIIS-B015</span>
+              </div>
+              <div className="px-5 py-5">
+                {(() => {
+                  const n = p.nom024Data
+                  return (
+                    <InfoGrid>
+                      <InfoRow label="Entidad de nacimiento" value={catLabel(ENTIDADES, n.entidadNacimiento)} />
+                      <InfoRow label="Sexo CURP (RENAPO)"   value={catLabel(SEXO_CURP, n.sexoCurp)} />
+                      <InfoRow label="Sexo biológico"        value={catLabel(SEXO_BIOLOGICO, n.sexoBiologico)} />
+                      <InfoRow label="Género"                value={catLabel(GENERO, n.genero)} />
+                      <InfoRow label="Derechohabiencia"      value={derechoLabel(n.derechohabiencia)} />
+                      <InfoRow label="Se considera indígena" value={catLabel(INDIGENA_AFRO, n.seConsideraIndigena)} />
+                      <InfoRow label="Afromexicano"          value={catLabel(INDIGENA_AFRO, n.seAutodenominaAfromexicano)} />
+                      <InfoRow label="Condición migrante"    value={catLabel(MIGRANTE, n.migrante)} />
+                    </InfoGrid>
+                  )
+                })()}
+              </div>
+            </div>
 
             <p className="text-center text-xs text-slate-400 dark:text-slate-600 pb-4">
               Expediente {p.expedienteNumber} · Última actualización: {formatDateTime(p.updatedAt)}

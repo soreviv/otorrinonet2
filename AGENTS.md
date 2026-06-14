@@ -166,14 +166,14 @@ Antes de hacer merge de un PR de Jules, Claude Code verifica TypeScript y aplica
 
 ## Módulos en desarrollo activo
 
-### Tienda en línea (Fase 1 — ✅ completada)
+### Tienda en línea (✅ completada)
 - **Admin staff**: ✅ completado (`/staff/tienda/`)
 - **Infraestructura Stripe**: ✅ completado (`stripe.ts`, `stripe-client.ts`, CSP, `useCarrito`, schemas Zod)
 - **Páginas públicas**: ✅ catálogo, detalle, carrito, checkout con Stripe Elements, confirmación, cancelado
 - **Webhook**: ✅ `/api/stripe/webhook` — firma HMAC, idempotencia, transacción stock + estado, email ticket
 - **Pendiente operativo**: llenar `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` en `.env` del servidor
 
-### Autofacturación CFDI 4.0
+### Autofacturación CFDI 4.0 (✅ completada)
 - ✅ Completado (`/autofactura/`)
 - Integrada con factura.com via `app/src/lib/factura-com.ts`
 
@@ -181,12 +181,15 @@ Antes de hacer merge de un PR de Jules, Claude Code verifica TypeScript y aplica
 
 ## Suite de tests
 
-El proyecto tiene **66 tests en verde** con Vitest (2026-05-24). Correr `npm test` (desde `app/`) antes de abrir cualquier PR.
+### Vitest (unitarios + integración)
+
+El proyecto tiene **~94 tests en verde** con Vitest (2026-06-13). Correr `npm test` (desde `app/`) antes de abrir cualquier PR.
 
 | Archivo | Cobertura |
 |---------|-----------|
 | `src/__tests__/schemas/tienda.test.ts` | Zod schemas — 7 casos |
 | `src/__tests__/lib/mailer.test.ts` | `esc()` HTML escape — 5 casos |
+| `src/__tests__/lib/giis-b015.test.ts` | Generador GIIS-B015 (normName, serializeRow, buildGiisFile) — 28 casos |
 | `src/__tests__/hooks/useCarrito.test.ts` | Hook carrito localStorage — 8 casos |
 | `src/__tests__/actions/appointments.test.ts` | Slots, bloqueos, reagendamiento — 17 casos |
 | `src/__tests__/actions/auth.test.ts` | Rate-limit, lockout, password reset — 18 casos |
@@ -194,29 +197,40 @@ El proyecto tiene **66 tests en verde** con Vitest (2026-05-24). Correr `npm tes
 
 **Regla:** usar `vi.hoisted()` para variables en factories de `vi.mock()`.
 
+### Playwright (E2E)
+
+**10/10 tests en verde** contra el servidor de producción (puerto 5000). Requieren `.env.e2e`.
+
+| Archivo | Cobertura |
+|---------|-----------|
+| `src/e2e/smoke.spec.ts` | Páginas públicas básicas — 3 casos |
+| `src/e2e/login.spec.ts` | Login 2FA, cierre de sesión, guard `/staff` — 5 casos |
+| `src/e2e/agendar.spec.ts` | Carga del formulario, paso 0→1 — 2 casos |
+
 ---
 
 ## Pendientes conocidos
 
 - **FIX-09**: botón flotante de WhatsApp y enlace `tel:` en el header — bloqueado hasta confirmar número celular del Dr. Viveros.
 - **`listo_para_recoger`** falta en el enum `OrderStatus` — agregar con `prisma db push` cuando sea necesario.
-- **Tienda Fase 3**: autofactura CFDI para paquetes de consulta (D01) — requiere definir proveedor de facturación.
+- **Módulo de cobros**: registro manual de honorarios (primera vez $1,100 / subsecuente $1,000 / lavado $600) — sin fecha.
+- **FHIR export**: endpoints individuales y bulk — requiere definir sistema receptor.
 
 ## Certificación NOM-024-SSA3-2012 (proyecto activo)
 
-El sistema se está certificando como SIRES ante la DGIS. La implementación se divide en 4 tracks:
+El sistema se está certificando como SIRES ante la DGIS. Estado por track:
 
-- **Track 1** — Datos mínimos del paciente: CURP, sexo CURP/biológico/género, derechohabiencia, entidad de nacimiento, indígena, afromexicano, migrante.
-- **Track 2** — Catálogos fundamentales: CIE-10 en diagnósticos de notas, CLUES del consultorio, catálogos DGIS.
-- **Track 3** — GIIS-B015: somatometría + signos vitales en nota clínica, generador del archivo de intercambio SIS-CEX (`/api/dgis/exportar-cex`), UI en `/staff/dgis`.
-- **Track 4** — GIIS-A004 SGSI: documentación de 11 dominios ISO 27799, Declaración de Aplicabilidad (6 meses de madurez obligatorios).
+- **Track 1 ✅ Implementado** — Datos mínimos del paciente: CURP, sexo CURP/biológico/género, derechohabiencia, entidad de nacimiento, indígena, afromexicano, migrante.
+- **Track 2 ✅ Implementado** — Catálogos fundamentales: CIE-10 en diagnósticos de notas, CLUES del consultorio, catálogos DGIS.
+- **Track 3 ✅ Implementado** — GIIS-B015: somatometría + signos vitales en nota clínica, generador SIS-CEX (`/api/dgis/exportar-cex`), UI en `/staff/dgis`, 28 tests unitarios en verde.
+- **Track 4 🔄 En documentación** — GIIS-A004 SGSI: 11 dominios ISO 27799, Declaración de Aplicabilidad. Requiere 6 meses de madurez antes de solicitar verificación ante DGIS.
 
-**Archivos nuevos protegidos para Claude Code** (no modificar sin coordinación):
+**Archivos protegidos (no modificar sin coordinación explícita con Claude Code):**
 
 | Archivo | Razón |
 |---|---|
 | `app/src/app/api/dgis/exportar-cex/route.ts` | Generador GIIS-B015 — lógica crítica de interoperabilidad con SSA |
-| `app/src/lib/catalogos/` | Catálogos CIE-10 y DGIS — no modificar sin verificar versión oficial |
-| `app/src/lib/schemas/dgis.ts` | Validaciones exactas de la GIIS-B015 — errores rompen la certificación |
+| `app/src/lib/giis-b015.ts` | Lógica de serialización del archivo de intercambio |
+| `app/src/lib/schemas/dgis.ts` | Validaciones exactas de la GIIS-B015 — errores invalidan la certificación |
 
-**Regla crítica**: nombres en archivo de intercambio en MAYÚSCULAS sin acentos. Máx 15% de CURP genérica. Máx 5% de diagnóstico R69X.
+**Regla crítica GIIS-B015**: nombres en MAYÚSCULAS sin acentos (A-Z + Ñ). Máx 15% CURP genérica. Máx 5% diagnóstico R69X.

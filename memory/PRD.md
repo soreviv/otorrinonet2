@@ -29,7 +29,7 @@
 - `/login` + `/login/setup-2fa` + `/login/verify-2fa`
 - `/staff/agenda` `/staff/ehr` `/staff/notas` `/staff/configuracion` `/staff/admin`
 
-## Última actualización: 2026-05-09
+## Última actualización: 2026-06-13
 
 ## Implementado en esta iteración (2026-01-05)
 
@@ -174,10 +174,41 @@ Framework: **Vitest** + jsdom + `@testing-library/react` + `vitest-mock-extended
 | T2-A | Solapamiento de slots (`appointments.ts`) | 17 | ✅ Claude |
 | T2-B | Rate-limit + lockout + password reset (`auth.ts`) | 18 | ✅ Claude |
 | T2-C | Webhook Stripe — idempotencia + stock | 11 | ✅ Claude |
-| T3 | E2E Playwright (login 2FA, agendar cita, checkout) | — | 🔲 sin fecha |
-| **Total** | | **66/66** | **✅ en verde** |
+| T3 | E2E Playwright (login 2FA, smoke, agendar) | 10 | ✅ Claude (2026-06-13) |
+| T4 | `src/__tests__/lib/giis-b015.test.ts` — generador GIIS-B015 | 28 | ✅ Claude (2026-06-13) |
+| **Total Vitest** | | **~94** | **✅ en verde** |
+| **Total Playwright** | | **10/10** | **✅ en verde** |
+
+## Implementado (2026-06-13)
+
+### NOM-024-SSA3-2012 — Tracks 1, 2 y 3
+
+- [x] **Track 1** — Campos NOM-024 en modelo `Patient`: CURP, sexo CURP/biológico/género, derechohabiencia, entidad de nacimiento, paisNacimiento, indígena, afromexicano, migrante.
+- [x] **Track 2** — Catálogos fundamentales: CIE-10 integrado en diagnósticos de notas clínicas (`Cie10` model + `searchCie10` + `Cie10Search.tsx`).
+- [x] **Track 3** — GIIS-B015 Consulta Externa:
+  - Somatometría y signos vitales en nota clínica (peso, talla, sistólica, diastólica, FC, FR, temperatura, SpO2, glucemia, circunferencia).
+  - Generador `src/lib/giis-b015.ts` (normName, serializeRow, buildGiisFile, giisFilename, noteToGiisRow).
+  - API route `src/app/api/dgis/exportar-cex/route.ts`.
+  - UI en `src/app/staff/dgis/page.tsx`.
+  - 28 tests unitarios en verde (`src/__tests__/lib/giis-b015.test.ts`).
+
+### E2E Playwright (T3)
+
+- [x] Suite E2E configurada con Playwright + `.env.e2e` (puerto 5000, credenciales reales, TOTP secret).
+- [x] `src/e2e/smoke.spec.ts` — 3 tests: páginas públicas básicas.
+- [x] `src/e2e/login.spec.ts` — 5 tests: login 2FA completo, guard `/staff`, cierre de sesión.
+- [x] `src/e2e/agendar.spec.ts` — 2 tests: carga del formulario, paso 0→1.
+- [x] Fixture `setup.ts` que pre-acepta cookies vía `addInitScript`.
+- [x] Nota: Turnstile de producción no es bypasseable en runtime — test de agendar cubre hasta paso 0→1.
+
+### Autofactura CFDI 4.0
+
+- [x] Implementada en `src/app/(public)/autofactura/` (AutofacturaClient.tsx + page.tsx).
+- [x] Integrada con factura.com via `src/lib/factura-com.ts`.
 
 ## Backlog largo plazo (baja prioridad / sin fecha)
 - [ ] **Módulo de cobros** — modelo `Cobro` en BD (tipoConsulta, montoTotal, metodoPago, notasExtra); formulario en panel de cita; dashboard financiero (ingresos del día/mes). Decisiones tomadas: sin Stripe, registro manual por el staff. Precios: primera vez $1,100 / subsecuente $1,000 / lavado de oídos $600. Nota aclaratoria: honorarios son por consulta; insumos extra (férulas, tapones, etc.) se cobran en consultorio y se anotan en campo libre. Descartado: pago anticipado online (baja adopción en el perfil de pacientes del consultorio).
-- [ ] Facturación CFDI (Facturama)
-- [ ] ~~Pago anticipado Stripe/MercadoPago~~ — descartado por baja adopción en el perfil de pacientes
+- [ ] **NOM-024 Track 4** — GIIS-A004 SGSI: documentar 11 dominios ISO 27799, Declaración de Aplicabilidad (DDA). Requiere 6 meses de madurez antes de verificación ante DGIS. Contacto: angel.serrano@salud.gob.mx.
+- [ ] Exportación FHIR (individual y bulk) — requiere definir sistema receptor.
+- [ ] ~~Facturación CFDI (Facturama)~~ — reemplazado por autofactura con factura.com.
+- [ ] ~~Pago anticipado Stripe/MercadoPago~~ — descartado por baja adopción en el perfil de pacientes.

@@ -139,16 +139,57 @@ function TagInput({
   )
 }
 
+const ENTIDAD_OPTS = [
+  { value: '',   label: '— No especificado —' },
+  { value: '01', label: '01 — Aguascalientes' },
+  { value: '02', label: '02 — Baja California' },
+  { value: '03', label: '03 — Baja California Sur' },
+  { value: '04', label: '04 — Campeche' },
+  { value: '05', label: '05 — Coahuila' },
+  { value: '06', label: '06 — Colima' },
+  { value: '07', label: '07 — Chiapas' },
+  { value: '08', label: '08 — Chihuahua' },
+  { value: '09', label: '09 — Ciudad de México' },
+  { value: '10', label: '10 — Durango' },
+  { value: '11', label: '11 — Guanajuato' },
+  { value: '12', label: '12 — Guerrero' },
+  { value: '13', label: '13 — Hidalgo' },
+  { value: '14', label: '14 — Jalisco' },
+  { value: '15', label: '15 — Estado de México' },
+  { value: '16', label: '16 — Michoacán' },
+  { value: '17', label: '17 — Morelos' },
+  { value: '18', label: '18 — Nayarit' },
+  { value: '19', label: '19 — Nuevo León' },
+  { value: '20', label: '20 — Oaxaca' },
+  { value: '21', label: '21 — Puebla' },
+  { value: '22', label: '22 — Querétaro' },
+  { value: '23', label: '23 — Quintana Roo' },
+  { value: '24', label: '24 — San Luis Potosí' },
+  { value: '25', label: '25 — Sinaloa' },
+  { value: '26', label: '26 — Sonora' },
+  { value: '27', label: '27 — Tabasco' },
+  { value: '28', label: '28 — Tamaulipas' },
+  { value: '29', label: '29 — Tlaxcala' },
+  { value: '30', label: '30 — Veracruz' },
+  { value: '31', label: '31 — Yucatán' },
+  { value: '32', label: '32 — Zacatecas' },
+  { value: '88', label: '88 — No aplica (nacido en el extranjero)' },
+  { value: '99', label: '99 — Se ignora' },
+]
+
 const DERECHOHABIENCIA_OPTS = [
-  { value: '1', label: 'Ninguna' },
-  { value: '2', label: 'IMSS' },
-  { value: '3', label: 'ISSSTE' },
-  { value: '4', label: 'PEMEX' },
-  { value: '5', label: 'SEDENA' },
-  { value: '6', label: 'SEMAR' },
-  { value: '8', label: 'Otra' },
+  { value: '0',  label: 'No especificado' },
+  { value: '1',  label: 'Ninguna' },
+  { value: '2',  label: 'IMSS' },
+  { value: '3',  label: 'ISSSTE' },
+  { value: '4',  label: 'PEMEX' },
+  { value: '5',  label: 'SEDENA' },
+  { value: '6',  label: 'SEMAR' },
+  { value: '8',  label: 'Otra' },
   { value: '10', label: 'IMSS Bienestar' },
   { value: '11', label: 'ISSFAM' },
+  { value: '14', label: 'OPD IMSS Bienestar' },
+  { value: '99', label: 'Se ignora' },
 ]
 
 type FormState = {
@@ -174,6 +215,7 @@ type FormState = {
   seConsideraIndigena: string
   seAutodenominaAfromexicano: string
   migrante: string
+  paisProcedencia: string
 }
 
 const EMPTY_FORM: FormState = {
@@ -181,7 +223,7 @@ const EMPTY_FORM: FormState = {
   familyNotes: '',
   pathological: '', nonPathological: '', allergies: [],
   entidadNacimiento: '', sexoCurp: '', sexoBiologico: '', genero: '', derechohabiencia: [],
-  seConsideraIndigena: '', seAutodenominaAfromexicano: '', migrante: '',
+  seConsideraIndigena: '', seAutodenominaAfromexicano: '', migrante: '', paisProcedencia: '',
 }
 
 export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: PatientFormProps) {
@@ -214,6 +256,7 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
       seConsideraIndigena: n?.seConsideraIndigena != null ? String(n.seConsideraIndigena) : '',
       seAutodenominaAfromexicano: n?.seAutodenominaAfromexicano != null ? String(n.seAutodenominaAfromexicano) : '',
       migrante: n?.migrante != null ? String(n.migrante) : '',
+      paisProcedencia: n?.paisProcedencia != null ? String(n.paisProcedencia) : '',
     }
   })
 
@@ -265,7 +308,7 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
         seConsideraIndigena: form.seConsideraIndigena !== '' ? Number(form.seConsideraIndigena) : null,
         seAutodenominaAfromexicano: form.seAutodenominaAfromexicano !== '' ? Number(form.seAutodenominaAfromexicano) : null,
         migrante: form.migrante !== '' ? Number(form.migrante) : null,
-        paisProcedencia: null,
+        paisProcedencia: form.paisProcedencia !== '' ? Number(form.paisProcedencia) : null,
       },
     })
   }
@@ -365,15 +408,16 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
         >
           <div className="grid sm:grid-cols-2 gap-4">
             <Field id="entidadNacimiento" label="Entidad federativa de nacimiento">
-              <input
+              <select
                 id="entidadNacimiento"
-                type="text"
                 value={form.entidadNacimiento}
-                onChange={(e) => set('entidadNacimiento', e.target.value.toUpperCase())}
-                placeholder="Ej. 09 (CDMX), 99=se ignora"
-                maxLength={2}
-                className={inputCls + ' font-mono uppercase'}
-              />
+                onChange={(e) => set('entidadNacimiento', e.target.value)}
+                className={inputCls}
+              >
+                {ENTIDAD_OPTS.map(o => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
             </Field>
             <Field id="sexoCurp" label="Sexo CURP (RENAPO)">
               <select id="sexoCurp" value={form.sexoCurp} onChange={(e) => set('sexoCurp', e.target.value)} className={inputCls}>
@@ -430,6 +474,19 @@ export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: Pa
                 <option value="3">3 — Retornado</option>
               </select>
             </Field>
+            {form.migrante === '2' && (
+              <Field id="paisProcedencia" label="País de procedencia (migrante internacional)">
+                <input
+                  id="paisProcedencia"
+                  type="number"
+                  min={1}
+                  value={form.paisProcedencia}
+                  onChange={(e) => set('paisProcedencia', e.target.value)}
+                  placeholder="Clave DGIS (ej. 484=México, 840=EUA)"
+                  className={inputCls + ' font-mono'}
+                />
+              </Field>
+            )}
           </div>
           <Field label="Derechohabiencia">
             <div className="flex flex-wrap gap-2 mt-1">
