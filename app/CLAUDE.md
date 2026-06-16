@@ -113,3 +113,7 @@ El sistema está en proceso de certificarse como SIRES ante la DGIS (Secretaría
 **Reglas críticas GIIS-B015:** nombres en MAYÚSCULAS sin acentos (A-Z + Ñ). Máx 15% CURP genérica. Máx 5% diagnóstico R69X.
 
 **Contacto DGIS:** angel.serrano@salud.gob.mx / blanca.pinette@salud.gob.mx · +52 55 6392 2300 ext. 52584
+
+## Local OpenACP Workspace
+
+The `.openacp/` directory contains a local OpenACP workspace with secrets (bot tokens, API keys). Do not read, commit, or reference files inside it.
