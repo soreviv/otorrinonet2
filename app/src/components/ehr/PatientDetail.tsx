@@ -578,7 +578,7 @@ export function PatientDetail({ patient, currentUserRole, onEdit, onViewDocument
         )}
 
         {tab === 'estudios' && (
-          <EstudiosTab patientId={p.id} onNewOrder={isMedico ? () => {} : undefined} />
+          <EstudiosTab patientId={p.id} onNewOrder={isMedico ? () => onViewDocuments?.(p.id) : undefined} />
         )}
       </div>
     </div>
