@@ -33,15 +33,9 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: "/(.*)",
+        source: "/_next/static/(.*)",
         headers: [
-          { key: "X-Content-Type-Options",    value: "nosniff" },
-          { key: "X-DNS-Prefetch-Control",     value: "on" },
-          { key: "Referrer-Policy",            value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy",         value: "camera=(), microphone=(), geolocation=()" },
-          // Mantenido por compatibilidad con navegadores sin soporte CSP3;
-          // frame-ancestors en el CSP del middleware tiene prioridad en navegadores modernos.
-          { key: "X-Frame-Options",            value: "DENY" },
+          { key: "Cache-Control", value: "public, immutable, max-age=31536000" },
         ],
       },
     ];
