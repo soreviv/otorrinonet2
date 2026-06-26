@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "chmod -R o+rX .next/",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
@@ -74,5 +75,12 @@
     "typescript": "^5",
     "vitest": "^4.1.7",
     "vitest-mock-extended": "^4.0.0"
+  },
+  "allowScripts": {
+    "@prisma/engines@7.8.0": true,
+    "esbuild@0.28.1": true,
+    "prisma@7.8.0": true,
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.11.1": true
   }
 }
