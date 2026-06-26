@@ -5,12 +5,13 @@ import type { PatientDetailProps } from '@/lib/ehr-types'
 import type { EvolutionNote, Prescription } from '@/lib/notas-types'
 import type { VitalsRecord } from '@/app/actions/patient-clinical'
 import { getPatientVitals, getPatientEvolutionNotes, getPatientPrescriptions } from '@/app/actions/patient-clinical'
-import { getPatientLabOrders, type LabOrderRecord } from '@/app/actions/lab-orders'
+import { getPatientLabOrders, createLabOrder, type LabOrderRecord } from '@/app/actions/lab-orders'
 import { printPrescription } from '@/lib/print-prescription'
 import {
   ChevronDown, ArrowLeft, Pencil, User, HeartPulse, ClipboardList,
   Pill, Lock, Phone, Mail,
   MapPin, FileText, Printer, ScrollText, FlaskConical, AlertCircle, Shield,
+  X, Plus,
 } from 'lucide-react'
 
 // ─── Catálogos NOM-024 ────────────────────────────────────────────────────────
@@ -338,8 +339,152 @@ function RecetasTab({ patientId, onNewPrescription }: { patientId: string; onNew
 
 // ─── Estudios/Lab tab ─────────────────────────────────────────────────────────
 
-function EstudiosTab({ patientId, onNewOrder }: { patientId: string; onNewOrder?: () => void }) {
+const ESTUDIOS_COMUNES = [
+  'Biometría hemática completa', 'Química sanguínea', 'Examen general de orina',
+  'Audiometría tonal', 'Impedanciometría', 'Tomografía de senos paranasales',
+  'Cultivo de exudado faríngeo', 'Pruebas de función tiroidea (TSH, T4)',
+  'Endoscopía nasal', 'Laringoscopía', 'Potenciales evocados auditivos (PEAT)',
+]
+
+function NuevaOrdenModal({ patientId, onClose, onCreated }: {
+  patientId: string
+  onClose: () => void
+  onCreated: (order: LabOrderRecord) => void
+}) {
+  const [estudios, setEstudios] = useState<string[]>([])
+  const [inputEstudio, setInputEstudio] = useState('')
+  const [diagnostico, setDiagnostico] = useState('')
+  const [indicaciones, setIndicaciones] = useState('')
+  const [urgente, setUrgente] = useState(false)
+  const [ayuno, setAyuno] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  function addEstudio(nombre: string) {
+    const trimmed = nombre.trim()
+    if (!trimmed || estudios.includes(trimmed)) return
+    setEstudios(prev => [...prev, trimmed])
+    setInputEstudio('')
+  }
+
+  function removeEstudio(e: string) {
+    setEstudios(prev => prev.filter(x => x !== e))
+  }
+
+  async function handleSubmit(ev: React.FormEvent) {
+    ev.preventDefault()
+    if (!estudios.length) { setError('Agrega al menos un estudio.'); return }
+    setSaving(true)
+    setError('')
+    try {
+      const order = await createLabOrder(patientId, { estudios, diagnosticoPresuntivo: diagnostico || undefined, indicacionesClinicas: indicaciones || undefined, urgente, ayuno })
+      onCreated(order)
+      onClose()
+    } catch {
+      setError('Error al crear la solicitud. Intenta de nuevo.')
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <FlaskConical className="w-4 h-4 text-sky-600" strokeWidth={2} />
+            <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Nueva solicitud de estudios</span>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {/* Estudios */}
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 block">Estudios *</label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={inputEstudio}
+                onChange={e => setInputEstudio(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addEstudio(inputEstudio) } }}
+                placeholder="Escribe un estudio y presiona Enter…"
+                className="flex-1 text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+              <button type="button" onClick={() => addEstudio(inputEstudio)}
+                className="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white transition-colors">
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+            {/* Sugerencias rápidas */}
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {ESTUDIOS_COMUNES.filter(e => !estudios.includes(e)).map(e => (
+                <button key={e} type="button" onClick={() => addEstudio(e)}
+                  className="text-[10px] px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-sky-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors">
+                  + {e}
+                </button>
+              ))}
+            </div>
+            {estudios.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {estudios.map(e => (
+                  <span key={e} className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                    {e}
+                    <button type="button" onClick={() => removeEstudio(e)} className="hover:text-rose-500 transition-colors">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Diagnóstico presuntivo */}
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 block">Diagnóstico presuntivo</label>
+            <input type="text" value={diagnostico} onChange={e => setDiagnostico(e.target.value)}
+              placeholder="Opcional…"
+              className="w-full text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+          </div>
+          {/* Indicaciones clínicas */}
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 block">Indicaciones clínicas</label>
+            <textarea value={indicaciones} onChange={e => setIndicaciones(e.target.value)}
+              rows={2} placeholder="Opcional…"
+              className="w-full text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none" />
+          </div>
+          {/* Checkboxes */}
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={urgente} onChange={e => setUrgente(e.target.checked)}
+                className="w-4 h-4 rounded accent-rose-500" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">Urgente</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={ayuno} onChange={e => setAyuno(e.target.checked)}
+                className="w-4 h-4 rounded accent-amber-500" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">Requiere ayuno</span>
+            </label>
+          </div>
+          {error && <p className="text-xs text-rose-500">{error}</p>}
+          <div className="flex justify-end gap-2 pt-1">
+            <button type="button" onClick={onClose}
+              className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+              Cancelar
+            </button>
+            <button type="submit" disabled={saving}
+              className="px-4 py-2 rounded-xl text-sm font-semibold bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white transition-colors">
+              {saving ? 'Guardando…' : 'Crear solicitud'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function EstudiosTab({ patientId, canCreate }: { patientId: string; canCreate?: boolean }) {
   const [orders, setOrders] = useState<LabOrderRecord[] | null>(null)
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     getPatientLabOrders(patientId).then(setOrders)
@@ -349,9 +494,16 @@ function EstudiosTab({ patientId, onNewOrder }: { patientId: string; onNewOrder?
 
   return (
     <div className="space-y-3">
-      {onNewOrder && (
+      {showModal && (
+        <NuevaOrdenModal
+          patientId={patientId}
+          onClose={() => setShowModal(false)}
+          onCreated={order => setOrders(prev => [order, ...(prev ?? [])])}
+        />
+      )}
+      {canCreate && (
         <div className="flex justify-end">
-          <button onClick={onNewOrder}
+          <button onClick={() => setShowModal(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition-colors">
             <FlaskConical className="w-3.5 h-3.5" strokeWidth={2} />
             Nueva solicitud
@@ -578,7 +730,7 @@ export function PatientDetail({ patient, currentUserRole, onEdit, onViewDocument
         )}
 
         {tab === 'estudios' && (
-          <EstudiosTab patientId={p.id} onNewOrder={isMedico ? () => onViewDocuments?.(p.id) : undefined} />
+          <EstudiosTab patientId={p.id} canCreate={isMedico} />
         )}
       </div>
     </div>
