@@ -234,7 +234,7 @@ export function NotasClient({
       <PrescriptionDetail
         prescription={selectedRx}
         onSign={handleSignPrescription}
-        onPrint={() => { void printPrescription(selectedRx) }}
+        onPrint={(id) => { const rx = prescriptions.find(r => r.id === id); if (rx) void printPrescription(rx) }}
         onBack={() => setView('list')}
       />
     )
