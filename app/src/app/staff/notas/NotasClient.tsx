@@ -40,6 +40,7 @@ interface Props {
   initialPrescriptions: Prescription[]
   initialConsentForms: ConsentForm[]
   currentUserRole: 'medico' | 'enfermera' | 'recepcionista'
+  initialAction?: 'nota' | 'receta'
 }
 
 function nowCDMX(): string {
@@ -53,8 +54,12 @@ export function NotasClient({
   initialPrescriptions,
   initialConsentForms,
   currentUserRole,
+  initialAction,
 }: Props) {
-  const [view, setView] = useState<View>('list')
+  const [view, setView] = useState<View>(() => {
+    if (currentUserRole !== 'medico' || !initialAction) return 'list'
+    return initialAction === 'receta' ? 'new-prescription' : 'new-note'
+  })
   const [selectedRxId, setSelectedRxId] = useState<string | null>(null)
   const [selectedConsentId, setSelectedConsentId] = useState<string | null>(null)
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
@@ -162,6 +167,18 @@ export function NotasClient({
     setView('prescription')
   }
 
+  async function handleCreateAndSignPrescription(medications: PrescriptionMedication[], diagnosis: string) {
+    const rx = await createPrescription(currentPatient.id, medications, diagnosis)
+    const signatureData = rx.doctorSignatureImageUrl ?? ''
+    const { firmaHash } = await signPrescriptionInDB(rx.id, signatureData || undefined)
+    setPrescriptions(prev => [
+      { ...rx, status: 'firmada', signatureData, signedAt: nowCDMX(), signatureTimestamp: new Date().toISOString(), firmaHash },
+      ...prev,
+    ])
+    setSelectedRxId(rx.id)
+    setView('prescription')
+  }
+
   async function handleSignPrescription(id: string, signatureData: string) {
     const signedAt = nowCDMX()
     const { firmaHash } = await signPrescriptionInDB(id, signatureData || undefined)
@@ -220,10 +237,17 @@ export function NotasClient({
   }
 
   if (view === 'new-prescription') {
+    // Prellenar el diagnóstico con los CIE-10 de la nota de evolución más reciente
+    const latestWithDx = evolutionNotes.find(n => n.diagnosticos.length > 0)
+    const initialDiagnosis = latestWithDx
+      ? latestWithDx.diagnosticos.map(d => `${d.descripcion} (${d.codigo})`).join('; ')
+      : ''
     return (
       <PrescriptionForm
         patientName={currentPatient.name}
+        initialDiagnosis={initialDiagnosis}
         onSave={handleCreatePrescription}
+        onSaveAndSign={handleCreateAndSignPrescription}
         onCancel={() => setView('list')}
       />
     )
@@ -234,7 +258,10 @@ export function NotasClient({
       <PrescriptionDetail
         prescription={selectedRx}
         onSign={handleSignPrescription}
-        onPrint={(id) => { const rx = prescriptions.find(r => r.id === id); if (rx) void printPrescription(rx) }}
+        onPrint={async (id) => {
+          const rx = prescriptions.find(r => r.id === id)
+          if (rx) await printPrescription(rx)
+        }}
         onBack={() => setView('list')}
       />
     )

@@ -70,7 +70,7 @@ export interface PatientDetailProps {
   patient: Patient
   currentUserRole: UserRole
   onEdit?: (patientId: string) => void
-  onViewDocuments?: (patientId: string) => void
+  onViewDocuments?: (patientId: string, nueva?: 'nota' | 'receta') => void
   onBack?: () => void
 }
 

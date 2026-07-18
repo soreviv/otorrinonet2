@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Save, FileSignature } from 'lucide-react'
 import type { PrescriptionMedication } from '@/lib/notas-types'
 
 const inputCls =
@@ -13,14 +13,17 @@ const EMPTY_MED: PrescriptionMedication = {
 
 interface Props {
   patientName: string
+  initialDiagnosis?: string
   onSave: (medications: PrescriptionMedication[], diagnosis: string) => Promise<void>
+  onSaveAndSign?: (medications: PrescriptionMedication[], diagnosis: string) => Promise<void>
   onCancel: () => void
 }
 
-export function PrescriptionForm({ patientName, onSave, onCancel }: Props) {
+export function PrescriptionForm({ patientName, initialDiagnosis, onSave, onSaveAndSign, onCancel }: Props) {
   const [meds, setMeds] = useState<PrescriptionMedication[]>([{ ...EMPTY_MED }])
-  const [diagnosis, setDiagnosis] = useState('')
+  const [diagnosis, setDiagnosis] = useState(initialDiagnosis ?? '')
   const [saving, setSaving] = useState(false)
+  const [signing, setSigning] = useState(false)
 
   function setMed(i: number, field: keyof PrescriptionMedication, value: string) {
     setMeds(prev => prev.map((m, idx) => idx === i ? { ...m, [field]: value } : m))
@@ -34,15 +37,31 @@ export function PrescriptionForm({ patientName, onSave, onCancel }: Props) {
     setMeds(prev => prev.filter((_, idx) => idx !== i))
   }
 
+  function validMeds(): PrescriptionMedication[] {
+    return meds.filter(m => m.name.trim() && m.dose.trim() && m.frequency.trim())
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const valid = meds.filter(m => m.name.trim() && m.dose.trim() && m.frequency.trim())
+    const valid = validMeds()
     if (!valid.length) return
     setSaving(true)
     try {
       await onSave(valid, diagnosis)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleSaveAndSign(e: React.MouseEvent) {
+    e.preventDefault()
+    const valid = validMeds()
+    if (!valid.length || !onSaveAndSign) return
+    setSigning(true)
+    try {
+      await onSaveAndSign(valid, diagnosis)
+    } finally {
+      setSigning(false)
     }
   }
 
@@ -219,22 +238,41 @@ export function PrescriptionForm({ patientName, onSave, onCancel }: Props) {
           Agregar medicamento
         </button>
 
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-4 py-2.5 rounded-xl text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-sky-600 hover:bg-sky-700 disabled:bg-sky-400 text-white transition-colors"
-          >
-            <Save className="w-4 h-4" strokeWidth={2} />
-            {saving ? 'Guardando…' : 'Crear receta'}
-          </button>
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+          {onSaveAndSign && (
+            <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
+              <strong className="text-slate-600 dark:text-slate-300">Guardar borrador</strong> permite firmar después.{' '}
+              <strong className="text-slate-600 dark:text-slate-300">Crear y Firmar</strong> sella la receta con sello de tiempo, la hace inalterable y la deja lista para imprimir.
+            </p>
+          )}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-4 py-2.5 rounded-xl text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={saving || signing}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-700 hover:bg-slate-800 disabled:bg-slate-400 dark:bg-slate-700 dark:hover:bg-slate-600 text-white transition-colors"
+            >
+              <Save className="w-4 h-4" strokeWidth={2} />
+              {saving ? 'Guardando…' : 'Guardar borrador'}
+            </button>
+            {onSaveAndSign && (
+              <button
+                type="button"
+                onClick={handleSaveAndSign}
+                disabled={saving || signing}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white transition-colors"
+              >
+                <FileSignature className="w-4 h-4" strokeWidth={2} />
+                {signing ? 'Firmando…' : 'Crear y Firmar'}
+              </button>
+            )}
+          </div>
         </div>
       </form>
     </div>

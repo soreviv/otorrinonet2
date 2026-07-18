@@ -722,11 +722,11 @@ export function PatientDetail({ patient, currentUserRole, onEdit, onViewDocument
         {tab === 'vitales' && <VitalsTab patientId={p.id} />}
 
         {tab === 'notas' && (
-          <NotasTab patientId={p.id} onNewNote={isMedico ? () => onViewDocuments?.(p.id) : undefined} />
+          <NotasTab patientId={p.id} onNewNote={isMedico ? () => onViewDocuments?.(p.id, 'nota') : undefined} />
         )}
 
         {tab === 'recetas' && (
-          <RecetasTab patientId={p.id} onNewPrescription={isMedico ? () => onViewDocuments?.(p.id) : undefined} />
+          <RecetasTab patientId={p.id} onNewPrescription={isMedico ? () => onViewDocuments?.(p.id, 'receta') : undefined} />
         )}
 
         {tab === 'estudios' && (

@@ -63,7 +63,7 @@ export function EhrClient({ initialPatients, currentUserRole }: Props) {
         patient={selectedPatient}
         currentUserRole={currentUserRole}
         onEdit={handleEdit}
-        onViewDocuments={id => router.push(`/staff/notas?paciente=${id}`)}
+        onViewDocuments={(id, nueva) => router.push(`/staff/notas?paciente=${id}${nueva ? `&nueva=${nueva}` : ''}`)}
         onBack={handleBack}
       />
     )
