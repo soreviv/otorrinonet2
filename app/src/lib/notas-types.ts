@@ -159,7 +159,7 @@ export interface DocumentListProps {
 export interface PrescriptionDetailProps {
   prescription: Prescription
   onSign?: (id: string, signatureData: string) => void
-  onPrint?: (id: string) => void
+  onPrint?: (id: string) => Promise<void> | void
   onBack?: () => void
 }
 

@@ -244,8 +244,8 @@ export async function printPrescription(rx: Prescription): Promise<void> {
   <div class="print-bar no-print">
     <span>Vista previa de receta</span>
     <div style="display:flex;gap:8px">
-      <button class="btn-print" onclick="window.print()">Imprimir receta</button>
-      <button class="btn-close" onclick="window.close()">Cerrar</button>
+      <button class="btn-print" type="button">Imprimir receta</button>
+      <button class="btn-close" type="button">Cerrar</button>
     </div>
   </div>
 
@@ -357,15 +357,18 @@ export async function printPrescription(rx: Prescription): Promise<void> {
     <span class="validity">Válida por 30 días a partir de la fecha de expedición</span>
   </div>
 
-<script>
-  window.onload = function() {
-    window.focus();
-    window.print();
-  };
-<\/script>
 </body>
 </html>`
 
   win.document.write(html)
   win.document.close()
+
+  // La CSP (script-src sin unsafe-inline) se hereda en la ventana about:blank y
+  // bloquea onclick/<script> inline; los listeners se adjuntan desde el opener.
+  win.document.querySelector('.btn-print')?.addEventListener('click', () => win.print())
+  win.document.querySelector('.btn-close')?.addEventListener('click', () => win.close())
+
+  const autoPrint = () => { win.focus(); win.print() }
+  if (win.document.readyState === 'complete') autoPrint()
+  else win.addEventListener('load', autoPrint)
 }

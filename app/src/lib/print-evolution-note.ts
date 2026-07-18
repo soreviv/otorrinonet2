@@ -229,10 +229,15 @@ ${adendaHtml}
   Nota expedida conforme a NOM-004-SSA3-2012 y NOM-024-SSA3-2012 · Uso exclusivo para el expediente del paciente indicado
 </div>
 
-<script>window.onload = function() { window.print(); }<\/script>
 </body>
 </html>`
 
   win.document.write(html)
   win.document.close()
+
+  // La CSP (script-src sin unsafe-inline) se hereda en la ventana about:blank y
+  // bloquea <script> inline; la impresión se dispara desde el opener.
+  const autoPrint = () => win.print()
+  if (win.document.readyState === 'complete') autoPrint()
+  else win.addEventListener('load', autoPrint)
 }
