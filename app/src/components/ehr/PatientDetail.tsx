@@ -5,8 +5,9 @@ import type { PatientDetailProps } from '@/lib/ehr-types'
 import type { EvolutionNote, Prescription } from '@/lib/notas-types'
 import type { VitalsRecord } from '@/app/actions/patient-clinical'
 import { getPatientVitals, getPatientEvolutionNotes, getPatientPrescriptions } from '@/app/actions/patient-clinical'
-import { getPatientLabOrders, createLabOrder, type LabOrderRecord } from '@/app/actions/lab-orders'
+import { getPatientLabOrders, createLabOrder, getLabOrderWithClinicData, type LabOrderRecord } from '@/app/actions/lab-orders'
 import { printPrescription } from '@/lib/print-prescription'
+import { printLabOrder } from '@/lib/print-lab-order'
 import {
   ChevronDown, ArrowLeft, Pencil, User, HeartPulse, ClipboardList,
   Pill, Lock, Phone, Mail,
@@ -482,9 +483,35 @@ function NuevaOrdenModal({ patientId, onClose, onCreated }: {
   )
 }
 
+const PALABRAS_LABORATORIO = [
+  'biometría', 'química', 'examen general', 'cultivo', 'prueba', 'anticuerpo',
+  'antígeno', 'perfil', 'hormona', 'tsh', 't3', 't4', 'coprológico', 'serología',
+  'coagulación', 'glucosa', 'colesterol', 'triglicéridos', 'orina', 'exudado',
+]
+
+function inferTipoEstudio(estudios: string[]): 'laboratorio' | 'gabinete' {
+  const esLaboratorio = (nombre: string) => {
+    const lower = nombre.toLowerCase()
+    return PALABRAS_LABORATORIO.some(palabra => lower.includes(palabra))
+  }
+  const totalLaboratorio = estudios.filter(esLaboratorio).length
+  return totalLaboratorio >= estudios.length - totalLaboratorio ? 'laboratorio' : 'gabinete'
+}
+
 function EstudiosTab({ patientId, canCreate }: { patientId: string; canCreate?: boolean }) {
   const [orders, setOrders] = useState<LabOrderRecord[] | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [printingId, setPrintingId] = useState<string | null>(null)
+
+  async function handlePrint(orderId: string) {
+    setPrintingId(orderId)
+    try {
+      const { order, patientName, clinic } = await getLabOrderWithClinicData(orderId)
+      printLabOrder({ order, patientName, tipoEstudio: inferTipoEstudio(order.estudios), clinic })
+    } finally {
+      setPrintingId(null)
+    }
+  }
 
   useEffect(() => {
     getPatientLabOrders(patientId).then(setOrders)
@@ -533,6 +560,11 @@ function EstudiosTab({ patientId, canCreate }: { patientId: string; canCreate?: 
                 </div>
               </div>
             </div>
+            <button onClick={() => handlePrint(order.id)} disabled={printingId === order.id}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors disabled:opacity-50">
+              <Printer className="w-3.5 h-3.5" strokeWidth={1.75} />
+              {printingId === order.id ? 'Preparando…' : 'Imprimir'}
+            </button>
           </div>
           <div className="px-5 py-4 space-y-3">
             <div>
