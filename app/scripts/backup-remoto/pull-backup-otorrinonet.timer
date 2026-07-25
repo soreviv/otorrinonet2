@@ -1,0 +1,10 @@
+[Unit]
+Description=Pull diario de backups remotos de OtorrinoNet
+
+[Timer]
+# 04:00 — una hora después del backup del origen (03:00) para darle margen
+OnCalendar=*-*-* 04:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
