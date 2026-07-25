@@ -47,4 +47,5 @@ credentials.json
 *.key
 .credentials
 .claude/design-system/
+.claude/settings.local.json
 sgsi/
