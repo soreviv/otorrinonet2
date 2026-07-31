@@ -22,6 +22,7 @@ import {
 } from '@/app/actions/notas'
 import { printEvolutionNote } from '@/lib/print-evolution-note'
 import { printPrescription } from '@/lib/print-prescription'
+import { printConsent } from '@/lib/print-consent'
 import type { CLINIC_CONFIG } from '@/lib/clinic-config'
 import type {
   Prescription,
@@ -273,7 +274,7 @@ export function NotasClient({
         consent={selectedConsent}
         onSignPresential={handleSignConsent}
         onSendEmail={handleSendConsentEmail}
-        onPrint={() => window.print()}
+        onPrint={() => printConsent(selectedConsent, clinicConfig)}
         onBack={() => setView('list')}
       />
     )

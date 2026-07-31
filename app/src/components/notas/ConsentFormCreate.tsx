@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { CONSENT_TEMPLATES, getConsentTemplate, renderTemplateToText } from '@/lib/consent-templates'
 
+// Documentos genéricos sin plantilla predefinida (texto libre).
 const TIPOS = [
   { value: 'Aviso de Privacidad', label: 'Aviso de Privacidad' },
   { value: 'Consentimiento para Tratamiento', label: 'Consentimiento para Tratamiento' },
@@ -17,9 +19,27 @@ interface Props {
 }
 
 export function ConsentFormCreate({ patientName, onSave, onCancel }: Props) {
-  const [tipo, setTipo] = useState(TIPOS[0].value)
-  const [content, setContent] = useState('')
+  // Valor del <select>: `tpl:<slug>` para plantillas, `gen:<tipo>` para documentos libres.
+  const [seleccion, setSeleccion] = useState(`tpl:${CONSENT_TEMPLATES[0].slug}`)
+  const [tipo, setTipo] = useState(CONSENT_TEMPLATES[0].procedure)
+  const [content, setContent] = useState(() => renderTemplateToText(CONSENT_TEMPLATES[0]))
   const [saving, setSaving] = useState(false)
+
+  const esPlantilla = seleccion.startsWith('tpl:')
+
+  function handleSelect(value: string) {
+    setSeleccion(value)
+    if (value.startsWith('tpl:')) {
+      const template = getConsentTemplate(value.slice(4))
+      if (template) {
+        setTipo(template.procedure)
+        setContent(renderTemplateToText(template))
+      }
+    } else {
+      setTipo(value.slice(4))
+      setContent('')
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -53,24 +73,37 @@ export function ConsentFormCreate({ patientName, onSave, onCancel }: Props) {
               Tipo de consentimiento
             </label>
             <select
-              value={tipo}
-              onChange={e => setTipo(e.target.value)}
+              value={seleccion}
+              onChange={e => handleSelect(e.target.value)}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 dark:border-slate-700 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 transition"
             >
-              {TIPOS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              <optgroup label="Plantillas de procedimiento">
+                {CONSENT_TEMPLATES.map(t => (
+                  <option key={t.slug} value={`tpl:${t.slug}`}>{t.procedure}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Otros documentos">
+                {TIPOS.map(t => <option key={t.value} value={`gen:${t.value}`}>{t.label}</option>)}
+              </optgroup>
             </select>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
-              Texto del consentimiento <span className="text-slate-400">(opcional)</span>
+              Texto del consentimiento{' '}
+              <span className="text-slate-400">{esPlantilla ? '(editable)' : '(opcional)'}</span>
             </label>
+            {esPlantilla && (
+              <p className="text-[11px] text-sky-600 dark:text-sky-400 mb-1.5">
+                Texto precargado desde la plantilla. Los datos del paciente, la fecha y las firmas se añaden al imprimir.
+              </p>
+            )}
             <textarea
               value={content}
               onChange={e => setContent(e.target.value)}
-              rows={6}
+              rows={esPlantilla ? 12 : 6}
               placeholder="Descripción o cláusulas específicas del consentimiento..."
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 dark:border-slate-700 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 transition resize-none"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 dark:border-slate-700 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 transition resize-y font-mono text-[13px] leading-relaxed"
             />
           </div>
         </div>

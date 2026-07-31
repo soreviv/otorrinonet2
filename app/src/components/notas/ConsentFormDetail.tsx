@@ -161,8 +161,20 @@ export function ConsentFormDetail({
             <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{consent.patientName}</p>
           </div>
 
-          <div className="px-5 py-4">
-            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{consent.consentText}</p>
+          <div className="px-5 py-4 space-y-2">
+            {consent.consentText.split(/\n{2,}/).map((block, i) => {
+              const text = block.trim()
+              if (!text) return null
+              return text.startsWith('## ') ? (
+                <h3 key={i} className="text-xs font-bold uppercase tracking-wide text-sky-700 dark:text-sky-400 pt-2">
+                  {text.slice(3).trim()}
+                </h3>
+              ) : (
+                <p key={i} className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed text-justify">
+                  {text}
+                </p>
+              )
+            })}
           </div>
         </div>
 
