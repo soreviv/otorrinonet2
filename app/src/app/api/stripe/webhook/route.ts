@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { sendOrderTicket } from '@/lib/mailer'
+import { sendStaffPush } from '@/lib/ntfy'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import type Stripe from 'stripe'
 
@@ -76,6 +77,13 @@ async function handleEvent(event: Stripe.Event) {
             })
           }
         }
+      })
+
+      sendStaffPush({
+        title: 'Nuevo pedido pagado',
+        message: `${order.compradorNombre} — $${(order.total / 100).toFixed(2)} MXN`,
+        tags: ['shopping_cart'],
+        click: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/staff/tienda/pedidos`,
       })
 
       // Email de ticket (fuera de la transacción)

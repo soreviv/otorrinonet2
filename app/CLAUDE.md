@@ -22,6 +22,7 @@ Sistema clínico para el consultorio de otorrinolaringología del **Dr. Alejandr
 - **Nodemailer / Resend** — emails transaccionales (recordatorio de cita 24 h antes, ticket de compra)
 - **Cloudflare Turnstile** — protección del formulario público de agendado
 - **Recharts** — gráficas en el dashboard
+- **ntfy autoalojado** (`https://ntfy.otorrinonet.com`) — push notifications al staff (nueva cita, mensaje de contacto, nuevo pedido pagado); complementa el correo, no lo reemplaza
 
 ## Comandos de desarrollo
 
@@ -56,6 +57,7 @@ npm run db:studio     # Prisma Studio
 | `src/lib/stripe.ts` | Cliente Stripe server-side (lazy init, evita error en build) |
 | `src/lib/stripe-client.ts` | `stripePromise` para Stripe Elements en el browser |
 | `src/lib/giis-b015.ts` | Generador del archivo de intercambio GIIS-B015 (SIS-CEX) |
+| `src/lib/ntfy.ts` | `sendStaffPush()` — push notifications al staff vía ntfy autoalojado (fire-and-forget) |
 | `src/lib/schemas/tienda.ts` | Schemas Zod para productos, pedidos y checkout |
 | `src/hooks/useCarrito.ts` | Hook de carrito (localStorage) |
 | `src/components/sitio-publico/PublicHeader.tsx` | Header compartido del sitio público |
@@ -78,6 +80,15 @@ npm run db:studio     # Prisma Studio
 - Idempotencia: `StripeWebhookEvent` con PK = `event.id` de Stripe.
 - Imágenes en `/public/assets/tienda/` — upload via API `/api/tienda/upload-imagen`.
 - Variables de entorno requeridas: `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `TIENDA_COSTO_ENVIO_CENTAVOS`.
+
+## Push notifications al staff (ntfy)
+
+- Servidor ntfy autoalojado en `https://ntfy.otorrinonet.com` (config en `/etc/ntfy/server.yml`, `behind-proxy: true`, `auth-default-access: deny-all`).
+- Topic `otorrinonet-staff`. Usuario `otorrinonet-app` (solo escritura, token en `NTFY_STAFF_TOKEN`) lo usa el servidor Next.js para publicar. Usuario `dr-viveros` (solo lectura) es con el que el Dr. Viveros se suscribe desde la app ntfy (Android/iOS/web).
+- Helper `sendStaffPush()` en `src/lib/ntfy.ts` — nunca lanza error ni bloquea (fire-and-forget, como los emails de `mailer.ts`).
+- Enganchado en 3 puntos, junto al correo existente (no lo sustituye): nueva cita (`src/app/actions/appointments.ts`), mensaje de contacto (`src/app/actions/contact.ts`), pedido pagado (`src/app/api/stripe/webhook/route.ts`).
+- Variables de entorno: `NTFY_BASE_URL`, `NTFY_STAFF_TOPIC`, `NTFY_STAFF_TOKEN`.
+- Gestión de usuarios/tokens ntfy: `ntfy user list`, `ntfy access <user> <topic> <permiso>`, `ntfy token add <user>` (requiere acceso root al VPS, no está en el repo).
 
 ## Agenda — Bloqueo de fechas
 

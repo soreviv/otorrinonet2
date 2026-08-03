@@ -42,6 +42,7 @@ OtorrinoNet es una plataforma integral de gestión clínica y portal de paciente
 | **Seguridad de Datos** | Cifrado AES-256-GCM (node:crypto) |
 | **Pagos** | Stripe (PaymentIntents + Webhooks) |
 | **Email** | Nodemailer (citas, recordatorios, tickets) |
+| **Push** | ntfy autoalojado (notificaciones al staff: nueva cita, contacto, pedido) |
 | **Captcha** | Cloudflare Turnstile |
 | **Tests** | Vitest + jsdom + @testing-library/react |
 | **Infraestructura** | Node.js 20+ / PM2 / nginx / VPS |

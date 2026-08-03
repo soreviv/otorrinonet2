@@ -13,6 +13,7 @@ import {
   sendAppointmentReschedule,
   type AppointmentEmailData,
 } from '@/lib/mailer'
+import { sendStaffPush } from '@/lib/ntfy'
 
 const CDMX = 'America/Mexico_City'
 
@@ -109,6 +110,13 @@ export async function submitAppointmentRequest(
     sendAppointmentConfirmationToPatient(emailData, cfg),
     sendAppointmentNotificationToDoctor(emailData, cfg),
   ]).catch(err => console.error('[mailer] Error enviando emails de cita:', err))
+
+  sendStaffPush({
+    title: 'Nueva cita agendada',
+    message: `${data.patientName} — ${data.date} ${data.time}`,
+    tags: ['calendar'],
+    click: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/staff/agenda`,
+  })
 
   return { ok: true }
 }

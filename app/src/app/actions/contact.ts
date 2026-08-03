@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { verifyTurnstileToken } from '@/lib/turnstile'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import { sendContactNotification } from '@/lib/mailer'
+import { sendStaffPush } from '@/lib/ntfy'
 
 export interface ContactFormPayload {
   name: string
@@ -37,6 +38,13 @@ export async function submitContactForm(payload: ContactFormPayload): Promise<{ 
       subject: 'Mensaje de contacto desde el portal',
       message: payload.message,
     }, cfg).catch(err => console.error('[mailer] Error enviando email de contacto:', err))
+  })
+
+  sendStaffPush({
+    title: 'Nuevo mensaje de contacto',
+    message: `${payload.name}: ${payload.message.slice(0, 200)}`,
+    tags: ['email'],
+    click: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/staff`,
   })
 
   return { ok: true }

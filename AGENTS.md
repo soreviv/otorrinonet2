@@ -21,6 +21,7 @@ La aplicación vive en `app/`. Todo el trabajo de código va dentro de esa carpe
 - **Stripe** — pagos de la tienda en línea
 - **JWT** en cookie `session` (8 h) — `verifySession()` en `app/src/lib/dal.ts`
 - **Nodemailer** — emails transaccionales
+- **ntfy autoalojado** — push notifications al staff (nueva cita, contacto, pedido pagado)
 - **Cloudflare Turnstile** — protección del formulario de agendado
 - **Zod** — validación de inputs en server actions
 - **Recharts** — gráficas en el dashboard
@@ -109,6 +110,7 @@ Todas las páginas públicas siguen este patrón:
 | `app/src/lib/dal.ts` | `verifySession()` — autenticación |
 | `app/src/lib/clinic-config.ts` | Datos del doctor/clínica (desde env vars) |
 | `app/src/lib/mailer.ts` | Emails transaccionales (Nodemailer) |
+| `app/src/lib/ntfy.ts` | `sendStaffPush()` — push al staff vía ntfy autoalojado (fire-and-forget) |
 | `app/src/lib/stripe.ts` | Singleton Stripe server-side (`'server-only'`) |
 | `app/src/lib/stripe-client.ts` | `stripePromise` para Stripe Elements |
 | `app/src/lib/schemas/tienda.ts` | Schemas Zod de la tienda (admin + checkout) |

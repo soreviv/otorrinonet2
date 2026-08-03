@@ -16,6 +16,7 @@ Plataforma integral para la práctica privada del **Dr. Alejandro Viveros Domín
 | Seguridad de datos | Cifrado AES-256-GCM (node:crypto) |
 | Pagos | Stripe (PaymentIntents + Webhooks) |
 | Email | Nodemailer (citas, recordatorios, tickets de compra) |
+| Push | ntfy autoalojado (notificaciones al staff: nueva cita, contacto, pedido) |
 | Captcha | Cloudflare Turnstile |
 | Tests | Vitest + jsdom + @testing-library/react |
 | Infraestructura | Node.js 20+ / PM2 / nginx / VPS |
@@ -69,6 +70,7 @@ otorrinonet2/
 │           ├── clinic-config.ts  # Datos del doctor/clínica
 │           ├── stripe.ts         # Cliente Stripe server-side
 │           ├── mailer.ts         # Emails transaccionales
+│           ├── ntfy.ts           # Push notifications al staff (ntfy autoalojado)
 │           └── prisma.ts         # Cliente Prisma singleton
 ├── memory/                       # PRD y plan de producto
 ├── .jules/                       # Instrucciones para agentes de IA
@@ -181,6 +183,9 @@ src/e2e/
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Clave pública de Stripe (`pk_live_…`) |
 | `STRIPE_WEBHOOK_SECRET` | Secreto del webhook de Stripe (`whsec_…`) |
 | `TIENDA_COSTO_ENVIO_CENTAVOS` | Costo de envío en centavos MXN (default: 15000 = $150) |
+| `NTFY_BASE_URL` | URL base del servidor ntfy autoalojado |
+| `NTFY_STAFF_TOPIC` | Topic ntfy para notificaciones al staff |
+| `NTFY_STAFF_TOKEN` | Token de acceso (solo escritura) del usuario ntfy que publica |
 
 ---
 
@@ -192,6 +197,7 @@ src/e2e/
 - Las rutas `/legal/*` redirigen 301 a sus canónicas (`/privacidad`, `/terminos`, `/cookies`, `/descargo`).
 - El stock se decrementa **solo** en el webhook `payment_intent.succeeded`, nunca al crear la orden.
 - El carrito vive en `localStorage` (`useCarrito`), no en BD ni cookies.
+- Además del correo, el staff recibe push notifications (ntfy) para nueva cita, mensaje de contacto y pedido pagado — ver `src/lib/ntfy.ts`. Es fire-and-forget: si falla o faltan variables de entorno, no bloquea el flujo.
 
 ---
 
