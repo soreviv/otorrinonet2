@@ -78,6 +78,10 @@
   --color-brand-nose:   #216e95;   /* nariz  · azul teal   */
   --color-brand-throat: #f28522;   /* garganta · naranja   */
 
+  /* Esculapio — panel de acceso (EHR) */
+  --color-esculapio-900: #123049;
+  --color-esculapio-700: #1c4a68;
+
   /* Tipografía — escala de tamaños */
   --text-xs:   0.75rem;
   --text-sm:   0.875rem;
