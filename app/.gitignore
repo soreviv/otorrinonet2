@@ -52,3 +52,6 @@ next-env.d.ts
 
 # OpenACP local workspace (contains secrets)
 .openacp
+
+# Documentos sueltos (plantillas .docx de referencia, etc.)
+*.docx

@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Genera .next/standalone con un server.js autocontenido (solo los node_modules
+  // que realmente se usan) — necesario para la imagen Docker de producción.
+  output: "standalone",
+
   images: {
     formats: ["image/avif", "image/webp"],
   },
