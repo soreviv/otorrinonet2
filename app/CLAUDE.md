@@ -98,12 +98,7 @@ npm run db:studio     # Prisma Studio
 
 ## Infraestructura (VPS)
 
-- **PM2**: proceso `otorrinonet` — `npm run start -- -p 5000` en `/var/www/otorrinonet2/app`.
-- **nginx**: config activa en `/etc/nginx/sites-enabled/otorrinonet.conf` (symlink a `sites-available/otorrinonet.conf`). `nginx.conf` incluye tanto `conf.d/*.conf` como `sites-enabled/*` — editar el archivo en `sites-available/`, nunca el symlink.
-  - `/_next/static/` → `alias` a `.next/static/` (archivos estáticos servidos desde disco, no proxeados).
-  - `/assets/` → `root` en `public/`.
-  - Todo lo demás → proxy a `127.0.0.1:5000`.
-  - `conf.d/` también tiene configs de correo (`mail.otorrinonet.conf`) y `sites-enabled/` tiene `mta-sts.conf` para el correo autohospedado.
+Ver skill `infraestructura-vps` (PM2, config de nginx).
 
 ## Pendientes conocidos
 
@@ -111,20 +106,9 @@ npm run db:studio     # Prisma Studio
 - **Módulo de cobros**: registro manual de honorarios (primera vez $1,100 / subsecuente $1,000 / lavado $600) — sin fecha, decisión pendiente de scope.
 - **FHIR export**: endpoints individuales y bulk — requiere definir sistema receptor (laboratorio, HIS, IMSS).
 
-## Certificación NOM-024-SSA3-2012 (en curso)
+## Certificación NOM-024-SSA3-2012
 
-El sistema está en proceso de certificarse como SIRES ante la DGIS (Secretaría de Salud). Ver plan completo en la memoria del proyecto.
-
-**4 tracks de implementación:**
-
-1. **Track 1 ✅ Implementado** — Datos mínimos del paciente: CURP, sexo CURP, sexo biológico, género, derechohabiencia, entidad de nacimiento, indicadores indígena/afromexicano/migrante en modelo `Patient`.
-2. **Track 2 ✅ Implementado** — Catálogos fundamentales: CIE-10 en diagnósticos de notas clínicas, CLUES del consultorio, catálogos DGIS.
-3. **Track 3 ✅ Implementado** — GIIS-B015 Consulta Externa: somatometría + signos vitales en nota clínica, generador SIS-CEX en `src/app/api/dgis/exportar-cex/`, UI en `src/app/staff/dgis/`.
-4. **Track 4 🔄 En documentación** — GIIS-A004 SGSI: 11 dominios ISO 27799, Declaración de Aplicabilidad (DDA), políticas. Requiere 6 meses de madurez antes de la verificación ante DGIS.
-
-**Reglas críticas GIIS-B015:** nombres en MAYÚSCULAS sin acentos (A-Z + Ñ). Máx 15% CURP genérica. Máx 5% diagnóstico R69X.
-
-**Contacto DGIS:** angel.serrano@salud.gob.mx / blanca.pinette@salud.gob.mx · +52 55 6392 2300 ext. 52584
+Ver skill `certificacion-nom024` (estado de tracks, reglas GIIS-B015, contacto DGIS).
 
 ## Local OpenACP Workspace
 
