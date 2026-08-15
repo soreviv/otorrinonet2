@@ -68,6 +68,9 @@ export function CookieBanner() {
       }
     } catch {}
     localStorage.removeItem(STORAGE_KEY)
+    // localStorage no existe durante el render en servidor — el banner solo puede
+    // decidirse a mostrar tras montar en cliente, así que el setState aquí es necesario.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisible(true)
   }, [])
 

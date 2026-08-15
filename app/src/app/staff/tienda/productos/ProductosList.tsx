@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   Edit2,
   Archive,
@@ -67,9 +68,9 @@ export function ProductosList({ productos }: ProductosListProps) {
               <tr key={producto.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded bg-slate-100 dark:bg-slate-800 shrink-0 overflow-hidden border border-slate-200 dark:border-slate-700">
+                    <div className="relative w-10 h-10 rounded bg-slate-100 dark:bg-slate-800 shrink-0 overflow-hidden border border-slate-200 dark:border-slate-700">
                       {producto.imagenes?.[0] ? (
-                        <img src={producto.imagenes[0]} alt={producto.nombre} className="w-full h-full object-cover" />
+                        <Image src={producto.imagenes[0]} alt={producto.nombre} fill sizes="40px" className="object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <Box className="w-5 h-5 text-slate-300" />

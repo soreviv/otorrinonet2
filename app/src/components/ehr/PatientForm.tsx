@@ -226,9 +226,8 @@ const EMPTY_FORM: FormState = {
   seConsideraIndigena: '', seAutodenominaAfromexicano: '', migrante: '', paisProcedencia: '',
 }
 
-export function PatientForm({ patient, currentUserRole, onSubmit, onCancel }: PatientFormProps) {
+export function PatientForm({ patient, onSubmit, onCancel }: PatientFormProps) {
   const isEdit = !!patient
-  const isMedico = currentUserRole === 'medico'
 
   const [form, setForm] = useState<FormState>(() => {
     if (!patient) return EMPTY_FORM

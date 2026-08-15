@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { PublicHeader } from './PublicHeader'
 import { PublicFooter } from './PublicFooter'
 import {
@@ -30,13 +31,15 @@ export function DoctorProfilePage({
           <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center md:items-start">
 
             <div className="relative flex-shrink-0">
-              <div className="w-40 h-40 md:w-52 md:h-52 rounded-3xl overflow-hidden bg-gradient-to-br from-sky-400 to-sky-700 shadow-xl">
+              <div className="relative w-40 h-40 md:w-52 md:h-52 rounded-3xl overflow-hidden bg-gradient-to-br from-sky-400 to-sky-700 shadow-xl">
                 {!imgError && (
-                  <img
+                  <Image
                     src={doctorProfile.photoProfile}
                     alt={doctorProfile.fullName}
                     onError={() => setImgError(true)}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 768px) 10rem, 13rem"
+                    className="object-cover"
                   />
                 )}
                 {imgError && (

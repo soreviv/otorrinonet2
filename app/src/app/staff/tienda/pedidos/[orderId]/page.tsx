@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getDetallePedido } from '@/app/actions/tienda-admin'
 import { OrderAdminActions } from './OrderAdminActions'
 import {
@@ -138,9 +139,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
                     <tr key={item.id} className="text-sm">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded bg-slate-100 dark:bg-slate-800 shrink-0 overflow-hidden border border-slate-200 dark:border-slate-700">
+                          <div className="relative w-12 h-12 rounded bg-slate-100 dark:bg-slate-800 shrink-0 overflow-hidden border border-slate-200 dark:border-slate-700">
                             {item.product && item.product.imagenes && item.product.imagenes[0] ? (
-                              <img src={item.product.imagenes[0]} alt={item.nombreSnapshot} className="w-full h-full object-cover" />
+                              <Image src={item.product.imagenes[0]} alt={item.nombreSnapshot} fill sizes="48px" className="object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
                                 <Package className="w-6 h-6 text-slate-300" />

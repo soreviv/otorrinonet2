@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useCarrito } from '@/hooks/useCarrito'
 import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, ArrowLeft, Info, AlertTriangle } from 'lucide-react'
 import { handleValidarStock } from './actions'
@@ -91,9 +92,9 @@ export function CarritoClient() {
                 alerta ? 'border-rose-200 bg-rose-50/30 dark:border-rose-900/50' : 'border-slate-100 dark:border-slate-800'
               }`}
             >
-              <div className="w-20 h-20 md:w-24 md:h-24 bg-slate-50 dark:bg-slate-800 rounded-xl overflow-hidden shrink-0 border border-slate-100 dark:border-slate-700">
+              <div className="relative w-20 h-20 md:w-24 md:h-24 bg-slate-50 dark:bg-slate-800 rounded-xl overflow-hidden shrink-0 border border-slate-100 dark:border-slate-700">
                 {item.imagen ? (
-                  <img src={item.imagen} alt={item.nombre} className="w-full h-full object-cover" />
+                  <Image src={item.imagen} alt={item.nombre} fill sizes="96px" className="object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-slate-200">
                     <ShoppingBag className="w-8 h-8" />

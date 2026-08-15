@@ -307,6 +307,7 @@ export function PrescriptionDetail({
               <div className="space-y-3">
                 {rx.signatureData ? (
                   <div className="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 p-3 flex justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- data URL base64 sin dimensiones fijas, no aplica optimización de next/image */}
                     <img src={rx.signatureData} alt="Firma del médico" className="max-h-24 object-contain" />
                   </div>
                 ) : (
@@ -340,6 +341,7 @@ export function PrescriptionDetail({
                 {hasPreconfiguredSignature ? (
                   <>
                     <div className="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 p-4 flex justify-center">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- data URL base64 sin dimensiones fijas, no aplica optimización de next/image */}
                       <img src={rx.doctorSignatureImageUrl} alt="Firma del médico" className="max-h-24 object-contain" />
                     </div>
                     <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center">

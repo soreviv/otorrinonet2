@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
 import { revalidatePath } from 'next/cache'
-import { TIPOS_CONSULTA, type TipoConsulta, type MetodoPago } from '@/lib/cobros-data'
+import { type TipoConsulta, type MetodoPago } from '@/lib/cobros-data'
 
 export async function registrarCobro(
   appointmentId: string,

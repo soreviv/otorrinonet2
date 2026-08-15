@@ -8,9 +8,6 @@ import type {
   Patient, PatientSex, FamilyHistory, PersonalHistory, Nom024Data,
 } from '@/lib/ehr-types'
 
-const EMPTY_FAMILY: FamilyHistory = { notes: '', relevantConditions: [] }
-const EMPTY_PERSONAL: Omit<PersonalHistory, 'allergies'> = { pathological: '', nonPathological: '', currentMedications: [] }
-
 function encryptPatient(p: {
   curp?: string | null
   telefono?: string | null

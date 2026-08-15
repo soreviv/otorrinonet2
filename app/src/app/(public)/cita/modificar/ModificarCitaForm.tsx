@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { StepDateTimeSelection } from '@/components/agenda/steps/StepDateTimeSelection'
 import { rescheduleAppointmentByToken } from '@/app/actions/appointments'
@@ -24,6 +25,7 @@ export default function ModificarCitaForm({
   const [blockedDates, setBlockedDates] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     getPublicBlockedDates().then(setBlockedDates).catch(() => {})
@@ -42,7 +44,7 @@ export default function ModificarCitaForm({
     setError(null)
     const result = await rescheduleAppointmentByToken(token, selectedDate, selectedTime)
     if (result.ok) {
-      window.location.href = '/cita-modificada'
+      router.push('/cita-modificada')
     } else {
       setError(result.error ?? 'Error al modificar la cita. Intente de nuevo.')
       setSubmitting(false)

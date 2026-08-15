@@ -6,7 +6,7 @@ import { PublicHeader } from './PublicHeader'
 import { PublicFooter } from './PublicFooter'
 import { Breadcrumbs } from './Breadcrumbs'
 import {
-  Calendar, Syringe, ShieldCheck, Info,
+  Syringe, ShieldCheck, Info,
   RefreshCw, AlertTriangle, MapPin,
 } from 'lucide-react'
 import {
@@ -54,7 +54,8 @@ export function VaccineRecommendationPage() {
     setNoneSelected(false)
     setConditions(prev => {
       const next = new Set(prev)
-      next.has(c) ? next.delete(c) : next.add(c)
+      if (next.has(c)) next.delete(c)
+      else next.add(c)
       return next
     })
   }

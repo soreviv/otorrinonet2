@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { submitPreregistro } from '@/app/actions/appointments'
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -149,9 +150,9 @@ export function PreregistroClient({ token, patientName }: Props) {
           Sus datos han sido registrados en su expediente. El Dr. Viveros los tendrá disponibles
           cuando llegue a su consulta.
         </p>
-        <a href="/" className="inline-block mt-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors">
+        <Link href="/" className="inline-block mt-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors">
           Volver al inicio
-        </a>
+        </Link>
       </div>
     )
   }

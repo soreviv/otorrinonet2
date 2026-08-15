@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useCarrito } from '@/hooks/useCarrito'
 import { CheckCircle2, Package, MapPin, Truck, Loader2, AlertTriangle, ShoppingBag, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Order, OrderItem } from '@/generated/prisma'
 
 type ProductSnap = { nombre: string; imagenes: string[] }
@@ -92,9 +93,9 @@ export function ConfirmacionClient({ order }: ConfirmacionClientProps) {
           <div className="space-y-4">
             {order.items.map((item) => (
               <div key={item.id} className="flex gap-4">
-                <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden shrink-0 border border-slate-100 dark:border-slate-700">
+                <div className="relative w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden shrink-0 border border-slate-100 dark:border-slate-700">
                   {item.product?.imagenes?.[0] ? (
-                    <img src={item.product.imagenes[0]} alt={item.nombreSnapshot} className="w-full h-full object-cover" />
+                    <Image src={item.product.imagenes[0]} alt={item.nombreSnapshot} fill sizes="48px" className="object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-200">
                       <ShoppingBag className="w-6 h-6" />

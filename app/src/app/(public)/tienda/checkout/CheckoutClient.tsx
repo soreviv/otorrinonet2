@@ -8,6 +8,7 @@ import { stripePromise } from '@/lib/stripe-client'
 import { crearOrdenYPaymentIntent } from '@/app/actions/tienda'
 import { ArrowLeft, Loader2, MapPin, Truck, AlertTriangle, ShoppingBag, Lock } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { DatosComprador } from '@/lib/schemas/tienda'
 
 const INPUT_CLS =
@@ -221,16 +222,9 @@ function StepDatos({ permiteEnvio, onConfirm, loading, error }: StepDatosProps) 
 
 // ── Formulario de pago con Stripe ──────────────────────────────────────────────
 
-function StripePaymentForm({
-  clientSecret,
-  orderId,
-}: {
-  clientSecret: string
-  orderId: string
-}) {
+function StripePaymentForm() {
   const stripe = useStripe()
   const elements = useElements()
-  const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -374,7 +368,7 @@ export function CheckoutClient() {
               },
             }}
           >
-            <StripePaymentForm clientSecret={clientSecret} orderId={orderId} />
+            <StripePaymentForm />
           </Elements>
         )}
       </div>
@@ -387,9 +381,9 @@ export function CheckoutClient() {
           <div className="space-y-4 mb-6">
             {items.map(item => (
               <div key={item.productId} className="flex gap-3">
-                <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden shrink-0 border border-slate-100 dark:border-slate-700">
+                <div className="relative w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden shrink-0 border border-slate-100 dark:border-slate-700">
                   {item.imagen ? (
-                    <img src={item.imagen} alt={item.nombre} className="w-full h-full object-cover" />
+                    <Image src={item.imagen} alt={item.nombre} fill sizes="48px" className="object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-300">
                       <ShoppingBag className="w-6 h-6" />

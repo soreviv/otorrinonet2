@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { PreregistroClient } from './PreregistroClient'
 
@@ -34,9 +35,9 @@ export default async function PreregistroPage({
           <p className="text-sm text-slate-500 dark:text-slate-400">
             Ya completó su información previamente. El Dr. Viveros la tendrá disponible en su consulta.
           </p>
-          <a href="/" className="inline-block bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors">
+          <Link href="/" className="inline-block bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors">
             Volver al inicio
-          </a>
+          </Link>
         </div>
       </main>
     )

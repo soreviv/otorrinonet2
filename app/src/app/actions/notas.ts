@@ -624,7 +624,6 @@ export async function signPrescriptionInDB(recetaId: string, firmaImagen?: strin
 export async function signConsentInDB(id: string): Promise<void> {
   const session = await verifySession()
   const isoTs = new Date().toISOString()
-  const hash = computeNoteSignatureHash(id, session.userId, isoTs)
 
   await prisma.patientConsent.update({
     where: { id },

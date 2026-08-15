@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { ProductCategory, DeliveryMode } from '@/generated/prisma'
 import { crearProducto, actualizarProducto } from '@/app/actions/tienda-admin'
 import {
@@ -177,7 +178,7 @@ export function ProductForm({ initialData, isEditing = false }: ProductFormProps
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {formData.imagenes.map((url, index) => (
                   <div key={index} className="relative group aspect-square rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800">
-                    <img src={url} alt={`Imagen ${index + 1}`} className="w-full h-full object-cover" />
+                    <Image src={url} alt={`Imagen ${index + 1}`} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" />
                     <button
                       type="button"
                       onClick={() => removeImage(index)}

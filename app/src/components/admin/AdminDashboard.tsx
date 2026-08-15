@@ -12,7 +12,6 @@ import type {
   FhirExport,
   UserRole,
   UserStatus,
-  ClinicInfo,
 } from '@/lib/admin-types'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
