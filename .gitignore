@@ -42,6 +42,8 @@ product-plan.zip
 .env
 .env.*
 *.env
+!.env.example
+!**/.env.example
 credentials.json
 *.pem
 *.key
