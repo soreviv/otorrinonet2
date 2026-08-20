@@ -9,17 +9,18 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // Leer DATABASE_URL del .env
 const envPath = path.resolve(__dirname, '../.env')
 const envContent = readFileSync(envPath, 'utf8')
-const dbUrlMatch = envContent.match(/DATABASE_URL=(.+)/)
-const DATABASE_URL = dbUrlMatch[1].trim()
+const dbUrlMatch = envContent.match(/^DATABASE_URL=(.+)$/m)
+const DATABASE_URL = dbUrlMatch[1].trim().replace(/^["']|["']$/g, '')
 
 const { Pool } = pg
 const pool = new Pool({ connectionString: DATABASE_URL })
 
-const XLSX_PATH = '/var/www/esculapio/attached_assets/DIAGNOSTICOS_20240416.xlsx'
+const XLSX_PATH = path.resolve(__dirname, '../../docs/DIAGNOSTICOS_20240416.xlsx')
 
 async function main() {
   console.log('Leyendo catálogo CIE-10…')
-  const wb = XLSX.readFile(XLSX_PATH)
+  const buf = readFileSync(XLSX_PATH)
+  const wb = XLSX.read(buf, { type: 'buffer' })
   const ws = wb.Sheets[wb.SheetNames[0]]
   const rows = XLSX.utils.sheet_to_json(ws, { header: 1 })
 
