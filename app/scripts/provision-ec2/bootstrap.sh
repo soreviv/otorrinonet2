@@ -5,8 +5,8 @@
 # NO clona el repo, NO toca secretos (Stripe, JWT_SECRET, etc.) — esos pasos
 # quedan manuales a propósito, ver el resumen que imprime al final.
 #
-# Uso, ya conectado por SSH a la instancia:
-#   git clone <repo> /tmp/otorrinonet2   (o sube este archivo suelto por scp)
+# Uso, ya conectado a la instancia (Session Manager o SSH):
+#   git clone <repo> /tmp/otorrinonet2   (o sube este archivo suelto)
 #   sudo bash bootstrap.sh
 
 set -euo pipefail
