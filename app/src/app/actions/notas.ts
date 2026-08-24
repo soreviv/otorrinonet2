@@ -6,6 +6,7 @@ import { verifySession, requireMedico } from '@/lib/dal'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import { logAction } from '@/lib/audit'
 import { computeNoteSignatureHash } from '@/lib/crypto'
+import { sendSignedPrescriptionEmail } from '@/lib/mailer'
 import type { EvolutionNote, NoteAddendum, NoteDiagnostico, Prescription, PrescriptionMedication, ConsentForm } from '@/lib/notas-types'
 
 // ─── Helpers de nombre de paciente ───────────────────────────────────────────
@@ -618,6 +619,37 @@ export async function signPrescriptionInDB(recetaId: string, firmaImagen?: strin
     data: { firmada: true, firmaHash: hash, firmaImagen: firmaImagen ?? null, fechaFirma: new Date(isoTs), firmaUserId: session.userId },
   })
   void logAction({ action: 'firma', resource: 'prescription', resourceId: recetaId, userId: session.userId })
+
+  // Fire-and-forget — email de receta firmada al paciente
+  const rows = await prisma.prescription.findMany({
+    where: { recetaId },
+    include: { patient: { select: { nombre: true, apellidoPaterno: true, apellidoMaterno: true, email: true } } },
+  })
+  const first = rows[0]
+  if (first?.patient.email) {
+    const cfg = await getClinicConfigFromDB()
+    sendSignedPrescriptionEmail(
+      {
+        patientName: patientFullName(first.patient),
+        patientEmail: first.patient.email,
+        doctorName: cfg.doctorName,
+        fecha: isoTs.split('T')[0],
+        prescriptionId: recetaId,
+        firmaHash: hash,
+        diagnostico: first.instruccionesGenerales ?? undefined,
+        medications: rows.map(r => ({
+          name: r.medicamento,
+          brandName: r.nombreComercial ?? undefined,
+          dose: r.dosis,
+          frequency: r.frecuencia,
+          duration: r.duracion ?? undefined,
+          route: r.via ?? undefined,
+        })),
+      },
+      cfg,
+    ).catch(err => console.error('[mailer] Error enviando email de receta firmada:', err))
+  }
+
   return { firmaHash: hash }
 }
 

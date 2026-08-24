@@ -2,7 +2,7 @@
 
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
-import { fromZonedTime } from 'date-fns-tz'
+import { fromZonedTime, formatInTimeZone } from 'date-fns-tz'
 import { verifyTurnstileToken } from '@/lib/turnstile'
 import { prisma } from '@/lib/prisma'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
@@ -11,6 +11,7 @@ import {
   sendAppointmentConfirmationToPatient,
   sendAppointmentNotificationToDoctor,
   sendAppointmentReschedule,
+  sendAppointmentCancellation,
   type AppointmentEmailData,
 } from '@/lib/mailer'
 import { sendStaffPush } from '@/lib/ntfy'
@@ -152,6 +153,21 @@ export async function cancelAppointmentByToken(
     where: { id: appointment.id },
     data: { status: 'cancelada' },
   })
+
+  if (appointment.patientEmail && appointment.patientName) {
+    const cfg = await getClinicConfigFromDB()
+    sendAppointmentCancellation(
+      {
+        patientName: appointment.patientName,
+        patientEmail: appointment.patientEmail,
+        fecha: formatInTimeZone(appointment.scheduledAt, CDMX, 'yyyy-MM-dd'),
+        hora: formatInTimeZone(appointment.scheduledAt, CDMX, 'HH:mm'),
+      },
+      cfg,
+      'patient',
+    ).catch(err => console.error('[mailer] Error enviando email de cancelación:', err))
+  }
+
   return { ok: true }
 }
 
