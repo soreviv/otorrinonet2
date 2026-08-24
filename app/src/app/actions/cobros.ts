@@ -48,19 +48,17 @@ export async function registrarCobro(
   }
 }
 
+function desdePeriodo(periodo: 'hoy' | 'semana' | 'mes'): Date {
+  const now = new Date()
+  if (periodo === 'hoy') return new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  if (periodo === 'semana') return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)
+  return new Date(now.getFullYear(), now.getMonth(), 1)
+}
+
 export async function getResumenFinanciero(periodo: 'hoy' | 'semana' | 'mes') {
   await verifySession()
 
-  const now = new Date()
-  let desde: Date
-
-  if (periodo === 'hoy') {
-    desde = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  } else if (periodo === 'semana') {
-    desde = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)
-  } else {
-    desde = new Date(now.getFullYear(), now.getMonth(), 1)
-  }
+  const desde = desdePeriodo(periodo)
 
   const cobros = await prisma.cobro.findMany({
     where: { cobradoAt: { gte: desde } },
@@ -75,4 +73,40 @@ export async function getResumenFinanciero(periodo: 'hoy' | 'semana' | 'mes') {
   }
 
   return { total, porMetodo, numCobros: cobros.length }
+}
+
+export async function listarCobros(filtros: {
+  periodo: 'hoy' | 'semana' | 'mes'
+  metodoPago?: MetodoPago
+  tipoConsulta?: TipoConsulta
+}) {
+  await verifySession()
+
+  const desde = desdePeriodo(filtros.periodo)
+
+  const cobros = await prisma.cobro.findMany({
+    where: {
+      cobradoAt: { gte: desde },
+      ...(filtros.metodoPago ? { metodoPago: filtros.metodoPago } : {}),
+      ...(filtros.tipoConsulta ? { tipoConsulta: filtros.tipoConsulta } : {}),
+    },
+    include: {
+      appointment: {
+        select: { patientName: true, patient: { select: { nombre: true, apellidoPaterno: true, apellidoMaterno: true } } },
+      },
+    },
+    orderBy: { cobradoAt: 'desc' },
+  })
+
+  return cobros.map(c => ({
+    id: c.id,
+    fecha: c.cobradoAt.toISOString(),
+    paciente: c.appointment.patient
+      ? [c.appointment.patient.nombre, c.appointment.patient.apellidoPaterno, c.appointment.patient.apellidoMaterno].filter(Boolean).join(' ')
+      : c.appointment.patientName || 'Sin nombre',
+    tipoConsulta: c.tipoConsulta,
+    montoTotal: c.montoTotal,
+    metodoPago: c.metodoPago,
+    facturado: c.facturado,
+  }))
 }

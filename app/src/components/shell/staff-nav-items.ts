@@ -7,6 +7,7 @@ import {
   ShoppingBag,
   Package,
   DatabaseZap,
+  Wallet,
 } from 'lucide-react'
 import type { StaffRole } from './StaffShell'
 
@@ -50,6 +51,13 @@ export const staffNavItems = [
     label: 'Productos de Tienda',
     href: '/staff/tienda/productos',
     icon: Package,
+    roles: ['medico', 'recepcionista'] as StaffRole[],
+  },
+  {
+    id: 'cobros',
+    label: 'Cobros',
+    href: '/staff/cobros',
+    icon: Wallet,
     roles: ['medico', 'recepcionista'] as StaffRole[],
   },
   {

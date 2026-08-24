@@ -90,9 +90,9 @@ El sistema está implementando el **Sistema de Gestión de Seguridad de la Infor
 |---|---|
 | 7. Control de Acceso | 2FA TOTP, sesiones revocables, roles por área, rate-limit |
 | 8.3 Controles criptográficos | JWT firmado HS256, bcrypt en contraseñas, AES-256-GCM en datos sensibles |
-| 6.5 Copias de seguridad | Pendiente documentar procedimiento formal de backup |
-| 9. Gestión de Incidentes | Pendiente redactar procedimiento de respuesta |
-| 10. Continuidad del Negocio | Pendiente plan formal de recuperación ante desastres |
+| 6.5 Copias de seguridad | Implementado: `systemd timer` diario, `pg_dump` cifrado con GPG (AES-256), rotación diaria/semanal/mensual, *pull* remoto vía `rrsync` (3-2-1) |
+| 9. Gestión de Incidentes | Redactado (`sgsi/PROC-INC-gestion-incidentes.md`, SGSI-PROC-INC-001) — pendiente firma del Dr. Viveros |
+| 10. Continuidad del Negocio | Redactado (`sgsi/PROC-BCM-continuidad-negocio.md`, SGSI-PROC-BCM-001) — pendiente firma del Dr. Viveros |
 
 **Medidas de integridad para interoperabilidad GIIS-B015:**
 - Validación estricta de CURP mediante regex oficial (≤ 15% genérica).

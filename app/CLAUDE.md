@@ -69,6 +69,8 @@ npm run db:studio     # Prisma Studio
 | `src/app/actions/appointments.ts` | Server Action — agendado de citas |
 | `src/app/actions/tienda.ts` | Server Actions — catálogo, stock, checkout |
 | `src/app/actions/tienda-admin.ts` | Server Actions — CRUD productos y pedidos (staff) |
+| `src/app/actions/cobros.ts` | Server Actions — registro de cobros, resumen financiero, listado |
+| `src/lib/cobros-data.ts` | Catálogo de tipos de consulta y montos de honorarios |
 | `src/app/api/stripe/webhook/route.ts` | Webhook Stripe — confirma pago, decrementa stock |
 | `src/app/api/dgis/exportar-cex/` | API route — genera archivo de intercambio mensual SIS-CEX |
 | `prisma/schema.prisma` | Schema de la base de datos |
@@ -90,6 +92,14 @@ npm run db:studio     # Prisma Studio
 - Variables de entorno: `NTFY_BASE_URL`, `NTFY_STAFF_TOPIC`, `NTFY_STAFF_TOKEN`.
 - Gestión de usuarios/tokens ntfy: `ntfy user list`, `ntfy access <user> <topic> <permiso>`, `ntfy token add <user>` (requiere acceso root al VPS, no está en el repo).
 
+## Cobros (honorarios)
+
+- Registro manual de honorarios por cita: primera vez $1,100 / subsecuente $1,000 / lavado de oídos $600 / otro (monto libre) — catálogo en `src/lib/cobros-data.ts`.
+- Modelo `Cobro` en `prisma/schema.prisma` — relación 1:1 con `Appointment`. Campos `facturado`/`cfdiUid`/`cfdiUuid` lo ligan con la autofactura CFDI (`src/app/actions/autofactura.ts`).
+- Server actions en `src/app/actions/cobros.ts`: `registrarCobro()` (upsert por cita — sin historial de ediciones, decisión intencional), `getResumenFinanciero()`, `listarCobros()`.
+- UI: `CobroPanel.tsx` embebido en `/staff/agenda` (registro por cita) y vista `/staff/cobros` (resumen financiero, filtros, historial, exportación CSV vía `/api/staff/cobros/export`).
+- Sin restricción de rol en las server actions (cualquier sesión de staff puede registrar/consultar cobros); el enlace de nav a `/staff/cobros` solo se oculta a `enfermera`.
+
 ## Agenda — Bloqueo de fechas
 
 - El personal puede bloquear rangos de fechas (vacaciones, congresos, incapacidad) desde `/staff/agenda`.
@@ -103,7 +113,6 @@ Ver skill `infraestructura-vps` (PM2, config de nginx).
 ## Pendientes conocidos
 
 - **FIX-09**: botón flotante de WhatsApp y enlace `tel:` en el header — bloqueado hasta que el Dr. Viveros confirme su número de celular. Rellenar `phone` y `whatsapp` en `src/lib/sitio-publico-data.ts` y añadir el botón flotante en `src/app/(public)/layout.tsx`.
-- **Módulo de cobros**: registro manual de honorarios (primera vez $1,100 / subsecuente $1,000 / lavado $600) — sin fecha, decisión pendiente de scope.
 - **FHIR export**: endpoints individuales y bulk — requiere definir sistema receptor (laboratorio, HIS, IMSS).
 
 ## Certificación NOM-024-SSA3-2012
