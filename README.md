@@ -200,6 +200,15 @@ src/e2e/
 
 ## Despliegue en producción
 
+**Primer despliegue en un servidor nuevo** (antes de correr `bootstrap.sh`, como root): clonar directo en su ubicación final evita el lío de clonar en `/tmp` y después mover/corregir dueños.
+
+```bash
+mkdir /var/www
+cd /var/www
+git clone https://github.com/soreviv/otorrinonet2.git
+chown -R ubuntu:ubuntu otorrinonet2
+```
+
 ```bash
 npm run build
 pm2 start "npm run start -- -p 5000" --name otorrinonet
