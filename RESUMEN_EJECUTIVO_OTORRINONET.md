@@ -68,6 +68,7 @@ OtorrinoNet es una plataforma integral de gestión clínica y portal de paciente
 | Configuración del consultorio | `/staff/configuracion` | ✅ Activo |
 | Panel admin (usuarios, bitácora, ARCO) | `/staff/admin` | ✅ Activo |
 | Exportación DGIS (GIIS-B015) | `/staff/dgis` | ✅ Activo |
+| Cobros (registro de honorarios) | `/staff/cobros` | ✅ Activo |
 
 ---
 
@@ -126,7 +127,6 @@ Completados en junio 2026. **10/10 tests en verde** contra el servidor de produc
 | Botón WhatsApp / `tel:` en header (FIX-09) | ⏳ Bloqueado | Confirmar número celular del Dr. Viveros |
 | NOM-024 Track 4 — SGSI (GIIS-A004) | 🔄 En documentación | 6 meses de madurez obligatorios |
 | Exportación FHIR (individual y bulk) | ⏳ Sin fecha | Definir sistema receptor (laboratorio, HIS, IMSS) |
-| Módulo de cobros interno | ⏳ Sin fecha | Decisión de scope (primera vez $1,100 / subsecuente $1,000 / lavado $600) |
 | Telemedicina (Daily.co) | ⏳ Sin fecha | Largo plazo |
 | Portal del paciente (login propio) | ⏳ Sin fecha | Largo plazo |
 
@@ -134,4 +134,4 @@ Completados en junio 2026. **10/10 tests en verde** contra el servidor de produc
 
 ## 9. Conclusión
 
-OtorrinoNet cuenta con una base tecnológica sólida, moderna y en producción activa. Los tres primeros tracks de la certificación NOM-024-SSA3-2012 (datos mínimos del paciente, catálogos CIE-10 y generador GIIS-B015) están implementados y validados con ~94 tests unitarios y 10 tests E2E en verde. La autofactura CFDI 4.0 está operativa. El único track pendiente es el SGSI (Track 4 / GIIS-A004), que requiere al menos 6 meses de madurez documental antes de solicitar la verificación ante la DGIS. Las siguientes prioridades de negocio son la activación del módulo de cobros manuales y la definición del sistema receptor para la exportación FHIR.
+OtorrinoNet cuenta con una base tecnológica sólida, moderna y en producción activa. Los tres primeros tracks de la certificación NOM-024-SSA3-2012 (datos mínimos del paciente, catálogos CIE-10 y generador GIIS-B015) están implementados y validados con ~94 tests unitarios y 10 tests E2E en verde. La autofactura CFDI 4.0 está operativa. El módulo de cobros (registro manual de honorarios) ya está activo en `/staff/cobros`. El único track pendiente es el SGSI (Track 4 / GIIS-A004), que requiere al menos 6 meses de madurez documental antes de solicitar la verificación ante la DGIS. La siguiente prioridad de negocio es la definición del sistema receptor para la exportación FHIR.
