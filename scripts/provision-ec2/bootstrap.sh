@@ -87,6 +87,10 @@ ufw allow 587/tcp   # SMTP submission (STARTTLS)
 ufw allow 993/tcp   # IMAPS
 ufw --force enable
 
+log "Creando usuario ${APP_USER} (si no existe)"
+# En AMIs de EC2 este usuario ya viene creado; en un VPS genérico no.
+id -u "${APP_USER}" &>/dev/null || useradd -m -s /bin/bash "${APP_USER}"
+
 log "Preparando carpeta de la app en ${APP_DIR}"
 mkdir -p "${APP_DIR}"
 chown "${APP_USER}:${APP_USER}" "${APP_DIR}"
