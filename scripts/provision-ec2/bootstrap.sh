@@ -113,16 +113,17 @@ cat <<SUMMARY
  nginx      : puerto 80, config en /etc/nginx/sites-available/otorrinonet.conf
  Node       : $(node -v)   npm: $(npm -v)   PM2: $(pm2 -v)
 
- Pendiente (manual, como usuario "${APP_USER}"):
-   1. git clone https://github.com/soreviv/otorrinonet2.git ${APP_DIR}
-      (Git pedirá usuario/token — el PAT se pega ahí, nunca en un archivo)
-   2. Crear ${APP_DIR}/.env con los secretos (Stripe, JWT_SECRET,
-      ENCRYPTION_KEY, SMTP, ntfy, Turnstile...) + el DATABASE_URL de
-      ${CREDS_FILE}
-   3. cd ${APP_DIR} && npm install && npx prisma db push && npm run build
-   4. pm2 start "npm run start -- -p 5000" --name otorrinonet && pm2 save
-   5. pm2 startup   (seguir la instrucción que imprime, correrla como root)
-   6. Apuntar el DNS del dominio a la Elastic IP de esta instancia
-   7. sudo certbot --nginx -d otorrinonet.com -d www.otorrinonet.com
+ Pendiente (manual):
+   [usuario ${APP_USER}] 1. su - ${APP_USER}
+   [usuario ${APP_USER}] 2. git clone https://github.com/soreviv/otorrinonet2.git ${APP_DIR}
+                            (Git pedirá usuario/token — el PAT se pega ahí, nunca en un archivo)
+   [usuario ${APP_USER}] 3. Crear ${APP_DIR}/.env con los secretos (Stripe, JWT_SECRET,
+                            ENCRYPTION_KEY, SMTP, ntfy, Turnstile...) + el DATABASE_URL de
+                            ${CREDS_FILE}
+   [usuario ${APP_USER}] 4. cd ${APP_DIR} && npm install && npx prisma db push && npm run build
+   [usuario ${APP_USER}] 5. pm2 start "npm run start -- -p 5000" --name otorrinonet && pm2 save
+   [usuario ${APP_USER}] 6. pm2 startup   (imprime un comando — ese comando sí se corre como root)
+   [en el registrador]   7. Apuntar el DNS del dominio a la Elastic IP de esta instancia
+   [root]                8. sudo certbot --nginx -d otorrinonet.com -d www.otorrinonet.com
 ======================================================================
 SUMMARY
