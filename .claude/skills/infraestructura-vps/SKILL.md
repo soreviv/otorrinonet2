@@ -5,7 +5,7 @@ description: Configuración de infraestructura del VPS de OtorrinoNet (PM2, ngin
 
 ## Infraestructura (VPS)
 
-- **PM2**: proceso `otorrinonet` — `npm run start -- -p 5000` en `/var/www/otorrinonet2/app`.
+- **PM2**: proceso `otorrinonet` — `npm run start -- -p 5000` en `/var/www/otorrinonet2`.
 - **nginx**: config activa en `/etc/nginx/sites-enabled/otorrinonet.conf` (symlink a `sites-available/otorrinonet.conf`). `nginx.conf` incluye tanto `conf.d/*.conf` como `sites-enabled/*` — editar el archivo en `sites-available/`, nunca el symlink.
   - `/_next/static/` → `alias` a `.next/static/` (archivos estáticos servidos desde disco, no proxeados).
   - `/assets/` → `root` en `public/`.

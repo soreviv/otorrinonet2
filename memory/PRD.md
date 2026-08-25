@@ -10,7 +10,7 @@
 - nodemailer para emails (citas, contacto, reset password)
 - Idioma: es-MX, zona horaria America/Mexico_City
 
-## Design System (fuente de verdad: `app/src/app/globals.css`)
+## Design System (fuente de verdad: `src/app/globals.css`)
 - **Primary:** `sky` — botones, links, acentos, estados activos de nav
 - **Secondary:** `blue` — tags, highlights, badges secundarios
 - **Neutral:** `slate` — fondos, texto, bordes, tarjetas (sin alias, clases directas)

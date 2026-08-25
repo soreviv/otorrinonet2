@@ -54,7 +54,7 @@ sudo -u postgres psql -v ON_ERROR_STOP=1 -tc "SELECT 1 FROM pg_database WHERE da
 
 cat > "$CREDS_FILE" <<EOF
 # Generado por bootstrap.sh — $(date -u +%Y-%m-%dT%H:%M:%SZ)
-# Copiar el valor de DATABASE_URL dentro de ${APP_DIR}/app/.env
+# Copiar el valor de DATABASE_URL dentro de ${APP_DIR}/.env
 DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@localhost:5432/${DB_NAME}
 EOF
 chmod 600 "$CREDS_FILE"
@@ -107,10 +107,10 @@ cat <<SUMMARY
  Pendiente (manual, como usuario "${APP_USER}"):
    1. git clone https://github.com/soreviv/otorrinonet2.git ${APP_DIR}
       (Git pedirá usuario/token — el PAT se pega ahí, nunca en un archivo)
-   2. Crear ${APP_DIR}/app/.env con los secretos (Stripe, JWT_SECRET,
+   2. Crear ${APP_DIR}/.env con los secretos (Stripe, JWT_SECRET,
       ENCRYPTION_KEY, SMTP, ntfy, Turnstile...) + el DATABASE_URL de
       ${CREDS_FILE}
-   3. cd ${APP_DIR}/app && npm install && npx prisma db push && npm run build
+   3. cd ${APP_DIR} && npm install && npx prisma db push && npm run build
    4. pm2 start "npm run start -- -p 5000" --name otorrinonet && pm2 save
    5. pm2 startup   (seguir la instrucción que imprime, correrla como root)
    6. Apuntar el DNS del dominio a la Elastic IP de esta instancia

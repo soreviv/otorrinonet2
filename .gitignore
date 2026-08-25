@@ -1,19 +1,33 @@
 # Dependencies
-node_modules/
-.pnp
-.pnp.js
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
 # Next.js
-.next/
-out/
+/.next/
+/out/
 build/
+/coverage
+.vercel
 
-# Environment variables
+# Prisma
+/src/generated/prisma
+
+# Environment and credential files
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+*.env
+!.env.example
+!**/.env.example
+credentials.json
+*.pem
+*.key
+.credentials
 
 # Debug logs
 npm-debug.log*
@@ -35,19 +49,14 @@ Thumbs.db
 *.tsbuildinfo
 next-env.d.ts
 
+# Tests
+/playwright-report/
+/test-results/
+
 # Misc
 product-plan.zip
--e 
-# Environment and credential files
-.env
-.env.*
-*.env
-!.env.example
-!**/.env.example
-credentials.json
-*.pem
-*.key
-.credentials
+*.docx
+.openacp/
 .claude/design-system/
 .claude/settings.local.json
 sgsi/

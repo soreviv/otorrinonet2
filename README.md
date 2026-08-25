@@ -92,7 +92,6 @@ otorrinonet2/
 ## Configuración inicial (desarrollo)
 
 ```bash
-cd app
 npm install
 cp .env.example .env        # completar variables (ver tabla abajo)
 npx prisma db push          # sincronizar schema con la BD
@@ -103,8 +102,6 @@ npm run dev                 # http://localhost:3000
 ---
 
 ## Scripts
-
-Todos los comandos se ejecutan desde `app/`.
 
 | Comando | Descripción |
 |---|---|
@@ -204,7 +201,6 @@ src/e2e/
 ## Despliegue en producción
 
 ```bash
-cd app
 npm run build
 pm2 start "npm run start -- -p 5000" --name otorrinonet
 pm2 save
@@ -215,7 +211,7 @@ pm2 startup
 
 ```bash
 git pull
-cd app && npm run build
+npm run build
 pm2 restart otorrinonet
 ```
 
@@ -223,7 +219,7 @@ pm2 restart otorrinonet
 
 ## Infraestructura (VPS)
 
-- **PM2**: proceso `otorrinonet` — `npm run start -- -p 5000` en `/var/www/otorrinonet2/app`
+- **PM2**: proceso `otorrinonet` — `npm run start -- -p 5000` en `/var/www/otorrinonet2`
 - **nginx**: config activa en `/etc/nginx/conf.d/otorrinonet.conf` (no en `sites-enabled/`)
   - `/_next/static/` → alias a `.next/static/` (archivos estáticos desde disco)
   - `/assets/` → root en `public/`

@@ -20,7 +20,7 @@ if echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(1 i
 fi
 
 echo "  → desplegando..." >> "$LOG"
-cd /var/www/otorrinonet2/app
+cd /var/www/otorrinonet2
 
 echo "=== git push exitoso — iniciando despliegue ==="
 

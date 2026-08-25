@@ -3,7 +3,7 @@ version: 2
 updates:
   # Dependencias npm (Next.js, Prisma, librerías UI, etc.)
   - package-ecosystem: "npm"
-    directory: "/app"
+    directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
