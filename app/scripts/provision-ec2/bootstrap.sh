@@ -22,7 +22,8 @@ DB_NAME="otorrinonet"
 DB_USER="otorrinonet"
 DB_PASS="$(openssl rand -hex 24)"
 CREDS_FILE="/root/otorrinonet-db-credentials.txt"
-NODE_MAJOR=22
+NODE_MAJOR=26
+NPM_MAJOR=12
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 log() { echo -e "\n>>> $*"; }
@@ -63,6 +64,9 @@ log "Instalando Node.js ${NODE_MAJOR}.x (NodeSource)"
 curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash -
 apt-get install -y nodejs
 
+log "Fijando npm a la v${NPM_MAJOR}"
+npm install -g "npm@${NPM_MAJOR}"
+
 log "Instalando PM2"
 npm install -g pm2
 
@@ -98,7 +102,7 @@ cat <<SUMMARY
  Credenciales: ${CREDS_FILE}  (DATABASE_URL listo para copiar a .env)
  App dir    : ${APP_DIR}  (dueño: ${APP_USER})
  nginx      : puerto 80, config en /etc/nginx/sites-available/otorrinonet.conf
- Node       : $(node -v)   PM2: $(pm2 -v)
+ Node       : $(node -v)   npm: $(npm -v)   PM2: $(pm2 -v)
 
  Pendiente (manual, como usuario "${APP_USER}"):
    1. git clone https://github.com/soreviv/otorrinonet2.git ${APP_DIR}
