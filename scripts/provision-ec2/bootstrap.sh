@@ -88,8 +88,15 @@ ufw allow 993/tcp   # IMAPS
 ufw --force enable
 
 log "Creando usuario ${APP_USER} (si no existe)"
-# En AMIs de EC2 este usuario ya viene creado; en un VPS genérico no.
-id -u "${APP_USER}" &>/dev/null || useradd -m -s /bin/bash "${APP_USER}"
+# En AMIs de EC2 este usuario ya viene creado con sudo sin contraseña
+# (vía cloud-init); en un VPS genérico hay que replicarlo a mano —
+# no tiene contraseña propia, así que sudo con password no serviría.
+if ! id -u "${APP_USER}" &>/dev/null; then
+  useradd -m -s /bin/bash "${APP_USER}"
+  usermod -aG sudo "${APP_USER}"
+  echo "${APP_USER} ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/90-${APP_USER}"
+  chmod 440 "/etc/sudoers.d/90-${APP_USER}"
+fi
 
 log "Preparando carpeta de la app en ${APP_DIR}"
 mkdir -p "${APP_DIR}"
