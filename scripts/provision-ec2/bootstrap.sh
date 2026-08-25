@@ -80,6 +80,11 @@ log "Configurando firewall (ufw)"
 apt-get install -y ufw
 ufw allow OpenSSH
 ufw allow 'Nginx Full'
+# Correo autoalojado (Postfix/Dovecot) corre en esta misma instancia:
+ufw allow 25/tcp    # SMTP (transferencia entre servidores)
+ufw allow 465/tcp   # SMTPS (submission TLS implícito)
+ufw allow 587/tcp   # SMTP submission (STARTTLS)
+ufw allow 993/tcp   # IMAPS
 ufw --force enable
 
 log "Preparando carpeta de la app en ${APP_DIR}"
