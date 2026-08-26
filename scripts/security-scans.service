@@ -1,0 +1,9 @@
+[Unit]
+Description=Escaneo de seguridad de OtorrinoNet (rkhunter, chkrootkit, clamav)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/run-security-scans.sh
+User=root

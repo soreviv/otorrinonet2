@@ -11,3 +11,9 @@ description: Push notifications al staff vía ntfy autoalojado — úsalo al toc
 - Enganchado en 3 puntos, junto al correo existente (no lo sustituye): nueva cita (`src/app/actions/appointments.ts`), mensaje de contacto (`src/app/actions/contact.ts`), pedido pagado (`src/app/api/stripe/webhook/route.ts`).
 - Variables de entorno: `NTFY_BASE_URL`, `NTFY_STAFF_TOPIC`, `NTFY_STAFF_TOKEN`.
 - Gestión de usuarios/tokens ntfy: `ntfy user list`, `ntfy access <user> <topic> <permiso>`, `ntfy token add <user>` (requiere acceso root al VPS, no está en el repo).
+
+### Topic `otorrinonet-seguridad` (hallazgos de escaneos, no confundir con `otorrinonet-staff`)
+
+- Topic separado para alertas de `scripts/run-security-scans.sh` (rkhunter, chkrootkit, clamav) — ver skill de scripts de seguridad si existe, o directamente el script.
+- Usuario `security-scans` (solo escritura), token en `/etc/otorrinonet-security-scans.env` en el VPS (fuera del repo).
+- `dr-viveros` tiene lectura en este topic además del de `otorrinonet-staff` — mismo usuario, dos topics, misma app.

@@ -1,0 +1,10 @@
+[Unit]
+Description=Corrida diaria del escaneo de seguridad de OtorrinoNet
+
+[Timer]
+# 02:00 — antes del backup de la BD (03:00) para no competir por I/O
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
