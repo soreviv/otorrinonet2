@@ -1,5 +1,5 @@
 # Resumen Ejecutivo: Proyecto OtorrinoNet
-**Fecha:** 13 de junio de 2026
+**Fecha:** 26 de agosto de 2026
 **Asunto:** Informe de Estado Técnico y Cumplimiento Normativo
 
 ---
@@ -33,11 +33,11 @@ OtorrinoNet es una plataforma integral de gestión clínica y portal de paciente
 
 | Capa | Tecnología |
 |---|---|
-| **Framework** | Next.js 16.2.4 (App Router) |
+| **Framework** | Next.js 16.2.6 (App Router) |
 | **UI Library** | React 19.2.4 |
 | **Estilos** | Tailwind CSS v4 |
 | **Lenguaje** | TypeScript 5 |
-| **Base de Datos** | PostgreSQL 15+ / Prisma 7.7.0 |
+| **Base de Datos** | PostgreSQL 15+ / Prisma 7.9.1 |
 | **Autenticación** | JWT (jose) + TOTP 2FA (otplib) + bcryptjs |
 | **Seguridad de Datos** | Cifrado AES-256-GCM (node:crypto) |
 | **Pagos** | Stripe (PaymentIntents + Webhooks) |
@@ -89,17 +89,18 @@ OtorrinoNet es una plataforma integral de gestión clínica y portal de paciente
 
 ### Tests unitarios — Vitest
 
-Ampliada en junio 2026. **~94 tests en verde** con Vitest.
+Ampliada en agosto 2026. **105 tests en verde** con Vitest.
 
 | Módulo | Tests | Qué verifica |
 |--------|-------|-------------|
 | Schemas Zod (tienda) | 7 | Checkout, carrito, dirección, email |
 | `esc()` mailer | 5 | Escape HTML de inputs en emails |
 | GIIS-B015 | 28 | normName, serializeRow, buildGiisFile, reglas DGIS |
+| Cifrado (`crypto.ts`) | 11 | Round-trip AES-256-GCM, formato iv:authTag:cipher |
 | Hook `useCarrito` | 8 | Carrito, subtotal, envío, localStorage |
-| Appointments | 17 | Solapamiento de slots, fechas bloqueadas, reagendamiento |
+| Appointments | 16 | Solapamiento de slots, fechas bloqueadas, reagendamiento |
 | Auth | 18 | Rate-limit, lockout, password reset, sessionVersion |
-| Webhook Stripe | 11 | Idempotencia, stock, estados de orden |
+| Webhook Stripe | 12 | Idempotencia, stock, estados de orden |
 
 ### Tests E2E — Playwright
 
@@ -134,4 +135,4 @@ Completados en junio 2026. **10/10 tests en verde** contra el servidor de produc
 
 ## 9. Conclusión
 
-OtorrinoNet cuenta con una base tecnológica sólida, moderna y en producción activa. Los tres primeros tracks de la certificación NOM-024-SSA3-2012 (datos mínimos del paciente, catálogos CIE-10 y generador GIIS-B015) están implementados y validados con ~94 tests unitarios y 10 tests E2E en verde. La autofactura CFDI 4.0 está operativa. El módulo de cobros (registro manual de honorarios) ya está activo en `/staff/cobros`. El único track pendiente es el SGSI (Track 4 / GIIS-A004), que requiere al menos 6 meses de madurez documental antes de solicitar la verificación ante la DGIS. La siguiente prioridad de negocio es la definición del sistema receptor para la exportación FHIR.
+OtorrinoNet cuenta con una base tecnológica sólida, moderna y en producción activa. Los tres primeros tracks de la certificación NOM-024-SSA3-2012 (datos mínimos del paciente, catálogos CIE-10 y generador GIIS-B015) están implementados y validados con 105 tests unitarios y 10 tests E2E en verde. La autofactura CFDI 4.0 está operativa. El módulo de cobros (registro manual de honorarios) ya está activo en `/staff/cobros`. El único track pendiente es el SGSI (Track 4 / GIIS-A004), que requiere al menos 6 meses de madurez documental antes de solicitar la verificación ante la DGIS. La siguiente prioridad de negocio es la definición del sistema receptor para la exportación FHIR.

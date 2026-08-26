@@ -39,6 +39,7 @@ Plataforma integral para la práctica privada del **Dr. Alejandro Viveros Domín
 | 10 | **Configuración** | `/staff/configuracion` | Datos del consultorio, logo, cédulas, bloqueos |
 | 11 | **Admin** | `/staff/admin` | Usuarios, bitácora, ARCO, exportación FHIR |
 | 12 | **Exportación DGIS** | `/staff/dgis` | UI para generación del archivo GIIS-B015 (SIS-CEX) |
+| 13 | **Cobros** | `/staff/cobros` | Registro de honorarios por cita, resumen financiero, exportación CSV |
 
 ---
 
@@ -46,32 +47,31 @@ Plataforma integral para la práctica privada del **Dr. Alejandro Viveros Domín
 
 ```
 otorrinonet2/
-├── app/                          # Aplicación Next.js
-│   ├── prisma/
-│   │   ├── schema.prisma         # Esquema de base de datos
-│   │   └── seed.ts               # Datos iniciales
-│   ├── vitest.config.ts          # Configuración de tests
-│   └── src/
-│       ├── app/
-│       │   ├── (public)/         # Sitio público y tienda
-│       │   ├── staff/            # Panel interno (requiere sesión + 2FA)
-│       │   ├── login/            # Autenticación (email+pass → 2FA)
-│       │   ├── actions/          # Server Actions
-│       │   └── api/              # API routes (stripe/webhook, cron, csp-report)
-│       ├── components/
-│       │   ├── sitio-publico/    # Header, Footer, Breadcrumbs
-│       │   ├── tienda/           # Carrito, checkout, galería
-│       │   ├── ehr/              # Expediente clínico
-│       │   ├── notas/            # Notas, recetas, consentimientos
-│       │   └── shell/            # StaffShell (nav lateral)
-│       ├── __tests__/            # Suite de tests (66/66 en verde)
-│       └── lib/
-│           ├── dal.ts            # verifySession()
-│           ├── clinic-config.ts  # Datos del doctor/clínica
-│           ├── stripe.ts         # Cliente Stripe server-side
-│           ├── mailer.ts         # Emails transaccionales
-│           ├── ntfy.ts           # Push notifications al staff (ntfy autoalojado)
-│           └── prisma.ts         # Cliente Prisma singleton
+├── prisma/
+│   ├── schema.prisma         # Esquema de base de datos
+│   └── seed.ts               # Datos iniciales
+├── vitest.config.ts          # Configuración de tests
+├── src/
+│   ├── app/
+│   │   ├── (public)/         # Sitio público y tienda
+│   │   ├── staff/            # Panel interno (requiere sesión + 2FA)
+│   │   ├── login/            # Autenticación (email+pass → 2FA)
+│   │   ├── actions/          # Server Actions
+│   │   └── api/              # API routes (stripe/webhook, cron, csp-report)
+│   ├── components/
+│   │   ├── sitio-publico/    # Header, Footer, Breadcrumbs
+│   │   ├── tienda/           # Carrito, checkout, galería
+│   │   ├── ehr/              # Expediente clínico
+│   │   ├── notas/            # Notas, recetas, consentimientos
+│   │   └── shell/            # StaffShell (nav lateral)
+│   ├── __tests__/            # Suite de tests (105/105 en verde)
+│   └── lib/
+│       ├── dal.ts            # verifySession()
+│       ├── clinic-config.ts  # Datos del doctor/clínica
+│       ├── stripe.ts         # Cliente Stripe server-side
+│       ├── mailer.ts         # Emails transaccionales
+│       ├── ntfy.ts           # Push notifications al staff (ntfy autoalojado)
+│       └── prisma.ts         # Cliente Prisma singleton
 ├── memory/                       # PRD y plan de producto
 ├── .jules/                       # Instrucciones para agentes de IA
 ├── AGENTS.md                     # Guía para agentes de IA
@@ -122,17 +122,18 @@ npm run dev                 # http://localhost:3000
 
 ### Tests unitarios — Vitest
 
-Framework: **Vitest** con jsdom y `@testing-library/react`. **~94 tests en verde.**
+Framework: **Vitest** con jsdom y `@testing-library/react`. **105 tests en verde.**
 
 ```
 src/__tests__/
 ├── schemas/tienda.test.ts          # 7 casos — schemas Zod (checkout, carrito, dirección)
 ├── lib/mailer.test.ts              # 5 casos — función esc() escape HTML
 ├── lib/giis-b015.test.ts           # 28 casos — generador GIIS-B015 (normName, serializeRow, buildGiisFile)
+├── lib/crypto.test.ts              # 11 casos — cifrado AES-256-GCM de datos sensibles
 ├── hooks/useCarrito.test.ts        # 8 casos — carrito (localStorage, subtotal, envío)
-├── actions/appointments.test.ts   # 17 casos — slots, fechas bloqueadas, reagendamiento
+├── actions/appointments.test.ts   # 16 casos — slots, fechas bloqueadas, reagendamiento
 ├── actions/auth.test.ts            # 18 casos — rate-limit, lockout, password reset
-└── api/stripe-webhook.test.ts      # 11 casos — idempotencia, stock, estados de orden
+└── api/stripe-webhook.test.ts      # 12 casos — idempotencia, stock, estados de orden
 ```
 
 > Usar `vi.hoisted()` para variables referenciadas dentro de factories de `vi.mock()`.
@@ -229,7 +230,7 @@ pm2 restart otorrinonet
 ## Infraestructura (VPS)
 
 - **PM2**: proceso `otorrinonet` — `npm run start -- -p 5000` en `/var/www/otorrinonet2`
-- **nginx**: config activa en `/etc/nginx/conf.d/otorrinonet.conf` (no en `sites-enabled/`)
+- **nginx**: config activa en `/etc/nginx/sites-enabled/otorrinonet.conf` (symlink a `sites-available/otorrinonet.conf`; editar el archivo en `sites-available/`, nunca el symlink)
   - `/_next/static/` → alias a `.next/static/` (archivos estáticos desde disco)
   - `/assets/` → root en `public/`
   - Todo lo demás → proxy a `127.0.0.1:5000`
