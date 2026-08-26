@@ -24,18 +24,6 @@ Sistema clínico para el consultorio de otorrinolaringología del **Dr. Alejandr
 - **Recharts** — gráficas en el dashboard
 - **ntfy autoalojado** (`https://ntfy.otorrinonet.com`) — push notifications al staff (nueva cita, mensaje de contacto, nuevo pedido pagado); complementa el correo, no lo reemplaza
 
-## Comandos de desarrollo
-
-```bash
-npm run dev           # servidor de desarrollo en http://localhost:3000
-npm run build         # build de producción
-npm run lint          # ESLint
-npx prisma db push    # sincronizar schema con la BD (usar en lugar de migrate)
-npx prisma generate   # regenerar cliente (necesario tras cambios al schema)
-npm run db:seed       # datos iniciales
-npm run db:studio     # Prisma Studio
-```
-
 ## Convenciones importantes
 
 - **Schema Prisma**: después de agregar un campo, ejecutar `npx prisma db push && npx prisma generate`.
@@ -77,34 +65,19 @@ npm run db:studio     # Prisma Studio
 
 ## Tienda en línea
 
-- Carrito en `localStorage` via `useCarrito` — no en BD ni cookies.
-- Stock se decrementa **solo** en webhook `payment_intent.succeeded`.
-- Idempotencia: `StripeWebhookEvent` con PK = `event.id` de Stripe.
-- Imágenes en `/public/assets/tienda/` — upload via API `/api/tienda/upload-imagen`.
-- Variables de entorno requeridas: `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `TIENDA_COSTO_ENVIO_CENTAVOS`.
+Ver skill `tienda` (carrito, stock, Stripe, checkout).
 
 ## Push notifications al staff (ntfy)
 
-- Servidor ntfy autoalojado en `https://ntfy.otorrinonet.com` (config en `/etc/ntfy/server.yml`, `behind-proxy: true`, `auth-default-access: deny-all`).
-- Topic `otorrinonet-staff`. Usuario `otorrinonet-app` (solo escritura, token en `NTFY_STAFF_TOKEN`) lo usa el servidor Next.js para publicar. Usuario `dr-viveros` (solo lectura) es con el que el Dr. Viveros se suscribe desde la app ntfy (Android/iOS/web).
-- Helper `sendStaffPush()` en `src/lib/ntfy.ts` — nunca lanza error ni bloquea (fire-and-forget, como los emails de `mailer.ts`).
-- Enganchado en 3 puntos, junto al correo existente (no lo sustituye): nueva cita (`src/app/actions/appointments.ts`), mensaje de contacto (`src/app/actions/contact.ts`), pedido pagado (`src/app/api/stripe/webhook/route.ts`).
-- Variables de entorno: `NTFY_BASE_URL`, `NTFY_STAFF_TOPIC`, `NTFY_STAFF_TOKEN`.
-- Gestión de usuarios/tokens ntfy: `ntfy user list`, `ntfy access <user> <topic> <permiso>`, `ntfy token add <user>` (requiere acceso root al VPS, no está en el repo).
+Ver skill `notificaciones-ntfy` (servidor autoalojado, topics, dónde está enganchado).
 
 ## Cobros (honorarios)
 
-- Registro manual de honorarios por cita: primera vez $1,100 / subsecuente $1,000 / lavado de oídos $600 / otro (monto libre) — catálogo en `src/lib/cobros-data.ts`.
-- Modelo `Cobro` en `prisma/schema.prisma` — relación 1:1 con `Appointment`. Campos `facturado`/`cfdiUid`/`cfdiUuid` lo ligan con la autofactura CFDI (`src/app/actions/autofactura.ts`).
-- Server actions en `src/app/actions/cobros.ts`: `registrarCobro()` (upsert por cita — sin historial de ediciones, decisión intencional), `getResumenFinanciero()`, `listarCobros()`.
-- UI: `CobroPanel.tsx` embebido en `/staff/agenda` (registro por cita) y vista `/staff/cobros` (resumen financiero, filtros, historial, exportación CSV vía `/api/staff/cobros/export`).
-- Sin restricción de rol en las server actions (cualquier sesión de staff puede registrar/consultar cobros); el enlace de nav a `/staff/cobros` solo se oculta a `enfermera`.
+Ver skill `cobros` (catálogo de montos, modelo, server actions, UI).
 
 ## Agenda — Bloqueo de fechas
 
-- El personal puede bloquear rangos de fechas (vacaciones, congresos, incapacidad) desde `/staff/agenda`.
-- Modelo `AgendaBlock` en `prisma/schema.prisma`.
-- El formulario público de agendado (`/agendar`) consulta los bloqueos antes de mostrar disponibilidad.
+Ver skill `agenda-bloqueos` (bloqueo de rangos de fechas para citas).
 
 ## Infraestructura (VPS)
 
