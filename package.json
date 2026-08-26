@@ -90,10 +90,10 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-latest/xlsx-latest.tgz"
   },
   "allowScripts": {
-    "esbuild@0.28.1": true,
     "sharp@0.34.5": true,
-    "unrs-resolver@1.11.1": true,
-    "prisma@7.9.1": true,
-    "@prisma/engines@7.9.1": true
+    "@prisma/engines": true,
+    "esbuild": true,
+    "prisma": true,
+    "unrs-resolver": true
   }
 }
