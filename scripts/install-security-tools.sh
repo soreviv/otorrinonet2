@@ -39,9 +39,12 @@ log "Desactivando el cron.daily por defecto de rkhunter y chkrootkit"
 if [[ -f /etc/default/rkhunter ]]; then
   sed -i 's/^CRON_DAILY_RUN=.*/CRON_DAILY_RUN="false"/' /etc/default/rkhunter
 fi
-if [[ -f /etc/chkrootkit.conf ]]; then
-  sed -i 's/^RUN_DAILY=.*/RUN_DAILY="false"/' /etc/chkrootkit.conf
+# En Ubuntu 24.04 la ruta real es /etc/chkrootkit/chkrootkit.conf (no /etc/chkrootkit.conf).
+if [[ -f /etc/chkrootkit/chkrootkit.conf ]]; then
+  sed -i 's/^RUN_DAILY=.*/RUN_DAILY="false"/' /etc/chkrootkit/chkrootkit.conf
 fi
+# El paquete también trae su propio timer systemd, separado del cron.daily.
+systemctl disable --now chkrootkit.timer 2>/dev/null || true
 
 log "Configurando fail2ban (sshd + nginx)"
 cat > /etc/fail2ban/jail.local <<'EOF'
