@@ -36,17 +36,28 @@ enviar_alerta() {
 HALLAZGOS=""
 
 log "Iniciando rkhunter"
-RKHUNTER_OUT=$(rkhunter --check --skip-keypress --report-warnings-only 2>&1) || true
+RKHUNTER_OUT=$(rkhunter --check --skip-keypress --report-warnings-only 2>&1); RKHUNTER_RC=$?
 echo "$RKHUNTER_OUT" >>"$LOG"
 if echo "$RKHUNTER_OUT" | grep -q "Warning"; then
   HALLAZGOS+=$'\n'"rkhunter reportó warnings — revisar /var/log/rkhunter.log en $(hostname)."
+elif [[ "$RKHUNTER_RC" -gt 1 ]]; then
+  # 0 = sin warnings, 1 = warnings (ya capturado arriba); >1 = el escaneo no se completó.
+  HALLAZGOS+=$'\n'"rkhunter terminó con error (código ${RKHUNTER_RC}) sin completar el escaneo — revisar ${LOG} en $(hostname)."
 fi
 
 log "Iniciando chkrootkit"
-CHKROOTKIT_OUT=$(chkrootkit 2>&1) || true
+CHKROOTKIT_OUT=$(chkrootkit 2>&1); CHKROOTKIT_RC=$?
 echo "$CHKROOTKIT_OUT" >>"$LOG"
-if echo "$CHKROOTKIT_OUT" | grep -qi "INFECTED"; then
+# La salida normal de chkrootkit incluye líneas como "not infected" en cada
+# check limpio — filtrarlas es necesario para que el grep de abajo no
+# dispare siempre. También se filtra el bindshell del puerto 465, falso
+# positivo conocido de chkrootkit en servidores de correo (este VPS corre
+# Postfix/Dovecot).
+CHKROOTKIT_HALLAZGOS=$(echo "$CHKROOTKIT_OUT" | grep -vi "not infected" | grep -v "infected ports: 465" | grep -i "infected" || true)
+if [[ -n "$CHKROOTKIT_HALLAZGOS" ]]; then
   HALLAZGOS+=$'\n'"chkrootkit reportó posible infección — revisar ${LOG} en $(hostname)."
+elif [[ "$CHKROOTKIT_RC" -ne 0 ]]; then
+  HALLAZGOS+=$'\n'"chkrootkit terminó con error (código ${CHKROOTKIT_RC}) sin completar el escaneo — revisar ${LOG} en $(hostname)."
 fi
 
 # clamscan es pesado — solo domingos (día 7 de la semana) para no cargar

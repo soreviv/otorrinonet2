@@ -32,6 +32,11 @@ rkhunter --propupd
 log "Habilitando actualización automática de firmas de ClamAV"
 systemctl enable --now clamav-freshclam
 
+log "Desactivando clamav-daemon (no se usa clamd, run-security-scans.sh corre clamscan standalone)"
+# El paquete clamav-daemon arranca clamd solo vía su postinst; mantenerlo
+# corriendo consume varios cientos de MB de RAM sin ningún beneficio aquí.
+systemctl disable --now clamav-daemon 2>/dev/null || true
+
 log "Desactivando el cron.daily por defecto de rkhunter y chkrootkit"
 # La programación real vive en security-scans.timer (un solo mecanismo,
 # con alerta a ntfy) — dejar además el cron.daily de cada paquete solo
