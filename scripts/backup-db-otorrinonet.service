@@ -1,0 +1,9 @@
+[Unit]
+Description=Backup cifrado de la base de datos de OtorrinoNet
+After=postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/backup-db-otorrinonet.sh
+User=root
