@@ -15,7 +15,7 @@ const DATABASE_URL = dbUrlMatch[1].trim().replace(/^["']|["']$/g, '')
 const { Pool } = pg
 const pool = new Pool({ connectionString: DATABASE_URL })
 
-const XLSX_PATH = path.resolve(__dirname, '../../docs/DIAGNOSTICOS_20240416.xlsx')
+const XLSX_PATH = path.resolve(__dirname, '../docs/DIAGNOSTICOS_20240416.xlsx')
 
 async function main() {
   console.log('Leyendo catálogo CIE-10…')
