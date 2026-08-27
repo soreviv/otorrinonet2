@@ -36,7 +36,11 @@ enviar_alerta() {
 HALLAZGOS=""
 
 log "Iniciando rkhunter"
-RKHUNTER_OUT=$(rkhunter --check --skip-keypress --report-warnings-only 2>&1); RKHUNTER_RC=$?
+if RKHUNTER_OUT=$(rkhunter --check --skip-keypress --report-warnings-only 2>&1); then
+  RKHUNTER_RC=0
+else
+  RKHUNTER_RC=$?
+fi
 echo "$RKHUNTER_OUT" >>"$LOG"
 if echo "$RKHUNTER_OUT" | grep -q "Warning"; then
   HALLAZGOS+=$'\n'"rkhunter reportó warnings — revisar /var/log/rkhunter.log en $(hostname)."
@@ -46,7 +50,11 @@ elif [[ "$RKHUNTER_RC" -gt 1 ]]; then
 fi
 
 log "Iniciando chkrootkit"
-CHKROOTKIT_OUT=$(chkrootkit 2>&1); CHKROOTKIT_RC=$?
+if CHKROOTKIT_OUT=$(chkrootkit 2>&1); then
+  CHKROOTKIT_RC=0
+else
+  CHKROOTKIT_RC=$?
+fi
 echo "$CHKROOTKIT_OUT" >>"$LOG"
 # La salida normal de chkrootkit incluye líneas como "not infected" en cada
 # check limpio — filtrarlas es necesario para que el grep de abajo no
