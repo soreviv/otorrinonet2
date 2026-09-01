@@ -210,6 +210,8 @@ git clone https://github.com/soreviv/otorrinonet2.git
 chown -R ubuntu:ubuntu otorrinonet2
 ```
 
+### Opción A: PM2 (Node nativo en VPS)
+
 ```bash
 npm run build
 pm2 start "npm run start -- -p 5000" --name otorrinonet
@@ -217,12 +219,25 @@ pm2 save
 pm2 startup
 ```
 
-**Actualizar en producción:**
+**Actualizar en producción (PM2):**
 
 ```bash
 git pull
 npm run build
 pm2 restart otorrinonet
+```
+
+### Opción B: Docker y Docker Compose (Contenedores)
+
+Ver guía completa en [**`DOCKER.md`**](file:///home/soreviv/Proyectos/otorrinonet2/DOCKER.md).
+
+```bash
+# Iniciar servicios con Docker Compose
+docker compose up -d --build
+
+# Actualizar en producción
+git pull
+docker compose up -d --build app
 ```
 
 ---

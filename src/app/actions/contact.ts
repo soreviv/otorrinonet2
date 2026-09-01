@@ -15,7 +15,7 @@ export interface ContactFormPayload {
 }
 
 export async function submitContactForm(payload: ContactFormPayload): Promise<{ ok: boolean; error?: string }> {
-  const valid = await verifyTurnstileToken(payload.captchaToken)
+  const valid = await verifyTurnstileToken(payload.captchaToken, { action: 'contacto' })
   if (!valid) return { ok: false, error: 'Verificación de seguridad fallida. Intenta de nuevo.' }
 
   // Guardar en BD

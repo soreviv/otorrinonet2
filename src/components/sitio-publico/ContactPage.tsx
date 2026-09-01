@@ -256,7 +256,7 @@ export function ContactPage({ contactInfo, onSubmitContactForm }: ContactPagePro
                       siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''}
                       onSuccess={setCaptchaToken}
                       onExpire={() => setCaptchaToken(null)}
-                      options={{ language: 'es' }}
+                      options={{ action: 'contacto', language: 'es' }}
                     />
                     {!captchaToken && errors.name === ' ' && (
                       <p className="text-xs text-red-500">Completa la verificación de seguridad</p>

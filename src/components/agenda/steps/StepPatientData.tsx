@@ -255,7 +255,7 @@ export function StepPatientData({
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''}
             onSuccess={onCaptchaSuccess}
             onExpire={onCaptchaExpire}
-            options={{ language: 'es' }}
+            options={{ action: 'agendar_cita', language: 'es' }}
           />
         </div>
       </div>

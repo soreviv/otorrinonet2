@@ -42,7 +42,7 @@ export async function submitAppointmentRequest(
   const data = parsed.data
 
   // 2. Captcha
-  const valid = await verifyTurnstileToken(data.captchaToken)
+  const valid = await verifyTurnstileToken(data.captchaToken, { action: 'agendar_cita' })
   if (!valid) return { ok: false, error: 'Verificación de seguridad fallida. Intenta de nuevo.' }
 
   // 3. Fecha no en el pasado (zona horaria CDMX, margen de 30 min)

@@ -1,0 +1,48 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: otorrinonet-app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+    networks:
+      - otorrinonet-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: otorrinonet-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-otorrinonet}
+      POSTGRES_USER: ${POSTGRES_USER:-otorrinonet}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-otorrinonet_secret_pass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-otorrinonet} -d $${POSTGRES_DB:-otorrinonet}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - otorrinonet-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  otorrinonet-network:
+    driver: bridge
