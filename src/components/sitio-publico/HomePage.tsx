@@ -112,9 +112,17 @@ export function HomePage({
                   </div>
                 </div>
 
-                <div className="absolute -top-3 -right-2 sm:-right-5 bg-white dark:bg-slate-800 rounded-2xl shadow-xl px-3.5 py-2.5 border border-slate-100 dark:border-slate-700 z-20">
-                  <p className="text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider">Cédula Prof.</p>
-                  <p className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">{doctorProfile.licenseNumber}</p>
+                <div className="absolute -top-3 -right-2 sm:-right-5 bg-white dark:bg-slate-800 rounded-2xl shadow-xl px-3.5 py-2.5 border border-slate-100 dark:border-slate-700 z-20 space-y-1.5">
+                  <div>
+                    <p className="text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider">Cédula Prof.</p>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">{doctorProfile.licenseNumber}</p>
+                  </div>
+                  {doctorProfile.specialtyLicense && (
+                    <div className="pt-1.5 border-t border-slate-100 dark:border-slate-700">
+                      <p className="text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider">Cédula Esp.</p>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">{doctorProfile.specialtyLicense}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
