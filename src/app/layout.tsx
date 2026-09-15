@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     template: "%s | Dr. Alejandro Viveros Domínguez ORL",
   },
   description:
-    "Otorrinolaringólogo y Cirujano de Cabeza y Cuello en Lindavista, CDMX. Consulta ORL, cirugía, audiología, rinitis alérgica e inmunoterapia. Cédula 6277305.",
+    "Otorrinolaringólogo y Cirujano de Cabeza y Cuello en Lindavista, CDMX. Consulta ORL, cirugía, audiología, rinitis alérgica e inmunoterapia. Cédula Prof. 6277305 · Céd. Esp. 10148701.",
   keywords: [
     "otorrinolaringólogo",
     "otorrinolaringología",
