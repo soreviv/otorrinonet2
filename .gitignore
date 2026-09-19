@@ -60,3 +60,9 @@ product-plan.zip
 .claude/design-system/
 .claude/settings.local.json
 sgsi/
+
+# Backups and dumps
+*.dump
+*.dump.gz
+*.dump.gz.gpg
+
