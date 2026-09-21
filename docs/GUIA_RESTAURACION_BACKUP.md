@@ -1,18 +1,20 @@
-# Guía de Restauración de Respaldos de Base de Datos - OtorrinoNet
+# Guía de Restauración de Respaldos de Base de Datos — OtorrinoNet
 
-Esta guía describe el procedimiento para restaurar la base de datos PostgreSQL de **OtorrinoNet** a partir de los archivos de respaldo cifrados generados por la política de respaldos (regla 3-2-1).
+Esta guía describe el procedimiento para restaurar la base de datos PostgreSQL de **OtorrinoNet** a partir de los archivos de respaldo cifrados generados por la política de respaldos (estrategia 3-2-1).
+
+Para una referencia rápida de comandos, consulte también [`scripts/RESTORE.md`](../scripts/RESTORE.md).
 
 ---
 
 ## 1. Arquitectura de Respaldos y Seguridad
 
-Los respaldos de OtorrinoNet se generan con el script `/var/www/otorrinonet2/scripts/backup-db-otorrinonet.sh` y se almacenan cifrados en `/var/backups/otorrinonet/{diario,semanal,mensual}` (y réplica remota).
+Los respaldos de OtorrinoNet se generan con el script `/var/www/otorrinonet2/scripts/backup-db-otorrinonet.sh` y se almacenan cifrados en `/var/backups/otorrinonet/{diario,semanal,mensual}` (junto con réplica remota externa).
 
 - **Formato original**: Dump personalizado de PostgreSQL (`pg_dump -Fc`).
 - **Compresión**: `gzip`.
-- **Cifrado**: GPG asimétrico (clave pública en el servidor, clave privada guardada de forma segura en la PC del administrador/médico).
-- **Extension de archivo**: `.dump.gz.gpg` (ej. `otorrinonet_2026-05-18.dump.gz.gpg`).
-- **Seguridad en restauración**: Procesamiento mediante tuberías en memoria (*streaming* pipeline) para evitar escribir dumps no cifrados en almacenamiento temporal.
+- **Cifrado**: GPG asimétrico (clave pública en el servidor, clave privada guardada de forma segura en la estación del administrador/médico).
+- **Extensión de archivo**: `.dump.gz.gpg` (ej. `otorrinonet_2026-05-18.dump.gz.gpg`).
+- **Seguridad en restauración**: Procesamiento mediante tuberías en memoria (*streaming pipeline*) para evitar escribir dumps no cifrados en almacenamiento temporal (`/tmp`).
 
 ---
 
@@ -24,7 +26,7 @@ Antes de iniciar la restauración, asegúrese de contar con:
 2. **La llave privada GPG** (`.asc` o `.key`) correspondiente al ID de destinatario `604767D2A98DF0F806A522B0CC65CC82AD55E625`.
 3. **Contraseña/Passphrase de la llave privada GPG** (exportada mediante variable de entorno `GPG_PASSPHRASE`).
 4. **Archivo `.env`** configurado en `/var/www/otorrinonet2/.env` con la variable `DATABASE_URL`.
-5. **Herramientas de sistema instaladas**: `gpg`, `gzip`, `pg_restore`.
+5. **Herramientas de sistema instaladas**: `gpg`, `gzip`, `pg_restore`, `psql`.
 
 ---
 
@@ -38,7 +40,8 @@ Utilice el script `scripts/restore-db-otorrinonet.sh`.
 /var/www/otorrinonet2/scripts/restore-db-otorrinonet.sh <archivo_backup.dump.gz.gpg> [llave_privada.asc]
 ```
 
-> **Nota de seguridad:** Por buenas prácticas de seguridad y cumplimiento normativo de protección de datos personales de salud (NOM-024 / LFPDPPP), la contraseña de la llave GPG nunca debe pasarse como argumento de línea de comandos para evitar que quede registrada en el historial del shell (`~/.bash_history`) o visible en la lista de procesos (`ps aux`). Use la variable de entorno `GPG_PASSPHRASE`.
+> [!CAUTION]
+> **Seguridad de credenciales:** Por cumplimiento normativo de protección de datos personales de salud (**NOM-024-SSA3** / **LFPDPPP**), la contraseña de la llave GPG **nunca** debe pasarse como argumento de línea de comandos para evitar que quede registrada en el historial del shell (`~/.bash_history`) o visible en la lista de procesos (`ps aux`). Use siempre la variable de entorno `GPG_PASSPHRASE`.
 
 ### Ejemplos de uso
 
@@ -66,7 +69,7 @@ export GPG_PASSPHRASE="MiContrasenaSeguraGPG"
 
 ## 4. Método 2: Restauración Manual Paso a Paso (Flujo Streaming)
 
-Si prefiere realizar el proceso manualmente sin usar el script automatizado, utilice el flujo directo en tubería (*pipe*) para mayor seguridad de la información médica:
+Si prefiere realizar el proceso manualmente sin usar el script automatizado, utilice el flujo directo en tubería (*pipe*) para garantizar que ningún dato médico quede expuesto en disco sin cifrar:
 
 ### Paso 1: Importar la llave privada GPG (si no se ha importado previamente)
 ```bash
@@ -96,10 +99,10 @@ Tras completar la restauración, se recomienda verificar la integridad de la bas
    ```bash
    psql "$DATABASE_URL" -c "SELECT count(*) FROM \"Patient\";"
    psql "$DATABASE_URL" -c "SELECT count(*) FROM \"MedicalNote\";"
+   psql "$DATABASE_URL" -c "SELECT count(*) FROM \"StaffUser\";"
    ```
-2. En proyectos Prisma, validar el esquema de base de datos:
+2. En proyectos Prisma, validar la coherencia del esquema:
    ```bash
-   cd /var/www/otorrinonet2/app
    npx prisma db pull --print
    ```
 
@@ -107,5 +110,7 @@ Tras completar la restauración, se recomienda verificar la integridad de la bas
 
 ## 6. Consideraciones de Seguridad
 
-- **No almacene la llave privada GPG en el servidor de producción de forma permanente.**
-- El uso de tuberías directas (`gpg | gzip | pg_restore`) garantiza que nunca existan archivos de historia clínica o pacientes desempaquetados sin cifrar en carpetas temporales como `/tmp`.
+> [!IMPORTANT]
+> - **No almacene la llave privada GPG en el servidor de producción de forma permanente.**
+> - El uso de tuberías directas (`gpg | gzip | pg_restore`) garantiza que nunca existan archivos de historia clínica o datos de pacientes desempaquetados sin cifrar en carpetas temporales como `/tmp`.
+
