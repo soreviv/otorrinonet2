@@ -2,37 +2,48 @@
 
 Guía de contexto para el asistente de IA al trabajar en este repositorio.
 
+---
+
 ## Proyecto
 
-Sistema clínico para el consultorio de otorrinolaringología del **Dr. Alejandro Viveros Domínguez** (CDMX). Tiene dos partes:
+Sistema clínico para el consultorio de otorrinolaringología del **Dr. Alejandro Viveros Domínguez** (CDMX). Tiene dos partes principales:
 
 - **Sitio público** (`src/app/(public)/`) — marketing, perfil, servicios, agendado de citas en línea, consentimientos informados y páginas legales.
-- **Panel interno** (`src/app/staff/`) — agenda, expediente clínico (EHR), notas, recetas, consentimientos, dashboard y configuración. Requiere sesión.
+- **Panel interno** (`src/app/staff/`) — agenda, expediente clínico (EHR), notas, recetas, consentimientos, dashboard y configuración. Requiere sesión autenticada con 2FA.
 
-## Stack
+---
 
-- **Next.js 16** App Router · **React 19** · **TypeScript 5**
-- **Prisma 7** + **PostgreSQL** — se usa `prisma db push` (sin carpeta `migrations`)
-- **Tailwind CSS 4**
+## Stack tecnológico
+
+- **Next.js 16** (App Router) · **React 19** · **TypeScript 5**
+- **Prisma 7** + **PostgreSQL** — se usa `prisma db push` (sin carpeta de migraciones en desarrollo activo)
+- **Tailwind CSS v4**
 - **JWT** en cookie `session` (8 h) — `verifySession()` en `src/lib/dal.ts`
 - **2FA TOTP** — obligatorio para todo el personal; configuración en primer login
 - **Sesiones revocables** — `sessionVersion` en `StaffUser`; incrementar para revocar
 - **Rate-limit en login** — 5 intentos / 15 min → bloqueo 30 min (en memoria, `src/app/actions/auth.ts`)
 - **Stripe** — pagos de la tienda; webhook en `/api/stripe/webhook`
 - **Nodemailer / Resend** — emails transaccionales (recordatorio de cita 24 h antes, ticket de compra)
-- **Cloudflare Turnstile** — protección del formulario público de agendado
+- **Cloudflare Turnstile** — protección del formulario público de agendado y contacto
 - **Recharts** — gráficas en el dashboard
 - **ntfy autoalojado** (`https://ntfy.otorrinonet.com`) — push notifications al staff (nueva cita, mensaje de contacto, nuevo pedido pagado); complementa el correo, no lo reemplaza
 
+---
+
 ## Convenciones importantes
 
-- **Schema Prisma**: después de agregar un campo, ejecutar `npx prisma db push && npx prisma generate`.
+- **Schema Prisma**: después de agregar o modificar campos, ejecutar:
+  ```bash
+  npx prisma db push && npx prisma generate
+  ```
 - **Sitio público**: el layout `(public)/layout.tsx` es un pass-through vacío. Cada componente de `src/components/sitio-publico/` incluye `<PublicHeader>` y `<PublicFooter>` directamente.
 - **`/agendar`**: usa `ssr: false` (dynamic import en `AgendarClient.tsx`) para evitar errores de hidratación con Turnstile y localStorage.
 - **Rutas legales**: `/legal/*` redirigen 301 a las rutas canónicas (`/privacidad`, `/terminos`, `/cookies`, `/descargo`). No agregar nuevas referencias a `/legal/*`.
 - **Configuración de clínica**: datos del doctor en `src/lib/clinic-config.ts` — se leen desde variables de entorno con fallback a la tabla `ClinicConfig` en BD.
 - **Idioma del sitio**: todo el contenido público está en español (México). Mantener el mismo registro al agregar páginas o textos.
 - **Commits**: mensajes en español, en imperativo, con prefijo convencional (`feat:`, `fix:`, `chore:`, `docs:`).
+
+---
 
 ## Archivos clave
 
@@ -63,35 +74,21 @@ Sistema clínico para el consultorio de otorrinolaringología del **Dr. Alejandr
 | `src/app/api/dgis/exportar-cex/` | API route — genera archivo de intercambio mensual SIS-CEX |
 | `prisma/schema.prisma` | Schema de la base de datos |
 
-## Tienda en línea
+---
 
-Ver skill `tienda` (carrito, stock, Stripe, checkout).
+## Módulos y referencias
 
-## Push notifications al staff (ntfy)
+- **Tienda en línea**: carrito (`useCarrito`), stock, Stripe, checkout.
+- **Push notifications al staff (ntfy)**: servidor autoalojado, topics, integraciones en citas, contacto y pedidos.
+- **Cobros (honorarios)**: catálogo de montos, modelo, server actions, UI en `/staff/cobros`.
+- **Agenda — Bloqueo de fechas**: bloqueo de rangos de fechas para citas médicas.
+- **Infraestructura (VPS)**: PM2, configuración de Nginx.
+- **Certificación NOM-024-SSA3-2012**: estado de tracks (1, 2 y 3 completados; 4 en SGSI), reglas GIIS-B015.
 
-Ver skill `notificaciones-ntfy` (servidor autoalojado, topics, dónde está enganchado).
-
-## Cobros (honorarios)
-
-Ver skill `cobros` (catálogo de montos, modelo, server actions, UI).
-
-## Agenda — Bloqueo de fechas
-
-Ver skill `agenda-bloqueos` (bloqueo de rangos de fechas para citas).
-
-## Infraestructura (VPS)
-
-Ver skill `infraestructura-vps` (PM2, config de nginx).
+---
 
 ## Pendientes conocidos
 
 - **FIX-09**: botón flotante de WhatsApp y enlace `tel:` en el header — bloqueado hasta que el Dr. Viveros confirme su número de celular. Rellenar `phone` y `whatsapp` en `src/lib/sitio-publico-data.ts` y añadir el botón flotante en `src/app/(public)/layout.tsx`.
 - **FHIR export**: endpoints individuales y bulk — requiere definir sistema receptor (laboratorio, HIS, IMSS).
 
-## Certificación NOM-024-SSA3-2012
-
-Ver skill `certificacion-nom024` (estado de tracks, reglas GIIS-B015, contacto DGIS).
-
-## Local OpenACP Workspace
-
-The `.openacp/` directory contains a local OpenACP workspace with secrets (bot tokens, API keys). Do not read, commit, or reference files inside it.
