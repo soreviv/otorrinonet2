@@ -56,7 +56,6 @@ next-env.d.ts
 # Misc
 product-plan.zip
 *.docx
-.openacp/
 .claude/design-system/
 .claude/settings.local.json
 sgsi/

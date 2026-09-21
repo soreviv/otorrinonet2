@@ -1,7 +1,7 @@
 # OtorrinoNet — Guía de Interacción para Agentes de IA
 
-> **Versión:** 2.0 | **Última actualización:** 2026-09-07
-> Este archivo guía a modelos de lenguaje que interactúan con el sitio web de OtorrinoNet como usuarios (pacientes, visitantes o staff). Describe cómo navegar, qué información obtener y cómo realizar acciones en el sitio.
+> **Versión:** 2.1 | **Última actualización:** Septiembre de 2026  
+> Este archivo guía a modelos de lenguaje y agentes de IA que interactúan con el sitio web de OtorrinoNet como usuarios (pacientes, visitantes o staff). Describe cómo navegar, qué información obtener y cómo realizar acciones en el sitio.
 
 ---
 
@@ -11,13 +11,13 @@
 
 El sitio combina:
 
-- **Sitio web público** — Perfil profesional, servicios, ubicación, contacto
-- **Agendado de citas en línea** — Reserva, modificación y cancelación de citas médicas
-- **Tienda médica en línea** — Productos relacionados con ORL, con pago seguro
-- **Autofacturación CFDI 4.0** — Generación de facturas electrónicas post-compra
-- **Panel de staff** — Solo para personal autorizado (médico, enfermera, recepcionista)
+- **Sitio web público** — Perfil profesional, servicios, ubicación y contacto.
+- **Agendado de citas en línea** — Reserva, modificación y cancelación de citas médicas.
+- **Tienda médica en línea** — Productos relacionados con ORL, con pago seguro mediante Stripe.
+- **Autofacturación CFDI 4.0** — Generación de facturas electrónicas post-compra con Factura.com.
+- **Panel de staff** — Solo para personal autorizado con 2FA (médico, enfermera, recepcionista).
 
-**URL del sitio:** `https://otorrinonet.com` (o el dominio configurado en producción)
+**URL del sitio:** `https://otorrinonet.com` (o el dominio configurado en producción).
 
 ---
 
@@ -27,59 +27,57 @@ Estas secciones están disponibles para cualquier visitante:
 
 ### 2.1 Inicio (`/`)
 
-- Presentación del Dr. Viveros Domínguez
-- Especialidad: Otorrinolaringología y Cirugía de Cabeza y Cuello
-- Resumen de servicios
-- Botón principal: **Agendar cita**
+- Presentación del Dr. Alejandro Viveros Domínguez.
+- Especialidad: Otorrinolaringología y Cirugía de Cabeza y Cuello.
+- Resumen de servicios y testimonios de pacientes.
+- Llamada a la acción principal: **Agendar cita**.
 
 ### 2.2 Perfil (`/perfil`)
 
-- Trayectoria académica y profesional del doctor
-- Cédula profesional y cédula de especialidad
-- Universidad de titulación
-- Afiliaciones y certificaciones
+- Trayectoria académica y profesional del médico.
+- Cédula profesional y cédula de especialidad.
+- Universidad de titulación y formación quirúrgica.
+- Afiliaciones y certificaciones colegiadas.
 
 ### 2.3 Servicios (`/servicios`)
 
-- Lista completa de servicios de ORL:
-- Consulta general de otorrinolaringología
-- Endoscopia nasal y laríngea
-- Audiometría y tamiz auditivo
-- Cirugía de tabique nasal (septoplastia)
-- Cirugía de senos paranasales (FESS)
-- Cirugía de amígdalas y adenoides
-- Cirugía de cuerdas vocales
-- Cirugía de cabeza y cuello
-- Rinoplastia funcional y estética
-- Otoscopia, limpieza de oídos, manejo de vértigo
-- Descripción de cada procedimiento
-- Indicaciones y contraindicaciones generales
+Lista completa de servicios y procedimientos de ORL:
+
+- Consulta general de otorrinolaringología.
+- Endoscopia nasal y laríngea.
+- Audiometría y tamiz auditivo.
+- Cirugía de tabique nasal (septoplastia funcional).
+- Cirugía endoscópica de senos paranasales (FESS).
+- Cirugía de amígdalas y adenoides (amigdalectomía).
+- Microcirugía de cuerdas vocales.
+- Cirugía de cabeza y cuello.
+- Rinoseptoplastia funcional y estética.
+- Otoscopia, lavado de oídos y manejo de vértigo.
 
 ### 2.4 Ubicación (`/ubicacion`)
 
-- Dirección completa del consultorio en CDMX
-- Mapa interactivo (Google Maps)
-- Indicaciones de cómo llegar
-- Horario de atención
-- Teléfono de contacto
-- Estacionamiento disponible
+- Dirección completa del consultorio en CDMX.
+- Mapa interactivo integrado (Google Maps).
+- Indicaciones de acceso y transporte.
+- Horarios de atención.
+- Estacionamiento disponible en las inmediaciones.
 
 ### 2.5 Contacto (`/contacto`)
 
-- Formulario de contacto general
-- Teléfono del consultorio
-- Correo electrónico
-- Campos: nombre, email, teléfono, asunto, mensaje
-- Protegido por Cloudflare Turnstile (captcha invisible)
-- El staff recibe notificación push al enviar el formulario
+- Formulario de contacto general.
+- Campos requeridos: nombre, email, teléfono, asunto y mensaje.
+- Protección mediante Cloudflare Turnstile (captcha invisible).
+- Notificación automática al personal vía correo y push (*ntfy*).
 
 ### 2.6 Páginas legales
 
-- `/privacidad` — Aviso de privacidad (LFPDPPP)
-- `/terminos` — Términos y condiciones
-- `/cookies` — Política de cookies
-- `/descargo` — Descargo de responsabilidad médica
-- Nota: Las rutas `/legal/*` redirigen 301 a estas URLs canónicas.
+- `/privacidad` — Aviso de privacidad integral (cumplimiento LFPDPPP).
+- `/terminos` — Términos y condiciones del servicio y tienda.
+- `/cookies` — Política de cookies y banner de consentimiento (Consent Mode v2).
+- `/descargo` — Descargo de responsabilidad médica.
+
+> [!NOTE]
+> Las rutas bajo `/legal/*` redirigen permanentemente (código HTTP 301) a sus URLs canónicas (`/privacidad`, `/terminos`, `/cookies`, `/descargo`).
 
 ---
 
@@ -87,241 +85,129 @@ Estas secciones están disponibles para cualquier visitante:
 
 ### 3.1 Requisitos previos
 
-- No se requiere cuenta de usuario
-- Se requiere completar el captcha Cloudflare Turnstile
-- Se requiere proporcionar datos de contacto válidos
+- No se requiere crear cuenta ni contraseña previa.
+- Verificación automática de Cloudflare Turnstile.
+- Proporcionar datos de contacto válidos (correo electrónico y teléfono).
 
-### 3.2 Paso 1: Seleccionar fecha y hora
+### 3.2 Paso 1: Selección de fecha y hora
 
-- Calendario interactivo con disponibilidad en tiempo real
-- Los slots bloqueados por el staff no aparecen
-- Fechas pasadas no son seleccionables
-- Se muestra disponibilidad por franjas horarias
+- Calendario interactivo con cálculo dinámico de disponibilidad en tiempo real.
+- Bloqueo automático de fechas no disponibles o feriados fijados por el consultorio.
+- No es posible seleccionar fechas pasadas ni horarios ocupados.
 
 ### 3.3 Paso 2: Datos del paciente
 
-- Nombre completo
-- Teléfono de contacto
-- Correo electrónico (obligatorio para confirmación)
-- Motivo de consulta (opcional pero recomendado)
-- Notas adicionales (opcional)
+- Nombre y apellidos (paterno y materno).
+- Teléfono celular de contacto.
+- Correo electrónico (indispensable para recibir la confirmación y el token).
+- Motivo de la consulta y notas adicionales opcionales.
 
 ### 3.4 Paso 3: Confirmación
 
-- Resumen de la cita (fecha, hora, datos del paciente)
-- Botón de confirmación final
+- Revisión del resumen de la cita médica.
 - Al confirmar:
-- Se genera un token único de cita
-- Se envía correo de confirmación al paciente
-- Se envía notificación push al staff
-- El slot queda reservado
+  - Se genera un token único de gestión de cita.
+  - Se despacha el correo de confirmación con el token al paciente.
+  - Se envía notificación push al staff mediante *ntfy*.
+  - El horario queda reservado inmediatamente.
 
-### 3.5 Post-agendado
+### 3.5 Post-agendado y gestión por token
 
-- El paciente recibe un **token de cita** por correo
-- Con este token puede:
-- **Modificar la cita** — cambiar fecha/hora (si hay disponibilidad)
-- **Cancelar la cita** — libera el slot automáticamente
-- No se requiere contraseña; el token es la credencial
+- Con el **token de cita**, el paciente puede desde el correo:
+  - **Modificar la cita (`/cita/modificar?token=...`)**: Seleccionar una nueva fecha y hora disponible.
+  - **Cancelar la cita (`/cita/cancelar?token=...`)**: Liberar el horario de manera inmediata.
 
-### 3.6 Recordatorios
+### 3.6 Recordatorios automatizados
 
-- El sistema envía recordatorios automáticos por correo electrónico
-- El paciente puede solicitar recordatorio por WhatsApp (si está configurado)
+- Envío de recordatorio por correo electrónico 24 horas antes de la cita programada (`/api/cron/reminder`).
+- Encuesta de satisfacción NPS post-consulta (`/api/cron/nps`).
 
 ---
 
 ## 4. Tienda médica (`/tienda`)
 
-### 4.1 Catálogo
+### 4.1 Catálogo de productos
 
-- Productos médicos relacionados con ORL:
-- Soluciones salinas y sprays nasales
-- Gotas óticas
-- Protectores auditivos
-- Humidificadores y nebulizadores
-- Suplementos y vitaminas recomendados
-- Material de curación y cuidado post-operatorio
-- Cada producto incluye:
-- Nombre, descripción, precio
-- Imagen(es)
-- Indicaciones de uso
-- Stock disponible
-- Categoría
+Productos médicos para el cuidado de salud otorrinolaringológica:
+
+- Soluciones salinas, lavados nasales y sprays.
+- Gotas óticas y lubricantes nasales.
+- Protectores auditivos y tapones a medida.
+- Humidificadores, nebulizadores y repuestos.
+- Material de curación y cuidado post-operatorio.
 
 ### 4.2 Carrito de compras
 
-- Agregar/eliminar productos
-- Modificar cantidades
-- Cálculo automático de subtotal
-- Costo de envío: **$150.00 MXN** por defecto (configurable)
-- El carrito persiste en `localStorage` del navegador
+- Adición y remoción de productos con actualización reactiva.
+- Persistencia del estado en `localStorage` mediante el hook `useCarrito`.
+- Cálculo dinámico de subtotal y tarifa de envío estándar ($150.00 MXN).
 
-### 4.3 Checkout
+### 4.3 Checkout y procesamiento de pagos
 
-- Formulario de dirección de envío
-- Método de pago: **Stripe** (tarjetas de crédito/débito)
-- Proceso de pago seguro (PaymentIntents)
-- Confirmación de compra por correo electrónico
-- Ticket de compra adjunto
+- Formulario de dirección de entrega.
+- Pasarela segura con **Stripe Elements** (tarjetas de crédito y débito).
+- Validación de firma HMAC y decremento de inventario exclusivo en webhook (`payment_intent.succeeded`).
+- Despacho automático del ticket de compra por correo.
 
-### 4.4 Autofacturación (`/autofactura`)
+### 4.4 Autofacturación electrónica (`/autofactura`)
 
-- Disponible **después** de completar una compra
-- El usuario ingresa:
-- RFC
-- Razón social
-- Uso CFDI (catálogo oficial SAT)
-- Correo para envío de factura
-- Genera factura electrónica **CFDI 4.0** válida ante el SAT
-- La factura se envía por correo electrónico
+- Disponible post-compra con los datos del pedido.
+- Entrada de datos fiscales: RFC, Razón Social, Régimen Fiscal, Código Postal y Uso de CFDI.
+- Emisión inmediata de comprobante fiscal digital **CFDI 4.0** timbrado ante el SAT vía Factura.com.
 
 ---
 
 ## 5. Panel de staff (`/staff/*`) — Acceso restringido
 
-**NO accesible al público.** Requiere:
+> [!CAUTION]
+> Área privada exclusiva para personal autorizado del consultorio. Requiere credenciales válidas y verificación 2FA TOTP activa.
 
-1. Credenciales de login (email + contraseña)
-2. Verificación de doble factor (TOTP 2FA)
-3. Rol autorizado
+### 5.1 Roles y matriz de permisos
 
-### 5.1 Roles y acceso
-
-| Rol | Qué puede hacer |
-| --- | --- |
-| **Médico** | Acceso completo a todos los módulos |
-| **Enfermera** | Ver expedientes (solo lectura), crear notas SOAP, recetas, consentimientos, ver agenda |
-| **Recepcionista** | Solo agenda (calendario de citas) |
+| Rol | Alcance y capacidades |
+|---|---|
+| **`medico`** | Acceso completo a todos los módulos: EHR, notas SOAP, firma electrónica, recetas, consentimientos, tienda, agenda, cobros, finanzas, DGIS y configuración |
+| **`enfermera`** | Lectura de expedientes (`/staff/ehr`), captura de notas/somatometría (`/staff/notas`) y vista de agenda |
+| **`recepcionista`** | Gestión exclusiva del calendario de citas (`/staff/agenda`) |
 
 ### 5.2 Módulos del panel
 
-- **Expediente clínico (`/staff/ehr`)** — Historia clínica estructurada (NOM-004-SSA3)
-- **Notas, recetas y consentimientos (`/staff/notas`)** — Notas SOAP, recetas con firma digital, somatometría
-- **Agenda (`/staff/agenda`)** — Calendario completo, bloqueo de fechas
-- **Tienda admin (`/staff/tienda`)** — Gestión de productos, pedidos, estadísticas
-- **Dashboard (`/staff/dashboard`)** — Métricas clínicas y de ventas
-- **Configuración (`/staff/configuracion`)** — Datos del consultorio, logo, cédulas
-- **Administración (`/staff/admin`)** — Usuarios, bitácora, derechos ARCO, exportación
-- **Exportación DGIS (`/staff/dgis`)** — Generación de archivo GIIS-B015 para Secretaría de Salud
-- **Cobros (`/staff/cobros`)** — Registro de honorarios, resumen financiero
+- **Expediente clínico (`/staff/ehr`)** — Historia clínica completa bajo norma NOM-004-SSA3 y datos NOM-024 Track 1.
+- **Notas y recetas (`/staff/notas`)** — Notas de evolución SOAP con firma SHA-256, adendas foliadas y recetas con código de verificación.
+- **Agenda (`/staff/agenda`)** — Gestión de citas del día y bloqueo de rangos vacacionales/académicos.
+- **Tienda (`/staff/tienda`)** — Administración de inventario, precios y seguimiento de pedidos.
+- **Cobros (`/staff/cobros`)** — Registro manual de honorarios médicos y exportación de reportes.
+- **Dashboard (`/staff/dashboard`)** — Métricas clínicas y análisis operativo.
+- **Exportación DGIS (`/staff/dgis`)** — Generación de archivo mensual SIS-CEX bajo especificación GIIS-B015.
+- **Administración (`/staff/admin`)** — Gestión de usuarios, bitácora de auditoría y ejercicio de derechos ARCO.
 
 ---
 
 ## 6. Información del consultorio
 
-| Dato | Valor (ejemplo; verificar en sitio) |
-| --- | --- |
-| **Doctor** | Dr. Alejandro Viveros Domínguez |
+| Parámetro | Detalle |
+|---|---|
+| **Médico titular** | Dr. Alejandro Viveros Domínguez |
 | **Especialidad** | Otorrinolaringología y Cirugía de Cabeza y Cuello |
-| **Cédula profesional** | [Ver en `/perfil`] |
-| **Cédula de especialidad** | [Ver en `/perfil`] |
-| **Universidad** | [Ver en `/perfil`] |
-| **Consultorio** | [Ver en `/ubicacion`] |
-| **Dirección** | CDMX, México [Ver en `/ubicacion`] |
-| **Teléfono** | [Ver en `/contacto` o `/ubicacion`] |
-| **Email** | [Ver en `/contacto`] |
-| **Horario** | [Ver en `/ubicacion`] |
-| **COFEPRIS** | [Si aplica, ver en sitio] |
+| **Cédula profesional** | Consultar en `/perfil` |
+| **Cédula de especialidad** | Consultar en `/perfil` |
+| **Ubicación** | Consultorio en Ciudad de México (detalles en `/ubicacion`) |
+| **Contacto** | Formulario en `/contacto` |
 
 ---
 
-## 7. Políticas importantes para el usuario
+## 7. Políticas de privacidad y protección de datos
 
-### 7.1 Privacidad y protección de datos
-
-- El sitio cumple con la **LFPDPPP** (Ley Federal de Protección de Datos Personales en Posesión de los Particulares)
-- Los datos personales y clínicos se cifran con AES-256-GCM
-- El paciente tiene derechos **ARCO** (Acceso, Rectificación, Cancelación, Oposición)
-- Para ejercer derechos ARCO: contactar por correo o formulario de contacto
-
-### 7.2 Cancelación y reprogramación de citas
-
-- Las citas pueden cancelarse o reprogramarse mediante el **token de cita** enviado por correo
-- Se recomienda cancelar con al menos 24 horas de anticipación
-- Los slots cancelados quedan disponibles para otros pacientes automáticamente
-
-### 7.3 Pagos y reembolsos
-
-- Los pagos de la tienda se procesan mediante Stripe
-- Política de reembolso: [consultar términos en `/terminos`]
-- Las facturas se generan en formato CFDI 4.0 válido ante el SAT
-
-### 7.4 Descargo médico
-
-- La información del sitio es orientativa y no sustituye la consulta médica
-- Para diagnósticos y tratamientos, agendar cita presencial
-- Ver `/descargo` para texto completo
+- Los datos personales y de salud están protegidos bajo la **LFPDPPP** y la **NOM-024-SSA3-2012**.
+- Cifrado en reposo con algoritmo **AES-256-GCM** para información sensible (CURP, teléfonos, correos y domicilios).
+- Los titulares pueden ejercer sus derechos **ARCO** (Acceso, Rectificación, Cancelación y Oposición) a través del formulario de contacto o en el consultorio.
 
 ---
 
-## 8. Cumplimiento normativo visible
+## 8. Restricciones operativas importantes
 
-El sitio declara cumplimiento con:
+> [!IMPORTANT]
+> - **Atención de emergencias:** Este portal **no** proporciona atención a urgencias médicas en tiempo real. Ante una emergencia, acudir de inmediato al hospital más cercano.
+> - **Medicamentos controlados:** La tienda en línea **no** comercializa medicamentos que requieran receta médica retenida o controlada; solo productos de cuidado e higiene ORL.
+> - **Validez de información:** La información publicada en el sitio es de carácter orientativo e informativo y no sustituye la consulta médica presencial.
 
-| Norma | Qué significa para el usuario |
-| --- | --- |
-| **NOM-004-SSA3** | Expediente clínico electrónico estructurado y seguro |
-| **LFPDPPP** | Sus datos personales están protegidos por ley |
-| **NOM-024 Track 1** | Datos mínimos de identificación del paciente registrados correctamente |
-| **NOM-024 Track 2** | Diagnósticos usando catálogos oficiales (CIE-10) |
-| **NOM-024 Track 3** | Capacidad de exportar información a la Secretaría de Salud (DGIS) |
-| **CFDI 4.0** | Facturación electrónica válida ante el SAT |
-
----
-
-## 9. Cómo contactar al consultorio
-
-### Formulario web
-
-- Ir a `/contacto`
-- Completar: nombre, email, teléfono, asunto, mensaje
-- Resolver captcha Cloudflare Turnstile
-- Enviar
-
-### Por teléfono
-
-- Número disponible en `/contacto` y `/ubicacion`
-- Horario de atención telefónica: [ver en `/ubicacion`]
-
-### Por correo electrónico
-
-- Email disponible en `/contacto`
-
-### Urgencias
-
-- Este sitio **no** atiende emergencias médicas
-- En caso de urgencia, acudir al servicio de urgencias más cercano o llamar a emergencias
-
----
-
-## 10. Restricciones y limitaciones
-
-- **No hay chat en vivo** en el sitio público
-- **No se pueden agendar citas para terceros** sin su consentimiento explícito
-- **No se venden medicamentos controlados** en la tienda (solo productos de cuidado ORL)
-- **El panel de staff no está disponible** para pacientes o visitantes
-- **Las facturas solo se generan** para compras completadas en la tienda
-- **No hay app móvil nativa**; el sitio es responsive y funciona en navegadores móviles
-
----
-
-## 11. Glosario de términos médicos/ORL
-
-| Término | Significado |
-| --- | --- |
-| **ORL** | Otorrinolaringología (especialidad médica) |
-| **EHR** | Expediente Clínico Electrónico (Electronic Health Record) |
-| **SOAP** | Formato de nota clínica: Subjetivo, Objetivo, Análisis, Plan |
-| **FESS** | Cirugía endoscópica de senos paranasales |
-| **CFDI** | Comprobante Fiscal Digital por Internet (factura electrónica mexicana) |
-| **DGIS** | Dirección General de Información en Salud (Secretaría de Salud) |
-| **GIIS-B015** | Formato estándar para registro de consulta externa ante DGIS |
-| **ARCO** | Derechos del paciente: Acceso, Rectificación, Cancelación, Oposición |
-| **NOM-004-SSA3** | Norma mexicana de expediente clínico |
-| **LFPDPPP** | Ley Federal de Protección de Datos Personales |
-
----
-
-*Este archivo está diseñado para que un modelo de lenguaje que navega OtorrinoNet como usuario pueda orientar correctamente a pacientes y visitantes. 
-Si hay discrepancia entre este archivo y el sitio en vivo, prevalece el sitio en vivo.*
