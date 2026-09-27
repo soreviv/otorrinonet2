@@ -232,7 +232,7 @@ export function NotasClient({
         onSave={(data) => handleSaveNote(selectedNote.id, data)}
         onSign={() => handleSignNote(selectedNote.id)}
         onAddAddendum={(c) => handleAddAddendum(selectedNote.id, c)}
-        onPrint={selectedNote.signed ? () => printEvolutionNote(selectedNote, clinicConfig) : undefined}
+        onPrint={() => printEvolutionNote(selectedNote, clinicConfig)}
       />
     )
   }
