@@ -17,7 +17,7 @@ export default function ConsentimientoAmigdalectomiaPage() {
         Dr. Alejandro Viveros Domínguez · Otorrinolaringología y Cirugía de Cabeza y Cuello
       </p>
       <p className="text-sm text-slate-400 dark:text-slate-500 mb-10">
-        Chosica 730, Col Lindavista, C.P. 07300, Ciudad de México &nbsp;·&nbsp; (55) 7136 2268
+        Chosica 730, Col Lindavista, C.P. 07300, Ciudad de México &nbsp;·&nbsp; contacto@otorrinonet.com
       </p>
 
       <div className="prose prose-slate dark:prose-invert max-w-none text-[15px] leading-relaxed space-y-6">
