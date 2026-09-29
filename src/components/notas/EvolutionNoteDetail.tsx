@@ -240,7 +240,7 @@ export function EvolutionNoteDetail({ note, canEdit, onBack, onSave, onSign, onA
             <button
               type="button"
               onClick={onPrint}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors shrink-0"
               title="Imprimir nota"
             >
               <Printer className="w-3.5 h-3.5" strokeWidth={2} />
