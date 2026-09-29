@@ -126,21 +126,22 @@ export function ConsentFormDetail({
             <h1 className="text-base font-bold text-slate-900 dark:text-white">Consentimiento Informado</h1>
             <p className="text-xs font-mono text-slate-400 dark:text-slate-500">{consent.patientName}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <span className={`px-3 py-1.5 rounded-lg border text-xs font-semibold ${statusCls}`}>
               {statusLabel}
             </span>
-            {isSigned && (
+            {onPrint && (
               <button
                 onClick={() => onPrint?.(consent.id)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors"
+                title="Imprimir consentimiento"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors shrink-0"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <polyline points="6 9 6 2 18 2 18 9" />
                   <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
                   <rect x="6" y="14" width="12" height="8" />
                 </svg>
-                Imprimir
+                <span className="hidden sm:inline">Imprimir</span>
               </button>
             )}
           </div>

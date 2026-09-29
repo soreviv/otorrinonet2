@@ -177,7 +177,10 @@ export function printConsent(consent: ConsentForm, cfg: ClinicConfig): void {
   <div class="signed-ts">
     ✓ Consentimiento firmado (${consent.signatureMethod === 'presencial' ? 'presencial' : 'correo electrónico'}) ·
     ${new Date(consent.signedAt).toLocaleString('es-MX', { timeZone: 'America/Mexico_City', dateStyle: 'long', timeStyle: 'short' })}
-  </div>` : ''}
+  </div>` : `
+  <div class="signed-ts" style="background:#fffbeb; border:1px solid #fde68a; color:#92400e;">
+    ⚠ BORRADOR SIN FIRMA — este documento no es válido hasta registrar la firma del paciente o representante legal.
+  </div>`}
 
   <div class="footer">
     Documento elaborado conforme a la NOM-004-SSA3-2012 del expediente clínico · Uso exclusivo para el paciente indicado

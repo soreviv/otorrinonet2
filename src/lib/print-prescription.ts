@@ -328,7 +328,10 @@ export async function printPrescription(rx: Prescription): Promise<void> {
   <div class="signed-ts">
     ✓ Firmada electrónicamente · ${new Date(rx.signedAt).toLocaleString('es-MX', { timeZone: 'America/Mexico_City', dateStyle: 'long', timeStyle: 'short' })}
     ${rx.firmaHash ? `· SHA-256: <span style="color:#475569">${rx.firmaHash}</span>` : ''}
-  </div>` : ''}
+  </div>` : `
+  <div class="signed-ts" style="background:#fffbeb; border:1px solid #fde68a; color:#92400e;">
+    ⚠ BORRADOR SIN FIRMA — este documento no es una receta válida hasta ser firmado electrónicamente por el médico.
+  </div>`}
 
   <!-- Firma + sello + QR -->
   <div class="bottom-section">
