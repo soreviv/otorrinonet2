@@ -1,3 +1,12 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Consentimiento Informado — Amigdalectomía',
+  description:
+    'Documento informativo sobre la amigdalectomía: procedimiento, riesgos, complicaciones frecuentes y cuidados del postoperatorio. Dr. Alejandro Viveros Domínguez, otorrinolaringólogo en Lindavista, CDMX.',
+  alternates: { canonical: '/consentimientos/amigdalectomia' },
+}
+
 export default function ConsentimientoAmigdalectomiaPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">

@@ -51,7 +51,6 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Dr. Alejandro Viveros Domínguez" }],
   creator: "Dr. Alejandro Viveros Domínguez",
-  alternates: { canonical: "/" },
   robots: {
     index: true,
     follow: true,

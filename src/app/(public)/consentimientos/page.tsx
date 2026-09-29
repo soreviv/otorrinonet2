@@ -1,4 +1,12 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Consentimientos Informados',
+  description:
+    'Consentimientos informados de los procedimientos quirúrgicos del consultorio del Dr. Alejandro Viveros Domínguez: rinoseptoplastia y amigdalectomía. Riesgos, beneficios y postoperatorio.',
+  alternates: { canonical: '/consentimientos' },
+}
 
 export default function ConsentimientosPage() {
   return (

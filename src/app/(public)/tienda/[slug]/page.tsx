@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: product.metaTitle || `${product.nombre} | Tienda Dr. Viveros`,
     description: product.metaDesc || product.descripcion,
+    alternates: { canonical: `/tienda/${product.slug}` },
   }
 }
 

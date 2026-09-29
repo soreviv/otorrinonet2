@@ -1,3 +1,12 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Consentimiento Informado — Rinoseptoplastia',
+  description:
+    'Documento informativo sobre la septorrinoplastia o rinoseptoplastia: procedimiento, riesgos, complicaciones frecuentes y cuidados del postoperatorio. Dr. Alejandro Viveros Domínguez, otorrinolaringólogo en Lindavista, CDMX.',
+  alternates: { canonical: '/consentimientos/rinoseptoplastia' },
+}
+
 export default function ConsentimientoRinoseptoplastiaPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">

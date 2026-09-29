@@ -1,8 +1,16 @@
+import type { Metadata } from 'next'
 import { PublicHeader } from '@/components/sitio-publico/PublicHeader'
 import { PublicFooter } from '@/components/sitio-publico/PublicFooter'
 import { Breadcrumbs } from '@/components/sitio-publico/Breadcrumbs'
 import { getProductosCatalogo } from '@/app/actions/tienda'
 import { CatalogoClient } from './CatalogoClient'
+
+export const metadata: Metadata = {
+  title: 'Tienda en línea',
+  description:
+    'Dispositivos médicos, suplementos y paquetes de consulta recomendados por el Dr. Alejandro Viveros Domínguez, otorrinolaringólogo en Lindavista, Ciudad de México.',
+  alternates: { canonical: '/tienda' },
+}
 
 export default async function TiendaPage() {
   const productos = await getProductosCatalogo()
