@@ -111,6 +111,8 @@ export function printEvolutionNote(note: EvolutionNote, cfg: ClinicConfig): void
   /* Signed banner */
   .signed-banner { margin: 0 18px 0; padding: 7px 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 4px; font-size: 10px; color: #166534; }
   .signed-banner strong { font-weight: 700; }
+  .draft-banner { margin: 10px 18px 0; padding: 7px 10px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 4px; font-size: 10px; color: #92400e; }
+  .draft-banner strong { font-weight: 700; }
   .hash { font-family: monospace; font-size: 8.5px; color: #64748b; margin-top: 3px; word-break: break-all; }
 
   /* Addendums */
@@ -211,7 +213,11 @@ ${note.signed && note.signedAt ? `
     (zona horaria Ciudad de México). Conforme a NOM-004-SSA3-2012 y NOM-024-SSA3-2012.
     ${note.firmaHash ? `<div class="hash">SHA-256: ${esc(note.firmaHash)}</div>` : ''}
   </div>
-</div>` : ''}
+</div>` : `
+<div class="draft-banner">
+  <strong>BORRADOR — SIN FIRMA ELECTRÓNICA.</strong> Documento no validado; no forma parte del
+  expediente clínico hasta ser firmado por el médico tratante.
+</div>`}
 
 <!-- Adendums -->
 ${adendaHtml}

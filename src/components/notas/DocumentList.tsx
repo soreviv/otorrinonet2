@@ -101,93 +101,109 @@ function SectionHeader({
   )
 }
 
-function EvolutionNoteRow({ note, onView }: { note: EvolutionNote; onView?: () => void }) {
+function PrintButton({ onPrint, label }: { onPrint?: () => void; label: string }) {
+  if (!onPrint) return null
   return (
-    <button onClick={onView}
-      className="w-full flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left group border-t border-slate-100 dark:border-slate-700">
-      <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-900/30 flex flex-col items-center justify-center">
-        <span className="text-xs font-bold text-violet-700 dark:text-violet-400 leading-none">
-          {new Date(note.date + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit' })}
-        </span>
-        <span className="text-[9px] uppercase tracking-wide text-violet-500 dark:text-violet-500">
-          {new Date(note.date + 'T00:00:00').toLocaleDateString('es-MX', { month: 'short' })}
-        </span>
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-sky-700 dark:group-hover:text-sky-400 transition-colors">
-          {note.consultationReason}
-        </p>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
-          {note.updatedDiagnosis}
-        </p>
-      </div>
-      <div className="flex-shrink-0 flex flex-col items-end gap-1">
-        <span className="text-xs text-slate-400 dark:text-slate-500">{note.time}</span>
-        <svg className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-sky-500 transition-colors"
-          viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-          <path d="M9 18l6-6-6-6" />
-        </svg>
-      </div>
+    <button
+      type="button"
+      onClick={e => { e.stopPropagation(); onPrint() }}
+      title={label}
+      aria-label={label}
+      className="flex-shrink-0 p-2 -mr-1 rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:text-sky-400 dark:hover:bg-sky-900/30 transition-colors"
+    >
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <polyline points="6 9 6 2 18 2 18 9" />
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+        <rect x="6" y="14" width="12" height="8" />
+      </svg>
     </button>
   )
 }
 
-function PrescriptionRow({ rx, onView }: { rx: Prescription; onView?: () => void }) {
+function EvolutionNoteRow({ note, onView, onPrint }: { note: EvolutionNote; onView?: () => void; onPrint?: () => void }) {
   return (
-    <button onClick={onView}
-      className="w-full flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left group border-t border-slate-100 dark:border-slate-700">
-      <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center">
-        <svg className="w-5 h-5 text-sky-600 dark:text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
-          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-          <rect x="9" y="3" width="6" height="4" rx="1" />
-          <path d="M9 12h6M9 16h4" />
-        </svg>
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-sky-700 dark:group-hover:text-sky-400 transition-colors">
-          {rx.medications.map(m => m.name).join(', ')}
-        </p>
-        <div className="flex items-center gap-2 mt-1">
-          <PrescriptionBadge status={rx.status} />
-          <span className="text-xs text-slate-400 dark:text-slate-500">{relativeDate(rx.createdAt)}</span>
-          <span className="text-xs text-slate-400 dark:text-slate-500">
-            · {rx.medications.length} medicamento{rx.medications.length !== 1 ? 's' : ''}
+    <div className="w-full flex items-center gap-1 pl-4 pr-2 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group border-t border-slate-100 dark:border-slate-700">
+      <button onClick={onView} className="flex-1 min-w-0 flex items-start gap-3 text-left py-1">
+        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-900/30 flex flex-col items-center justify-center">
+          <span className="text-xs font-bold text-violet-700 dark:text-violet-400 leading-none">
+            {new Date(note.date + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit' })}
+          </span>
+          <span className="text-[9px] uppercase tracking-wide text-violet-500 dark:text-violet-500">
+            {new Date(note.date + 'T00:00:00').toLocaleDateString('es-MX', { month: 'short' })}
           </span>
         </div>
-      </div>
-      <svg className="flex-shrink-0 w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-sky-500 transition-colors self-center"
-        viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-        <path d="M9 18l6-6-6-6" />
-      </svg>
-    </button>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-sky-700 dark:group-hover:text-sky-400 transition-colors">
+            {note.consultationReason}
+          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+            {note.updatedDiagnosis}
+          </p>
+        </div>
+        <div className="flex-shrink-0 flex flex-col items-end gap-1">
+          <span className="text-xs text-slate-400 dark:text-slate-500">{note.time}</span>
+          {!note.signed && (
+            <span className="text-[9px] uppercase font-semibold text-amber-600 dark:text-amber-400">Borrador</span>
+          )}
+        </div>
+      </button>
+      <PrintButton onPrint={onPrint} label="Imprimir nota" />
+    </div>
   )
 }
 
-function ConsentRow({ consent, onView }: { consent: ConsentForm; onView?: () => void }) {
+function PrescriptionRow({ rx, onView, onPrint }: { rx: Prescription; onView?: () => void; onPrint?: () => void }) {
   return (
-    <button onClick={onView}
-      className="w-full flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left group border-t border-slate-100 dark:border-slate-700">
-      <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center">
-        <svg className="w-5 h-5 text-sky-600 dark:text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <path d="M14 2v6h6" />
-          <path d="M16 13H8M16 17H8M10 9H8" />
-        </svg>
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-sky-700 dark:group-hover:text-sky-400 transition-colors">
-          {consent.procedure}
-        </p>
-        <div className="flex items-center gap-2 mt-1">
-          <ConsentBadge status={consent.status} />
-          <span className="text-xs text-slate-400 dark:text-slate-500">{relativeDate(consent.createdAt)}</span>
+    <div className="w-full flex items-center gap-1 pl-4 pr-2 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group border-t border-slate-100 dark:border-slate-700">
+      <button onClick={onView} className="flex-1 min-w-0 flex items-start gap-3 text-left py-1">
+        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center">
+          <svg className="w-5 h-5 text-sky-600 dark:text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+            <rect x="9" y="3" width="6" height="4" rx="1" />
+            <path d="M9 12h6M9 16h4" />
+          </svg>
         </div>
-      </div>
-      <svg className="flex-shrink-0 w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-sky-500 transition-colors self-center"
-        viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-        <path d="M9 18l6-6-6-6" />
-      </svg>
-    </button>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-sky-700 dark:group-hover:text-sky-400 transition-colors">
+            {rx.medications.map(m => m.name).join(', ')}
+          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <PrescriptionBadge status={rx.status} />
+            <span className="text-xs text-slate-400 dark:text-slate-500">{relativeDate(rx.createdAt)}</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500">
+              · {rx.medications.length} medicamento{rx.medications.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+        </div>
+      </button>
+      <PrintButton onPrint={onPrint} label="Imprimir receta" />
+    </div>
+  )
+}
+
+function ConsentRow({ consent, onView, onPrint }: { consent: ConsentForm; onView?: () => void; onPrint?: () => void }) {
+  return (
+    <div className="w-full flex items-center gap-1 pl-4 pr-2 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group border-t border-slate-100 dark:border-slate-700">
+      <button onClick={onView} className="flex-1 min-w-0 flex items-start gap-3 text-left py-1">
+        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center">
+          <svg className="w-5 h-5 text-sky-600 dark:text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <path d="M14 2v6h6" />
+            <path d="M16 13H8M16 17H8M10 9H8" />
+          </svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-sky-700 dark:group-hover:text-sky-400 transition-colors">
+            {consent.procedure}
+          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <ConsentBadge status={consent.status} />
+            <span className="text-xs text-slate-400 dark:text-slate-500">{relativeDate(consent.createdAt)}</span>
+          </div>
+        </div>
+      </button>
+      <PrintButton onPrint={onPrint} label="Imprimir consentimiento" />
+    </div>
   )
 }
 
@@ -202,6 +218,7 @@ function EmptyState({ label }: { label: string }) {
 export function DocumentList({
   currentPatient, evolutionNotes, prescriptions, consentForms,
   onViewNote, onViewPrescription, onViewConsent,
+  onPrintNote, onPrintPrescription, onPrintConsent,
   onNewNote, onNewPrescription, onNewConsent, onBack,
 }: DocumentListProps) {
   const [openSections, setOpenSections] = useState({ evolution: true, prescriptions: true, consents: true })
@@ -263,7 +280,14 @@ export function DocumentList({
           />
           {openSections.evolution && (patientNotes.length === 0
             ? <EmptyState label="Sin notas de evolución registradas" />
-            : patientNotes.map(n => <EvolutionNoteRow key={n.id} note={n} onView={() => onViewNote?.(n.id)} />)
+            : patientNotes.map(n => (
+              <EvolutionNoteRow
+                key={n.id}
+                note={n}
+                onView={() => onViewNote?.(n.id)}
+                onPrint={onPrintNote ? () => onPrintNote(n.id) : undefined}
+              />
+            ))
           )}
         </div>
 
@@ -277,7 +301,14 @@ export function DocumentList({
           />
           {openSections.prescriptions && (patientRx.length === 0
             ? <EmptyState label="Sin recetas emitidas para este paciente" />
-            : patientRx.map(rx => <PrescriptionRow key={rx.id} rx={rx} onView={() => onViewPrescription?.(rx.id)} />)
+            : patientRx.map(rx => (
+              <PrescriptionRow
+                key={rx.id}
+                rx={rx}
+                onView={() => onViewPrescription?.(rx.id)}
+                onPrint={onPrintPrescription ? () => onPrintPrescription(rx.id) : undefined}
+              />
+            ))
           )}
         </div>
 
@@ -291,7 +322,14 @@ export function DocumentList({
           />
           {openSections.consents && (patientConsents.length === 0
             ? <EmptyState label="Sin consentimientos registrados para este paciente" />
-            : patientConsents.map(c => <ConsentRow key={c.id} consent={c} onView={() => onViewConsent?.(c.id)} />)
+            : patientConsents.map(c => (
+              <ConsentRow
+                key={c.id}
+                consent={c}
+                onView={() => onViewConsent?.(c.id)}
+                onPrint={onPrintConsent ? () => onPrintConsent(c.id) : undefined}
+              />
+            ))
           )}
         </div>
 

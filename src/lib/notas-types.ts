@@ -150,6 +150,9 @@ export interface DocumentListProps {
   onViewNote?: (id: string) => void
   onViewPrescription?: (id: string) => void
   onViewConsent?: (id: string) => void
+  onPrintNote?: (id: string) => void
+  onPrintPrescription?: (id: string) => void
+  onPrintConsent?: (id: string) => void
   onNewNote?: () => void
   onNewPrescription?: () => void
   onNewConsent?: () => void

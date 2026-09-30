@@ -212,6 +212,21 @@ export function NotasClient({
     setConsentForms(prev => prev.map(c => (c.id === id ? { ...c, emailSentAt: nowCDMX() } : c)))
   }
 
+  function printNoteById(id: string) {
+    const note = evolutionNotes.find(n => n.id === id)
+    if (note) printEvolutionNote(note, clinicConfig)
+  }
+
+  function printPrescriptionById(id: string) {
+    const rx = prescriptions.find(r => r.id === id)
+    if (rx) void printPrescription(rx)
+  }
+
+  function printConsentById(id: string) {
+    const consent = consentForms.find(c => c.id === id)
+    if (consent) printConsent(consent, clinicConfig)
+  }
+
   if (view === 'new-note') {
     return (
       <EvolutionNoteForm
@@ -293,6 +308,9 @@ export function NotasClient({
       onViewNote={(id) => { setSelectedNoteId(id); setView('note-detail') }}
       onViewPrescription={id => { setSelectedRxId(id); setView('prescription') }}
       onViewConsent={id => { setSelectedConsentId(id); setView('consent') }}
+      onPrintNote={printNoteById}
+      onPrintPrescription={printPrescriptionById}
+      onPrintConsent={printConsentById}
       onNewNote={isMedico ? () => setView('new-note') : undefined}
       onNewPrescription={isMedico ? () => setView('new-prescription') : undefined}
       onNewConsent={isMedico ? () => setView('new-consent') : undefined}
