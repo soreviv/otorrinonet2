@@ -2,125 +2,85 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-heading: var(--font-dm-sans), system-ui, sans-serif;
-  --font-mono: var(--font-ibm-plex-mono), monospace;
+  /* Tipografía principal */
+  --font-sans: var(--font-inter, system-ui, sans-serif);
+  --font-heading: var(--font-dm-sans, system-ui, sans-serif);
+  --font-mono: var(--font-ibm-plex-mono, monospace);
 
-  /* Design token aliases — sky=primary, blue=secondary */
-  --color-primary-50: var(--color-sky-50);
-  --color-primary-100: var(--color-sky-100);
-  --color-primary-200: var(--color-sky-200);
-  --color-primary-300: var(--color-sky-300);
-  --color-primary-400: var(--color-sky-400);
-  --color-primary-500: var(--color-sky-500);
-  --color-primary-600: var(--color-sky-600);
-  --color-primary-700: var(--color-sky-700);
-  --color-primary-800: var(--color-sky-800);
-  --color-primary-900: var(--color-sky-900);
-  --color-primary-950: var(--color-sky-950);
+  /* Colores de marca (OtorrinoNet) mapeados a utilidades de Tailwind */
+  --color-brand-ear: #b6c24f;    /* oído   · oliva/lima */
+  --color-brand-nose: #216e95;   /* nariz  · azul teal  */
+  --color-brand-throat: #f28522; /* garganta · naranja  */
 
-  --color-secondary-50: var(--color-blue-50);
-  --color-secondary-100: var(--color-blue-100);
-  --color-secondary-200: var(--color-blue-200);
-  --color-secondary-300: var(--color-blue-300);
-  --color-secondary-400: var(--color-blue-400);
-  --color-secondary-500: var(--color-blue-500);
-  --color-secondary-600: var(--color-blue-600);
-  --color-secondary-700: var(--color-blue-700);
-  --color-secondary-800: var(--color-blue-800);
-  --color-secondary-900: var(--color-blue-900);
-  --color-secondary-950: var(--color-blue-950);
+  /* Aliases de colores primarios y secundarios */
+  --color-primary-50: inline-color(sky, 50);
+  --color-primary-100: inline-color(sky, 100);
+  --color-primary-200: inline-color(sky, 200);
+  --color-primary-300: inline-color(sky, 300);
+  --color-primary-400: inline-color(sky, 400);
+  --color-primary-500: inline-color(sky, 500);
+  --color-primary-600: inline-color(sky, 600);
+  --color-primary-700: inline-color(sky, 700);
+  --color-primary-800: inline-color(sky, 800);
+  --color-primary-900: inline-color(sky, 900);
+  --color-primary-950: inline-color(sky, 950);
+
+  --color-secondary-50: inline-color(blue, 50);
+  --color-secondary-100: inline-color(blue, 100);
+  --color-secondary-200: inline-color(blue, 200);
+  --color-secondary-300: inline-color(blue, 300);
+  --color-secondary-400: inline-color(blue, 400);
+  --color-secondary-500: inline-color(blue, 500);
+  --color-secondary-600: inline-color(blue, 600);
+  --color-secondary-700: inline-color(blue, 700);
+  --color-secondary-800: inline-color(blue, 800);
+  --color-secondary-900: inline-color(blue, 900);
+  --color-secondary-950: inline-color(blue, 950);
 }
 
-/* ── Design System Tokens — OtorrinoNet ────────────────────────────────────
-   Semantic CSS custom properties del design system oficial.
-   Fuente: docs/OtorrinoNet Design System-handoff.zip                      */
+/* ── Design System Tokens — OtorrinoNet (Custom Properties CSS) ────────── */
 
 :root {
   /* Surfaces */
-  --surface-page:         var(--color-slate-50);
-  --surface-card:         #ffffff;
-  --surface-sunken:       var(--color-slate-100);
-  --surface-primary:      var(--color-sky-600);
-  --surface-primary-soft: var(--color-sky-50);
+  --surface-page:          var(--color-slate-50, #f8fafc);
+  --surface-card:          #ffffff;
+  --surface-sunken:        var(--color-slate-100, #f1f5f9);
+  --surface-primary:       var(--color-sky-600, #0284c7);
+  --surface-primary-soft:  var(--color-sky-50, #f0f9ff);
 
   /* Text */
-  --text-strong:      var(--color-slate-900);
-  --text-body:        var(--color-slate-600);
-  --text-muted:       var(--color-slate-400);
-  --text-on-primary:  #ffffff;
-  --text-link:        var(--color-sky-600);
+  --text-strong:     var(--color-slate-900, #0f172a);
+  --text-body:       var(--color-slate-600, #475569);
+  --text-muted:      var(--color-slate-400, #94a3b8);
+  --text-on-primary: #ffffff;
+  --text-link:       var(--color-sky-600, #0284c7);
 
   /* Brand / interactive */
-  --brand-primary:        var(--color-sky-600);
-  --brand-primary-hover:  var(--color-sky-700);
-  --brand-primary-active: var(--color-sky-800);
-  --brand-accent-soft:    var(--color-sky-50);
+  --brand-primary:        var(--color-sky-600, #0284c7);
+  --brand-primary-hover:  var(--color-sky-700, #0369a1);
+  --brand-primary-active: var(--color-sky-800, #075985);
+  --brand-accent-soft:    var(--color-sky-50, #f0f9ff);
 
   /* Borders */
-  --border-subtle:  var(--color-slate-100);
-  --border-default: var(--color-slate-200);
-  --border-strong:  var(--color-slate-300);
-  --border-focus:   var(--color-sky-500);
+  --border-subtle:  var(--color-slate-100, #f1f5f9);
+  --border-default: var(--color-slate-200, #e2e8f0);
+  --border-strong:  var(--color-slate-300, #cbd5e1);
+  --border-focus:   var(--color-sky-500, #0ea5e9);
 
   /* State pills */
-  --state-info-fg:    var(--color-sky-700);
-  --state-info-bg:    var(--color-sky-100);
-  --state-warning-fg: var(--color-amber-700);
-  --state-warning-bg: var(--color-amber-100);
-  --state-success-fg: var(--color-emerald-700);
-  --state-success-bg: var(--color-emerald-100);
-  --state-danger-fg:  var(--color-rose-600);
-  --state-danger-bg:  var(--color-rose-100);
+  --state-info-fg:    var(--color-sky-700, #0369a1);
+  --state-info-bg:    var(--color-sky-100, #e0f2fe);
+  --state-warning-fg: var(--color-amber-700, #b45309);
+  --state-warning-bg: var(--color-amber-100, #fef3c7);
+  --state-success-fg: var(--color-emerald-700, #047857);
+  --state-success-bg: var(--color-emerald-100, #d1fae5);
+  --state-danger-fg:  var(--color-rose-600, #e11d48);
+  --state-danger-bg:  var(--color-rose-100, #ffe4e6);
 
-  /* Brand identity trio — colores del logotipo */
+  /* Brand identity trio */
   --color-brand-ear:    #b6c24f;   /* oído   · oliva/lima  */
   --color-brand-nose:   #216e95;   /* nariz  · azul teal   */
   --color-brand-throat: #f28522;   /* garganta · naranja   */
-
-  /* Tipografía — escala de tamaños */
-  --text-xs:   0.75rem;
-  --text-sm:   0.875rem;
-  --text-base: 1rem;
-  --text-lg:   1.125rem;
-  --text-xl:   1.25rem;
-  --text-2xl:  1.5rem;
-  --text-3xl:  1.875rem;
-  --text-4xl:  2.25rem;
-  --text-5xl:  3rem;
-
-  /* Pesos */
-  --font-weight-normal:   400;
-  --font-weight-medium:   500;
-  --font-weight-semibold: 600;
-  --font-weight-bold:     700;
-
-  /* Interlineado */
-  --leading-none:    1;
-  --leading-tight:   1.08;
-  --leading-snug:    1.25;
-  --leading-normal:  1.5;
-  --leading-relaxed: 1.65;
-
-  /* Tracking */
-  --tracking-tight:   -0.02em;
-  --tracking-normal:  0;
-  --tracking-wide:    0.05em;
-  --tracking-widest:  0.12em;
-
-  /* Espaciado (base 4px) */
-  --space-0:   0;
-  --space-1:   0.25rem;
-  --space-2:   0.5rem;
-  --space-3:   0.75rem;
-  --space-4:   1rem;
-  --space-5:   1.25rem;
-  --space-6:   1.5rem;
-  --space-8:   2rem;
-  --space-10:  2.5rem;
-  --space-12:  3rem;
-  --space-16:  4rem;
-  --space-24:  6rem;
 
   /* Layout */
   --container-max:        72rem;
@@ -129,15 +89,7 @@
   --sidebar-w-collapsed:  4rem;
   --header-h:             4rem;
 
-  /* Radios */
-  --radius-sm:   0.375rem;
-  --radius-md:   0.5rem;
-  --radius-lg:   0.75rem;
-  --radius-xl:   1rem;
-  --radius-2xl:  1.5rem;
-  --radius-full: 9999px;
-
-  /* Sombras */
+  /* Sombras y enfoques */
   --shadow-xs:  0 1px 2px 0 rgb(15 23 42 / 0.04);
   --shadow-sm:  0 1px 3px 0 rgb(15 23 42 / 0.07), 0 1px 2px -1px rgb(15 23 42 / 0.05);
   --shadow-md:  0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.06);
@@ -145,7 +97,7 @@
   --shadow-xl:  0 20px 25px -5px rgb(15 23 42 / 0.10), 0 8px 10px -6px rgb(15 23 42 / 0.06);
   --shadow-2xl: 0 25px 50px -12px rgb(15 23 42 / 0.20);
   --shadow-primary: 0 10px 25px -6px rgb(2 132 199 / 0.45);
-  --ring-focus: 0 0 0 2px #ffffff, 0 0 0 4px var(--color-sky-500);
+  --ring-focus: 0 0 0 2px #ffffff, 0 0 0 4px var(--color-sky-500, #0ea5e9);
 
   /* Movimiento */
   --duration-fast:   120ms;
@@ -160,7 +112,7 @@
 
 @keyframes ds-pulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
+  50%      { opacity: 0.4; }
 }
 
 body {
@@ -173,9 +125,7 @@ code, pre, kbd, samp {
   font-family: var(--font-mono);
 }
 
-/* ── Decorative helpers ────────────────────────────────────────────────────
-   Clases para patrones y formas que antes eran estilos inline en componentes.
-   Su existencia en CSS externo permite eliminar unsafe-inline de style-src.  */
+/* ── Decorative helpers ────────────────────────────────────────────────── */
 
 .hero-clip-diagonal {
   clip-path: polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%);
