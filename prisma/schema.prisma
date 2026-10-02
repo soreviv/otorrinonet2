@@ -332,6 +332,9 @@ model PatientConsent {
   fechaAceptacion         DateTime?
   lugarFirma              String?
   ipAddress               String?
+  signatureData           String?   // data URL (image/png base64) de la firma del paciente
+  signatureMethod         String?   // 'presencial' | 'correo'
+  firmaHash               String?   // SHA-256 de integridad (consentId|userId|timestamp|secret)
   createdAt               DateTime  @default(now())
 
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)

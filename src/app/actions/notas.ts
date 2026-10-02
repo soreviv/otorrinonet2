@@ -181,7 +181,8 @@ function mapPrescription(
 
 function mapConsent(c: {
   id: string; patientId: string; tipoConsentimiento: string; consentTexto: string | null;
-  aceptado: boolean; fechaAceptacion: Date | null; createdAt: Date
+  aceptado: boolean; fechaAceptacion: Date | null; createdAt: Date;
+  signatureData: string | null; signatureMethod: string | null;
 }, patientName: string, authorName: string): ConsentForm {
   return {
     id: c.id,
@@ -189,10 +190,12 @@ function mapConsent(c: {
     patientName,
     procedure: c.tipoConsentimiento,
     consentText: c.consentTexto ?? '',
-    status: c.aceptado ? 'firmado-presencial' : 'pendiente',
-    patientSignatureData: null,
+    status: c.aceptado
+      ? (c.signatureMethod === 'correo' ? 'firmado-correo' : 'firmado-presencial')
+      : 'pendiente',
+    patientSignatureData: c.signatureData ?? null,
     signedAt: c.fechaAceptacion?.toISOString() ?? null,
-    signatureMethod: c.aceptado ? 'presencial' : null,
+    signatureMethod: c.signatureMethod === 'correo' ? 'correo' : c.aceptado ? 'presencial' : null,
     emailSentAt: null,
     authorName,
     createdAt: c.createdAt.toISOString(),
