@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ArrowLeft, Plus, Trash2, Save, FileSignature } from 'lucide-react'
+import { Cie10Search, type DiagnosticoSeleccionado } from '@/components/ehr/Cie10Search'
 import type { PrescriptionMedication } from '@/lib/notas-types'
 
 const inputCls =
@@ -19,11 +20,42 @@ interface Props {
   onCancel: () => void
 }
 
+function parseInitialDiagnosticos(text?: string): DiagnosticoSeleccionado[] {
+  if (!text) return []
+  // Formato habitual: "Otitis media supurativa (H660); ..."
+  const parts = text.split(';').map(p => p.trim()).filter(Boolean)
+  const results: DiagnosticoSeleccionado[] = []
+  for (const part of parts) {
+    const match = part.match(/^(.*?)(?:\s*\(([A-Z0-9]+)\))?$/)
+    if (match) {
+      const desc = match[1].trim()
+      const cod = match[2]?.trim()
+      if (cod) {
+        results.push({ codigo: cod, descripcion: desc })
+      }
+    }
+  }
+  return results
+}
+
 export function PrescriptionForm({ patientName, initialDiagnosis, onSave, onSaveAndSign, onCancel }: Props) {
   const [meds, setMeds] = useState<PrescriptionMedication[]>([{ ...EMPTY_MED }])
   const [diagnosis, setDiagnosis] = useState(initialDiagnosis ?? '')
+  const [cie10List, setCie10List] = useState<DiagnosticoSeleccionado[]>(() =>
+    parseInitialDiagnosticos(initialDiagnosis)
+  )
   const [saving, setSaving] = useState(false)
   const [signing, setSigning] = useState(false)
+
+  function handleCie10Change(selected: DiagnosticoSeleccionado[]) {
+    setCie10List(selected)
+    if (selected.length > 0) {
+      const formatted = selected.map(d => `${d.descripcion} (${d.codigo})`).join('; ')
+      setDiagnosis(formatted)
+    } else {
+      setDiagnosis('')
+    }
+  }
 
   function setMed(i: number, field: keyof PrescriptionMedication, value: string) {
     setMeds(prev => prev.map((m, idx) => idx === i ? { ...m, [field]: value } : m))
@@ -85,17 +117,26 @@ export function PrescriptionForm({ patientName, initialDiagnosis, onSave, onSave
 
       <form onSubmit={handleSubmit} className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-4">
         {/* Diagnosis */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-          <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1.5">
-            Diagnóstico / indicación
-          </label>
-          <input
-            type="text"
-            value={diagnosis}
-            onChange={e => setDiagnosis(e.target.value)}
-            className={inputCls}
-            placeholder="Ej. Otitis media aguda bilateral"
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
+          <Cie10Search
+            value={cie10List}
+            onChange={handleCie10Change}
+            maxDiagnosticos={3}
+            label="Búsqueda Diagnóstica CIE-10"
           />
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">
+              Texto del diagnóstico en la receta (editable)
+            </label>
+            <input
+              type="text"
+              value={diagnosis}
+              onChange={e => setDiagnosis(e.target.value)}
+              className={inputCls}
+              placeholder="Ej. Otitis media aguda bilateral (H660)"
+            />
+          </div>
         </div>
 
         {/* Medications */}
