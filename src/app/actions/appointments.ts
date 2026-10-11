@@ -7,6 +7,7 @@ import { verifyTurnstileToken } from '@/lib/turnstile'
 import { prisma } from '@/lib/prisma'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import { encrypt } from '@/lib/crypto'
+import { findExistingPatient } from '@/lib/patient-matching'
 import {
   sendAppointmentConfirmationToPatient,
   sendAppointmentNotificationToDoctor,
@@ -320,6 +321,27 @@ export async function submitPreregistro(
 
 async function findOrCreatePortalPatient(fullName: string, email: string, phone: string): Promise<string | null> {
   try {
+    // 1. Evitar expedientes duplicados: buscar si ya existe un paciente con este correo o celular
+    const existing = await findExistingPatient({ email, phone })
+    if (existing) {
+      // Reutilizar el expediente existente. Si no tenía teléfono o correo registrado, completarlo
+      const updates: { telefono?: string; email?: string } = {}
+      if (!existing.patient.telefono && phone) {
+        updates.telefono = encrypt(phone)
+      }
+      if (!existing.patient.email && email) {
+        updates.email = encrypt(email)
+      }
+      if (Object.keys(updates).length > 0) {
+        await prisma.patient.update({
+          where: { id: existing.patient.id },
+          data: updates,
+        })
+      }
+      return existing.patient.id
+    }
+
+    // 2. Si no existe expediente previo, crear uno nuevo
     const { nombre, apellidoPaterno, apellidoMaterno } = parseName(fullName)
     const year = new Date().getFullYear()
     const count = await prisma.patient.count()
@@ -341,7 +363,7 @@ async function findOrCreatePortalPatient(fullName: string, email: string, phone:
     return patient.id
   } catch (err) {
     // No bloquear la cita si la creación del expediente falla
-    console.error('[appointments] Error creando expediente desde portal:', err)
+    console.error('[appointments] Error creando o asociando expediente desde portal:', err)
     return null
   }
 }

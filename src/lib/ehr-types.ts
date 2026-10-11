@@ -77,6 +77,6 @@ export interface PatientDetailProps {
 export interface PatientFormProps {
   patient?: Patient
   currentUserRole: UserRole
-  onSubmit?: (data: Omit<Patient, 'id' | 'expedienteNumber' | 'createdAt' | 'updatedAt'>) => void
+  onSubmit?: (data: Omit<Patient, 'id' | 'expedienteNumber' | 'createdAt' | 'updatedAt'>) => Promise<void> | void
   onCancel?: () => void
 }

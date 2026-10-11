@@ -2,6 +2,9 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes, scryptSync }
 
 const algorithm = 'aes-256-gcm'
 
+let cachedKey: Buffer | null = null
+let cachedKeyFingerprint: string | null = null
+
 function getKey(): Buffer {
   const password = process.env.ENCRYPTION_KEY
   const kdfSalt = process.env.ENCRYPTION_KDF_SALT
@@ -13,10 +16,18 @@ function getKey(): Buffer {
         'Genera valores con: openssl rand -hex 32',
       )
     }
-    return scryptSync('otorrinonet-dev-key-not-for-production', 'otorrinonet-kdf-salt-dev', 32)
+    const devFp = '__dev__'
+    if (cachedKey && cachedKeyFingerprint === devFp) return cachedKey
+    cachedKey = scryptSync('otorrinonet-dev-key-not-for-production', 'otorrinonet-kdf-salt-dev', 32)
+    cachedKeyFingerprint = devFp
+    return cachedKey
   }
 
-  return scryptSync(password, kdfSalt, 32)
+  const fp = `${password}:${kdfSalt}`
+  if (cachedKey && cachedKeyFingerprint === fp) return cachedKey
+  cachedKey = scryptSync(password, kdfSalt, 32)
+  cachedKeyFingerprint = fp
+  return cachedKey
 }
 
 // Returns "iv:authTag:encryptedHex"

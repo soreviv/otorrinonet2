@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { verifySession, requireMedico } from '@/lib/dal'
 import { encrypt, decrypt } from '@/lib/crypto'
 import { logAction } from '@/lib/audit'
+import { findExistingPatient } from '@/lib/patient-matching'
 import type {
   Patient, PatientSex, FamilyHistory, PersonalHistory, Nom024Data,
 } from '@/lib/ehr-types'
@@ -220,6 +221,27 @@ export async function savePatient(
     seAutodenominaAfromexicano: ('seAutodenominaAfromexicano' in nom ? nom.seAutodenominaAfromexicano : undefined) ?? null,
     migrante: ('migrante' in nom ? nom.migrante : undefined) ?? null,
     paisProcedencia: ('paisProcedencia' in nom ? nom.paisProcedencia : undefined) ?? null,
+  }
+
+  const emailToCheck = data.generalData.email?.trim() || null
+  const phoneToCheck = data.generalData.phone?.trim() || null
+
+  if (emailToCheck || phoneToCheck) {
+    const existing = await findExistingPatient({
+      email: emailToCheck,
+      phone: phoneToCheck,
+      excludePatientId: id,
+    })
+    if (existing) {
+      const matchType = existing.matchedBy === 'email'
+        ? 'correo electrónico'
+        : existing.matchedBy === 'phone'
+          ? 'teléfono celular'
+          : 'correo electrónico o teléfono'
+      throw new Error(
+        `Ya existe un expediente activo con este ${matchType} (${existing.patient.expedienteNumber}).`,
+      )
+    }
   }
 
   if (id) {

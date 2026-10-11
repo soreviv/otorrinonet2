@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   Save,
   Shield,
+  AlertCircle,
 } from 'lucide-react'
 
 const inputCls =
@@ -272,44 +273,56 @@ export function PatientForm({ patient, onSubmit, onCancel }: PatientFormProps) {
     })
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    onSubmit?.({
-      generalData: {
-        nombre: form.nombre,
-        apellidoPaterno: form.apellidoPaterno,
-        apellidoMaterno: form.apellidoMaterno,
-        fullName: [form.nombre, form.apellidoPaterno, form.apellidoMaterno].filter(Boolean).join(' '),
-        birthDate: form.birthDate,
-        sex: form.sex as 'masculino' | 'femenino' | 'otro',
-        curp: form.curp,
-        phone: form.phone,
-        email: form.email,
-        address: form.address,
-      },
-      familyHistory: {
-        notes: form.familyNotes,
-        relevantConditions: [],
-      },
-      personalHistory: {
-        pathological: form.pathological,
-        nonPathological: form.nonPathological,
-        allergies: form.allergies,
-        currentMedications: patient?.personalHistory.currentMedications ?? [],
-      },
-      nom024Data: {
-        paisNacimiento: 142,
-        entidadNacimiento: form.entidadNacimiento || null,
-        sexoCurp: form.sexoCurp !== '' ? Number(form.sexoCurp) : null,
-        sexoBiologico: form.sexoBiologico !== '' ? Number(form.sexoBiologico) : null,
-        genero: form.genero !== '' ? Number(form.genero) : null,
-        derechohabiencia: form.derechohabiencia.length > 0 ? form.derechohabiencia.join('&') : null,
-        seConsideraIndigena: form.seConsideraIndigena !== '' ? Number(form.seConsideraIndigena) : null,
-        seAutodenominaAfromexicano: form.seAutodenominaAfromexicano !== '' ? Number(form.seAutodenominaAfromexicano) : null,
-        migrante: form.migrante !== '' ? Number(form.migrante) : null,
-        paisProcedencia: form.paisProcedencia !== '' ? Number(form.paisProcedencia) : null,
-      },
-    })
+    setError(null)
+    setSubmitting(true)
+    try {
+      await onSubmit?.({
+        generalData: {
+          nombre: form.nombre,
+          apellidoPaterno: form.apellidoPaterno,
+          apellidoMaterno: form.apellidoMaterno,
+          fullName: [form.nombre, form.apellidoPaterno, form.apellidoMaterno].filter(Boolean).join(' '),
+          birthDate: form.birthDate,
+          sex: form.sex as 'masculino' | 'femenino' | 'otro',
+          curp: form.curp,
+          phone: form.phone,
+          email: form.email,
+          address: form.address,
+        },
+        familyHistory: {
+          notes: form.familyNotes,
+          relevantConditions: [],
+        },
+        personalHistory: {
+          pathological: form.pathological,
+          nonPathological: form.nonPathological,
+          allergies: form.allergies,
+          currentMedications: patient?.personalHistory.currentMedications ?? [],
+        },
+        nom024Data: {
+          paisNacimiento: 142,
+          entidadNacimiento: form.entidadNacimiento || null,
+          sexoCurp: form.sexoCurp !== '' ? Number(form.sexoCurp) : null,
+          sexoBiologico: form.sexoBiologico !== '' ? Number(form.sexoBiologico) : null,
+          genero: form.genero !== '' ? Number(form.genero) : null,
+          derechohabiencia: form.derechohabiencia.length > 0 ? form.derechohabiencia.join('&') : null,
+          seConsideraIndigena: form.seConsideraIndigena !== '' ? Number(form.seConsideraIndigena) : null,
+          seAutodenominaAfromexicano: form.seAutodenominaAfromexicano !== '' ? Number(form.seAutodenominaAfromexicano) : null,
+          migrante: form.migrante !== '' ? Number(form.migrante) : null,
+          paisProcedencia: form.paisProcedencia !== '' ? Number(form.paisProcedencia) : null,
+        },
+      })
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al guardar el expediente'
+      setError(msg)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -332,6 +345,13 @@ export function PatientForm({ patient, onSubmit, onCancel }: PatientFormProps) {
             </p>
           </div>
         </div>
+
+        {error && (
+          <div className="flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-2xl text-rose-700 dark:text-rose-300 text-sm">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
         <FormSection
           icon={<User className="w-4 h-4 text-sky-600 dark:text-sky-400" strokeWidth={1.5} />}
@@ -514,10 +534,11 @@ export function PatientForm({ patient, onSubmit, onCancel }: PatientFormProps) {
           </button>
           <button
             type="submit"
-            className="flex items-center gap-2 px-6 py-2.5 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
+            disabled={submitting}
+            className="flex items-center gap-2 px-6 py-2.5 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
             <Save className="w-4 h-4" strokeWidth={2} />
-            {isEdit ? 'Guardar cambios' : 'Crear expediente'}
+            {submitting ? 'Guardando...' : (isEdit ? 'Guardar cambios' : 'Crear expediente')}
           </button>
         </div>
       </form>

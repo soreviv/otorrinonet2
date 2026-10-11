@@ -19,6 +19,7 @@ vi.mock('@/lib/clinic-config', () => ({
 
 vi.mock('@/lib/crypto', () => ({
   encrypt: vi.fn((v: string) => `enc(${v})`),
+  decrypt: vi.fn((v: string) => (v.startsWith('enc(') && v.endsWith(')') ? v.slice(4, -1) : v)),
 }))
 
 vi.mock('@/lib/mailer', () => ({
@@ -42,8 +43,10 @@ const mockPrisma = vi.hoisted(() => ({
     update: vi.fn().mockResolvedValue({}),
   },
   patient: {
+    findMany: vi.fn().mockResolvedValue([]),
     count: vi.fn().mockResolvedValue(0),
     create: vi.fn().mockResolvedValue({ id: 'patient-1' }),
+    update: vi.fn().mockResolvedValue({}),
   },
 }))
 
@@ -139,6 +142,64 @@ describe('submitAppointmentRequest', () => {
   it('crea la cita cuando el slot está libre', async () => {
     await submitAppointmentRequest(validPayload())
     expect(mockPrisma.appointment.create).toHaveBeenCalledOnce()
+  })
+
+  it('reutiliza el expediente existente y no crea uno nuevo si coincide el correo del paciente', async () => {
+    mockPrisma.patient.findMany.mockResolvedValue([
+      {
+        id: 'patient-existente',
+        expedienteNumber: 'VIV-2025-0012',
+        nombre: 'Ana',
+        apellidoPaterno: 'García',
+        apellidoMaterno: 'López',
+        email: 'enc(ana@example.com)',
+        telefono: 'enc(5512345678)',
+        status: 'activo',
+      },
+    ])
+
+    const res = await submitAppointmentRequest(validPayload())
+    expect(res.ok).toBe(true)
+    // No debe crear un nuevo paciente
+    expect(mockPrisma.patient.create).not.toHaveBeenCalled()
+    // La cita debe asociarse al paciente existente
+    expect(mockPrisma.appointment.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          patientId: 'patient-existente',
+        }),
+      }),
+    )
+  })
+
+  it('reutiliza el expediente existente si coincide el celular del paciente', async () => {
+    mockPrisma.patient.findMany.mockResolvedValue([
+      {
+        id: 'patient-celular-existente',
+        expedienteNumber: 'VIV-2025-0044',
+        nombre: 'Ana',
+        apellidoPaterno: 'García',
+        apellidoMaterno: null,
+        email: null,
+        telefono: 'enc(5512345678)',
+        status: 'activo',
+      },
+    ])
+
+    const res = await submitAppointmentRequest({
+      ...validPayload(),
+      email: 'otro-correo@example.com',
+      phone: '+52 55 1234 5678',
+    })
+    expect(res.ok).toBe(true)
+    expect(mockPrisma.patient.create).not.toHaveBeenCalled()
+    expect(mockPrisma.appointment.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          patientId: 'patient-celular-existente',
+        }),
+      }),
+    )
   })
 })
 
