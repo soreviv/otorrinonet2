@@ -216,8 +216,8 @@ src/e2e/
 # 1. Compilar el proyecto
 npm run build
 
-# 2. Iniciar proceso en PM2
-pm2 start "npm run start -- -p 5000" --name otorrinonet
+# 2. Iniciar proceso en PM2 (config declarativa en ecosystem.config.cjs)
+pm2 start ecosystem.config.cjs
 pm2 save
 pm2 startup
 ```

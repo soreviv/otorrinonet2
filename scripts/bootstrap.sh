@@ -130,7 +130,7 @@ cat <<SUMMARY
                             ENCRYPTION_KEY, SMTP, ntfy, Turnstile...) + el DATABASE_URL de
                             ${CREDS_FILE}
    [usuario ${APP_USER}] 4. cd ${APP_DIR} && npm install && npx prisma db push && npm run build
-   [usuario ${APP_USER}] 5. pm2 start "npm run start -- -p 5000" --name otorrinonet && pm2 save
+    [usuario ${APP_USER}] 5. pm2 start ecosystem.config.cjs && pm2 save
    [usuario ${APP_USER}] 6. pm2 startup   (imprime un comando — ese comando sí se corre como root)
    [en el registrador]   7. Apuntar el DNS del dominio a la Elastic IP de esta instancia
    [root]                8. sudo certbot --nginx -d otorrinonet.com -d www.otorrinonet.com
