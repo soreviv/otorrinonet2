@@ -93,6 +93,8 @@ export interface Prescription {
   createdAt: string
   /** Diagnóstico médico (instruccionesGenerales en BD) */
   diagnosis?: string
+  /** Fecha de nacimiento del paciente */
+  patientBirthDate?: string
   /** Edad calculada al momento de expedir la receta */
   patientAge?: number
   /** Sexo del paciente */

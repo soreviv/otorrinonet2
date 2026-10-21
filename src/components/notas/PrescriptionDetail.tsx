@@ -156,8 +156,16 @@ export function PrescriptionDetail({
               </div>
             </div>
             {/* Datos clínicos del paciente */}
-            {(rx.patientAge != null || rx.patientSex || rx.patientAllergies?.length || rx.patientWeight || rx.patientHeight || rx.patientTemperature || rx.patientBloodPressure || rx.patientHeartRate != null || rx.patientRespiratoryRate != null || rx.patientOxygenSaturation != null || rx.patientGlucose != null) && (
+            {(rx.patientBirthDate || rx.patientAge != null || rx.patientSex || rx.patientAllergies?.length || rx.patientWeight || rx.patientHeight || rx.patientTemperature || rx.patientBloodPressure || rx.patientHeartRate != null || rx.patientRespiratoryRate != null || rx.patientOxygenSaturation != null || rx.patientGlucose != null) && (
               <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2">
+                {rx.patientBirthDate && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Fecha de nacimiento</p>
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{new Date(rx.patientBirthDate).toLocaleDateString('es-MX', {
+                      day: '2-digit', month: 'long', year: 'numeric',
+                    })}</p>
+                  </div>
+                )}
                 {rx.patientAge != null && (
                   <div>
                     <p className="text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">Edad</p>

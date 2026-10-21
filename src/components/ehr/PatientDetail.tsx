@@ -8,11 +8,12 @@ import { getPatientVitals, getPatientEvolutionNotes, getPatientPrescriptions } f
 import { getPatientLabOrders, createLabOrder, getLabOrderWithClinicData, type LabOrderRecord } from '@/app/actions/lab-orders'
 import { printPrescription } from '@/lib/print-prescription'
 import { printLabOrder } from '@/lib/print-lab-order'
+import { deletePatient } from '@/app/actions/ehr'
 import {
   ChevronDown, ArrowLeft, Pencil, User, HeartPulse, ClipboardList,
   Pill, Lock, Phone, Mail,
   MapPin, FileText, Printer, ScrollText, FlaskConical, AlertCircle, Shield,
-  X, Plus,
+  X, Plus, Trash2,
 } from 'lucide-react'
 
 // ─── Catálogos NOM-024 ────────────────────────────────────────────────────────
@@ -628,13 +629,30 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function PatientDetail({ patient, currentUserRole, onEdit, onViewDocuments, onBack }: PatientDetailProps) {
+export function PatientDetail({ patient, currentUserRole, onEdit, onViewDocuments, onBack, onDelete }: PatientDetailProps) {
   const p = patient
   const age = calculateAge(p.generalData.birthDate)
   const isMedico = currentUserRole === 'medico'
   const [tab, setTab] = useState<Tab>('expediente')
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const initials = p.generalData.fullName.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()
+
+  async function handleDelete() {
+    setDeleteError(null)
+    setDeleting(true)
+    try {
+      await deletePatient(p.id)
+      setDeleting(false)
+      setConfirmDeleteOpen(false)
+      onBack?.()
+    } catch (err) {
+      setDeleting(false)
+      setDeleteError(err instanceof Error ? err.message : 'Error al eliminar el expediente')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -661,11 +679,18 @@ export function PatientDetail({ patient, currentUserRole, onEdit, onViewDocument
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {isMedico && (
-                    <button onClick={() => onEdit?.(p.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg transition-colors">
-                      <Pencil className="w-3.5 h-3.5" strokeWidth={2} />
-                      Editar
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => onEdit?.(p.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg transition-colors">
+                        <Pencil className="w-3.5 h-3.5" strokeWidth={2} />
+                        Editar
+                      </button>
+                      <button onClick={() => setConfirmDeleteOpen(true)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 dark:bg-rose-950/20 hover:bg-rose-100 dark:hover:bg-rose-900/30 text-rose-700 dark:text-rose-300 text-xs font-semibold rounded-lg transition-colors">
+                        <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
+                        Eliminar
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -763,6 +788,38 @@ export function PatientDetail({ patient, currentUserRole, onEdit, onViewDocument
 
         {tab === 'estudios' && (
           <EstudiosTab patientId={p.id} canCreate={isMedico} />
+        )}
+
+        {confirmDeleteOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-rose-500" strokeWidth={2} />
+                  <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Eliminar expediente</span>
+                </div>
+              </div>
+              <div className="px-6 py-5">
+                <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
+                  ¿Estás seguro de que deseas eliminar el expediente de <strong>{p.generalData.fullName}</strong> ({p.expedienteNumber})?
+                </p>
+                <p className="text-xs text-slate-400 mb-6">
+                  El expediente se marcará como inactivo (borrado lógico). Se conserva por obligación legal (NOM-004, retención mínima 5 años).
+                </p>
+                <div className="flex justify-end gap-2">
+                  <button onClick={() => setConfirmDeleteOpen(false)}
+                    className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    Cancelar
+                  </button>
+                  <button onClick={handleDelete} disabled={deleting}
+                    className="px-4 py-2 rounded-xl text-sm font-semibold bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white transition-colors">
+                    {deleting ? 'Eliminando…' : 'Eliminar'}
+                  </button>
+                </div>
+                {deleteError && <p className="mt-3 text-xs text-rose-500">{deleteError}</p>}
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

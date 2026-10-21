@@ -163,6 +163,7 @@ function mapPrescription(
     firmaHash: first.firmaHash ?? null,
     createdAt: first.createdAt.toISOString(),
     diagnosis: first.instruccionesGenerales ?? undefined,
+    patientBirthDate: patientData ? patientData.fechaNacimiento.toISOString() : undefined,
     patientAge: patientData ? calcAge(patientData.fechaNacimiento, first.createdAt) : undefined,
     patientSex: patientData?.sexo,
     patientAllergies: patientData?.alergias?.length ? patientData.alergias : undefined,

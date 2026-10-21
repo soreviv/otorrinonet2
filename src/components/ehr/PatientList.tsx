@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import type { PatientListProps, Patient, UserRole } from '@/lib/ehr-types'
-import { Search, Plus, ChevronRight, User, X } from 'lucide-react'
+import { Search, Plus, ChevronRight, User, X, Trash2 } from 'lucide-react'
 
 function calculateAge(birthDate: string): number {
   const today = new Date()
@@ -31,9 +31,10 @@ function getInitials(name: string): string {
 interface PatientRowProps {
   patient: Patient
   onView?: () => void
+  onDelete?: () => void
 }
 
-function PatientRow({ patient, onView }: PatientRowProps) {
+function PatientRow({ patient, onView, onDelete }: PatientRowProps) {
   const p = patient
   const age = calculateAge(p.generalData.birthDate)
 
@@ -68,6 +69,16 @@ function PatientRow({ patient, onView }: PatientRowProps) {
         </p>
       </div>
 
+      {onDelete && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onDelete() }}
+          className="p-1.5 text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 transition-colors shrink-0"
+          aria-label="Eliminar expediente"
+        >
+          <Trash2 className="w-4 h-4" strokeWidth={2} />
+        </button>
+      )}
+
       <ChevronRight
         className="w-4 h-4 text-slate-300 dark:text-slate-700 group-hover:text-sky-500 dark:group-hover:text-sky-400 transition-colors shrink-0"
         strokeWidth={2}
@@ -91,7 +102,7 @@ function RoleBadge({ role }: { role: UserRole }) {
   )
 }
 
-export function PatientList({ patients, currentUserRole, onView, onCreate, onSearch }: PatientListProps) {
+export function PatientList({ patients, currentUserRole, onView, onCreate, onSearch, onDelete }: PatientListProps) {
   const [query, setQuery] = useState('')
 
   const filtered = useMemo(() => {
@@ -203,6 +214,7 @@ export function PatientList({ patients, currentUserRole, onView, onCreate, onSea
                 key={patient.id}
                 patient={patient}
                 onView={() => onView?.(patient.id)}
+                onDelete={() => onDelete?.(patient.id)}
               />
             ))
           )}

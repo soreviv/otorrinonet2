@@ -64,6 +64,7 @@ export interface PatientListProps {
   onView?: (patientId: string) => void
   onCreate?: () => void
   onSearch?: (query: string) => void
+  onDelete?: (patientId: string) => void
 }
 
 export interface PatientDetailProps {
@@ -72,6 +73,7 @@ export interface PatientDetailProps {
   onEdit?: (patientId: string) => void
   onViewDocuments?: (patientId: string, nueva?: 'nota' | 'receta') => void
   onBack?: () => void
+  onDelete?: (patientId: string) => void
 }
 
 export interface PatientFormProps {

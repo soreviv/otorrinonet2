@@ -291,8 +291,9 @@ export async function printPrescription(rx: Prescription): Promise<void> {
   </div>
 
   <!-- Datos clínicos -->
-  ${(rx.patientAge != null || rx.patientSex || rx.patientWeight || rx.patientHeight || rx.patientBMI != null || rx.patientTemperature != null || rx.patientBloodPressure || rx.patientHeartRate != null || rx.patientRespiratoryRate != null || rx.patientOxygenSaturation != null || rx.patientGlucose != null || rx.patientAllergies?.length) ? `
+  ${(rx.patientBirthDate || rx.patientAge != null || rx.patientSex || rx.patientWeight || rx.patientHeight || rx.patientBMI != null || rx.patientTemperature != null || rx.patientBloodPressure || rx.patientHeartRate != null || rx.patientRespiratoryRate != null || rx.patientOxygenSaturation != null || rx.patientGlucose != null || rx.patientAllergies?.length) ? `
   <div class="clinical-row">
+    ${rx.patientBirthDate ? `<div class="item"><span class="lbl">Fecha de nacimiento</span><span class="val">${formatDateLong(rx.patientBirthDate)}</span></div>` : ''}
     ${rx.patientAge != null ? `<div class="item"><span class="lbl">Edad</span><span class="val">${rx.patientAge} años</span></div>` : ''}
     ${rx.patientSex ? `<div class="item"><span class="lbl">Sexo</span><span class="val">${esc(rx.patientSex)}</span></div>` : ''}
     ${rx.patientWeight != null ? `<div class="item"><span class="lbl">Peso</span><span class="val">${rx.patientWeight} kg</span></div>` : ''}
