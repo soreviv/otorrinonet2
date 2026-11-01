@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import { encrypt } from '@/lib/crypto'
 import { findExistingPatient } from '@/lib/patient-matching'
+import { parseHispanicFullName, formatExpedienteNumber } from '@/lib/patient-utils'
 import {
   sendAppointmentConfirmationToPatient,
   sendAppointmentNotificationToDoctor,
@@ -238,17 +239,7 @@ export async function rescheduleAppointmentByToken(
 
 // ─── Helpers internos ─────────────────────────────────────────────────────────
 
-function parseName(fullName: string): { nombre: string; apellidoPaterno: string; apellidoMaterno: string | null } {
-  const parts = fullName.trim().split(/\s+/)
-  if (parts.length === 1) return { nombre: parts[0], apellidoPaterno: parts[0], apellidoMaterno: null }
-  if (parts.length === 2) return { nombre: parts[0], apellidoPaterno: parts[1], apellidoMaterno: null }
-  // 3+ palabras: primer token = nombre, segundo = apellido paterno, resto = apellido materno
-  return {
-    nombre: parts[0],
-    apellidoPaterno: parts[1],
-    apellidoMaterno: parts.slice(2).join(' '),
-  }
-}
+// parseHispanicFullName y formatExpedienteNumber se importan desde @/lib/patient-utils
 
 // ─── Preregistro del paciente ─────────────────────────────────────────────────
 
@@ -342,10 +333,10 @@ async function findOrCreatePortalPatient(fullName: string, email: string, phone:
     }
 
     // 2. Si no existe expediente previo, crear uno nuevo
-    const { nombre, apellidoPaterno, apellidoMaterno } = parseName(fullName)
+    const { nombre, apellidoPaterno, apellidoMaterno } = parseHispanicFullName(fullName)
     const year = new Date().getFullYear()
     const count = await prisma.patient.count()
-    const expedienteNumber = `VIV-${year}-${String(count + 1).padStart(4, '0')}`
+    const expedienteNumber = formatExpedienteNumber(year, count + 1)
 
     const patient = await prisma.patient.create({
       data: {

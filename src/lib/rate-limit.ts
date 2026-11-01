@@ -1,13 +1,26 @@
 const MAX_ATTEMPTS = 5
 const WINDOW_MS   = 15 * 60 * 1000   // 15 min
 const LOCKOUT_MS  = 30 * 60 * 1000   // 30 min
+const MAX_ENTRIES = 5000
 
 type Entry = { attempts: number; firstAt: number; lockedUntil?: number }
 
 const store = new Map<string, Entry>()
 
-export function checkRateLimit(key: string): { blocked: boolean } {
-  const now   = Date.now()
+/**
+ * Elimina entradas caducadas del almacén para evitar fugas de memoria por acumulación de claves únicas.
+ */
+function pruneExpired(now: number): void {
+  for (const [key, entry] of store.entries()) {
+    const isLocked = entry.lockedUntil ? now < entry.lockedUntil : false
+    const isWithinWindow = now - entry.firstAt <= WINDOW_MS
+    if (!isLocked && !isWithinWindow) {
+      store.delete(key)
+    }
+  }
+}
+
+export function checkRateLimit(key: string, now: number = Date.now()): { blocked: boolean } {
   const entry = store.get(key)
   if (!entry) return { blocked: false }
 
@@ -25,8 +38,12 @@ export function checkRateLimit(key: string): { blocked: boolean } {
   return { blocked: false }
 }
 
-export function recordFailure(key: string): void {
-  const now   = Date.now()
+export function recordFailure(key: string, now: number = Date.now()): void {
+  // Limpieza preventiva si el almacén supera la capacidad máxima
+  if (store.size >= MAX_ENTRIES) {
+    pruneExpired(now)
+  }
+
   const entry = store.get(key)
 
   if (!entry || now - entry.firstAt > WINDOW_MS) {
@@ -44,4 +61,15 @@ export function recordFailure(key: string): void {
 
 export function clearRateLimit(key: string): void {
   store.delete(key)
+}
+
+/**
+ * Funciones de diagnóstico y testing
+ */
+export function resetRateLimitStore(): void {
+  store.clear()
+}
+
+export function getRateLimitStoreSize(): number {
+  return store.size
 }

@@ -372,13 +372,18 @@ export function getRecommendations(
 ): VaccineResult[] {
   const results: VaccineResult[] = [];
   const seen = new Set<string>();
+  const conditionSet = new Set(conditions);
 
   for (const v of vaccines) {
     if (seen.has(v.id)) continue;
 
+    // Regla de seguridad clínica: omitir vacunas expresamente contraindicadas para las condiciones del paciente
+    const isContraindicated = v.contraindications?.some((c) => conditionSet.has(c)) ?? false;
+    if (isContraindicated) continue;
+
     const inAgeRange  = ageYears >= v.minAge && ageYears <= v.maxAge;
     const sexMatch    = v.sex === "all" || v.sex === sex;
-    const byCondition = v.conditionTriggers?.some((c) => conditions.includes(c)) ?? false;
+    const byCondition = v.conditionTriggers?.some((c) => conditionSet.has(c)) ?? false;
 
     if (!sexMatch) continue;
     if (!inAgeRange && !byCondition) continue;
@@ -391,6 +396,17 @@ export function getRecommendations(
   results.sort((a, b) => order.indexOf(a.priority) - order.indexOf(b.priority));
 
   return results;
+}
+
+/**
+ * Retorna las vacunas que se encuentran contraindicadas para el conjunto de condiciones dadas.
+ */
+export function getContraindicatedVaccines(
+  conditions: Condition[],
+): Vaccine[] {
+  if (!conditions || conditions.length === 0) return [];
+  const conditionSet = new Set(conditions);
+  return vaccines.filter((v) => v.contraindications?.some((c) => conditionSet.has(c)));
 }
 
 export const PRIORITY_LABEL: Record<Priority, string> = {

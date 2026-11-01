@@ -5,6 +5,7 @@ import { verifySession, requireMedico } from '@/lib/dal'
 import { encrypt, decrypt } from '@/lib/crypto'
 import { logAction } from '@/lib/audit'
 import { findExistingPatient } from '@/lib/patient-matching'
+import { formatExpedienteNumber } from '@/lib/patient-utils'
 import type {
   Patient, PatientSex, FamilyHistory, PersonalHistory, Nom024Data,
 } from '@/lib/ehr-types'
@@ -252,7 +253,7 @@ export async function savePatient(
 
   const year = new Date().getFullYear()
   const count = await prisma.patient.count()
-  const expedienteNumber = `VIV-${year}-${String(count + 1).padStart(4, '0')}`
+  const expedienteNumber = formatExpedienteNumber(year, count + 1)
 
   const created = await prisma.patient.create({ data: { expedienteNumber, ...fields } })
   void logAction({ action: 'creacion', resource: 'patient', resourceId: created.id, userId: session.userId })

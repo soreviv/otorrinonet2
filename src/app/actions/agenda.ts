@@ -4,7 +4,10 @@ import { prisma } from '@/lib/prisma'
 import { decrypt } from '@/lib/crypto'
 import { verifySession } from '@/lib/dal'
 import { logAction } from '@/lib/audit'
+import { formatInTimeZone } from 'date-fns-tz'
 import type { Appointment, Service } from '@/lib/agenda-types'
+
+const CDMX = 'America/Mexico_City'
 
 export async function getAppointments(): Promise<Appointment[]> {
   await verifySession()
@@ -33,12 +36,8 @@ export async function getAppointments(): Promise<Appointment[]> {
       email,
       serviceId: apt.serviceId ?? null,
       serviceName: apt.service?.name ?? '—',
-      date: apt.scheduledAt.toISOString().split('T')[0],
-      time: apt.scheduledAt.toLocaleTimeString('es-MX', {
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'America/Mexico_City',
-      }),
+      date: formatInTimeZone(apt.scheduledAt, CDMX, 'yyyy-MM-dd'),
+      time: formatInTimeZone(apt.scheduledAt, CDMX, 'HH:mm'),
       reason: apt.notes ?? '',
       status: apt.status as Appointment['status'],
       privacyAccepted: true,

@@ -1,48 +1,59 @@
 'use server'
 
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { verifyTurnstileToken } from '@/lib/turnstile'
 import { getClinicConfigFromDB } from '@/lib/clinic-config'
 import { sendContactNotification } from '@/lib/mailer'
 import { sendStaffPush } from '@/lib/ntfy'
 
-export interface ContactFormPayload {
-  name: string
-  phone: string
-  email: string
-  message: string
-  captchaToken: string
-}
+const ContactFormSchema = z.object({
+  name: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres').max(120),
+  email: z.string().trim().email('Correo electrónico inválido').max(200),
+  phone: z.string().trim().max(30).optional().or(z.literal('')),
+  message: z.string().trim().min(10, 'El mensaje debe tener al menos 10 caracteres').max(2000),
+  captchaToken: z.string().min(1, 'Token de seguridad requerido'),
+})
+
+export type ContactFormPayload = z.infer<typeof ContactFormSchema>
 
 export async function submitContactForm(payload: ContactFormPayload): Promise<{ ok: boolean; error?: string }> {
-  const valid = await verifyTurnstileToken(payload.captchaToken, { action: 'contacto' })
+  // 1. Validación de esquema
+  const parsed = ContactFormSchema.safeParse(payload)
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos de contacto inválidos.' }
+  }
+  const data = parsed.data
+
+  // 2. Verificación de seguridad Turnstile
+  const valid = await verifyTurnstileToken(data.captchaToken, { action: 'contacto' })
   if (!valid) return { ok: false, error: 'Verificación de seguridad fallida. Intenta de nuevo.' }
 
-  // Guardar en BD
+  // 3. Persistencia en base de datos
   await prisma.contactMessage.create({
     data: {
-      name: payload.name,
-      email: payload.email,
-      phone: payload.phone || null,
+      name: data.name,
+      email: data.email,
+      phone: data.phone || null,
       subject: 'Mensaje de contacto desde el portal',
-      message: payload.message,
+      message: data.message,
     },
   })
 
-  // Enviar email de notificación (fire-and-forget)
+  // 4. Notificaciones
   getClinicConfigFromDB().then(cfg => {
     sendContactNotification({
-      name: payload.name,
-      email: payload.email,
-      phone: payload.phone || null,
+      name: data.name,
+      email: data.email,
+      phone: data.phone || null,
       subject: 'Mensaje de contacto desde el portal',
-      message: payload.message,
+      message: data.message,
     }, cfg).catch(err => console.error('[mailer] Error enviando email de contacto:', err))
   })
 
   sendStaffPush({
     title: 'Nuevo mensaje de contacto',
-    message: `${payload.name}: ${payload.message.slice(0, 200)}`,
+    message: `${data.name}: ${data.message.slice(0, 200)}`,
     tags: ['email'],
     click: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/staff`,
   })
